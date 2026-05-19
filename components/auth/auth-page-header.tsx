@@ -1,6 +1,6 @@
 import Image from "next/image";
 import Link from "next/link";
-import logo from "@/app/logo.png";
+import darkLogo from "@/app/darklogo.png";
 
 export function AuthPageHeader({
   title,
@@ -13,7 +13,7 @@ export function AuthPageHeader({
     <header className="mb-8">
       <Link href="/" className="inline-block">
         <Image
-          src={logo}
+          src={darkLogo}
           alt="DUI Checkpoints Locator — Statewide, Real-time Alerts"
           className="h-11 w-auto md:h-12"
           priority
