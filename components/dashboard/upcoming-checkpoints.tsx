@@ -52,13 +52,13 @@ export function UpcomingCheckpoints({
           </div>
           <div className="flex flex-wrap gap-3">
             <Link
-              href="/dashboard/checkpoints/upcoming"
+              href="/dashboard/checkpoints"
               className="font-montserrat text-sm font-semibold text-[#F57E3A] hover:underline"
             >
-              All upcoming
+              View all
             </Link>
             <Link
-              href="/dashboard/checkpoints/past"
+              href="/dashboard/checkpoints?tab=past"
               className="font-montserrat text-sm font-semibold text-white/70 hover:text-white"
             >
               Past events

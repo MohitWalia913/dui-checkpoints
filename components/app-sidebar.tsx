@@ -6,7 +6,6 @@ import { usePathname } from "next/navigation";
 import {
   BookOpen,
   CalendarClock,
-  History,
   LayoutDashboard,
   Map,
   Megaphone,
@@ -34,14 +33,9 @@ const NAV_ITEMS = [
     icon: LayoutDashboard,
   },
   {
-    title: "Upcoming",
-    url: "/dashboard/checkpoints/upcoming",
+    title: "Checkpoints",
+    url: "/dashboard/checkpoints",
     icon: CalendarClock,
-  },
-  {
-    title: "Past",
-    url: "/dashboard/checkpoints/past",
-    icon: History,
   },
   {
     title: "Checkpoint Map",
@@ -106,8 +100,11 @@ export function AppSidebar({
               const isActive =
                 item.url === "/dashboard"
                   ? pathname === "/dashboard"
-                  : pathname === item.url ||
-                    pathname.startsWith(`${item.url}/`);
+                  : item.url === "/dashboard/checkpoints"
+                    ? pathname === "/dashboard/checkpoints" ||
+                      pathname.startsWith("/dashboard/checkpoints/")
+                    : pathname === item.url ||
+                      pathname.startsWith(`${item.url}/`);
 
               return (
                 <SidebarMenuItem key={item.title}>
