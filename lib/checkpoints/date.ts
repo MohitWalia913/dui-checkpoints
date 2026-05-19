@@ -30,6 +30,10 @@ function formatDateParts(date: Date): string {
   return `${year}-${month}-${day}`;
 }
 
+export function isCheckpointUpcoming(dateStr: string): boolean {
+  return dateStr >= getTodayDateString();
+}
+
 export function formatCheckpointDate(dateStr: string): string {
   const [year, month, day] = dateStr.split("-").map(Number);
   if (!year || !month || !day) return dateStr;

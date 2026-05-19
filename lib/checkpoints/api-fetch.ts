@@ -3,7 +3,7 @@ import type {
   CheckpointStats,
 } from "@/lib/checkpoints/types";
 
-type ApiError = { error: string };
+type ApiError = { error?: string };
 
 export async function fetchCheckpointStatsFromApi(): Promise<{
   data: CheckpointStats | null;
@@ -14,40 +14,49 @@ export async function fetchCheckpointStatsFromApi(): Promise<{
     cache: "no-store",
   });
 
-  const json = (await res.json()) as { data?: CheckpointStats } & ApiError;
+  const json = (await res.json().catch(() => ({}))) as {
+    data?: CheckpointStats;
+  } & ApiError;
 
   if (!res.ok || !json.data) {
     return {
       data: null,
-      error: json.error ?? "Failed to load stats",
+      error: json.error ?? `Failed to load stats (${res.status})`,
     };
   }
 
   return { data: json.data, error: null };
 }
 
-export async function fetchUpcomingCheckpointsFromApi(limit = 12): Promise<{
+export async function fetchDashboardCheckpointsFromApi(limit = 12): Promise<{
   data: CheckpointListItem[];
+  listType: "upcoming" | "latest";
   error: string | null;
 }> {
   const res = await fetch(
-    `/api/checkpoints?upcoming=true&limit=${limit}`,
+    `/api/checkpoints?dashboard=true&limit=${limit}`,
     {
       credentials: "include",
       cache: "no-store",
     },
   );
 
-  const json = (await res.json()) as {
+  const json = (await res.json().catch(() => ({}))) as {
     data?: CheckpointListItem[];
+    meta?: { listType?: "upcoming" | "latest" };
   } & ApiError;
 
   if (!res.ok) {
     return {
       data: [],
-      error: json.error ?? "Failed to load checkpoints",
+      listType: "latest",
+      error: json.error ?? `Failed to load checkpoints (${res.status})`,
     };
   }
 
-  return { data: json.data ?? [], error: null };
+  return {
+    data: json.data ?? [],
+    listType: json.meta?.listType ?? "latest",
+    error: null,
+  };
 }

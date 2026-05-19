@@ -1,6 +1,7 @@
 import { requireApiUser } from "@/lib/api/auth";
 import {
   createCheckpoint,
+  getDashboardCheckpoints,
   listCheckpoints,
 } from "@/lib/checkpoints/repository";
 import type { CheckpointInsert } from "@/lib/checkpoints/types";
@@ -12,14 +13,35 @@ export async function GET(request: NextRequest) {
 
   const { searchParams } = request.nextUrl;
 
+  const dashboard =
+    searchParams.get("dashboard") === "true" ||
+    searchParams.get("dashboard") === "1";
   const upcoming =
     searchParams.get("upcoming") === "true" ||
     searchParams.get("upcoming") === "1";
+  const latest =
+    searchParams.get("latest") === "true" ||
+    searchParams.get("latest") === "1";
   const limit = Number(searchParams.get("limit") ?? "50");
   const offset = Number(searchParams.get("offset") ?? "0");
 
+  if (dashboard) {
+    const dashLimit = Number.isFinite(limit) ? limit : 12;
+    const result = await getDashboardCheckpoints(dashLimit);
+
+    if (result.error) {
+      return NextResponse.json({ error: result.error }, { status: 500 });
+    }
+
+    return NextResponse.json({
+      data: result.data,
+      meta: { listType: result.listType, count: result.data.length, limit: dashLimit },
+    });
+  }
+
   const result = await listCheckpoints({
     upcoming: upcoming || undefined,
+    latest: latest || undefined,
     state: searchParams.get("state") ?? undefined,
     county: searchParams.get("county") ?? undefined,
     city: searchParams.get("city") ?? undefined,

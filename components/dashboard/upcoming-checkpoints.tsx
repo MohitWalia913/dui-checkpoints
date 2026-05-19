@@ -1,20 +1,33 @@
-import { formatCheckpointDate } from "@/lib/checkpoints/date";
+import {
+  formatCheckpointDate,
+  isCheckpointUpcoming,
+} from "@/lib/checkpoints/date";
 import type { CheckpointListItem } from "@/lib/checkpoints/types";
 import { Calendar, Clock, ExternalLink, MapPin } from "lucide-react";
+
 export function UpcomingCheckpoints({
   checkpoints,
+  listType = "upcoming",
 }: {
   checkpoints: CheckpointListItem[];
+  listType?: "upcoming" | "latest";
 }) {
+  const title =
+    listType === "upcoming" ? "Upcoming checkpoints" : "Latest checkpoints";
+  const subtitle =
+    listType === "upcoming"
+      ? "Sorted by date — next scheduled DUI checkpoints in California"
+      : "Most recent records from the database (includes past dates)";
+
   if (checkpoints.length === 0) {
     return (
       <section className="rounded-xl border border-white/10 bg-white/5 p-8 text-center">
         <p className="font-montserrat text-lg font-semibold text-white">
-          No upcoming checkpoints
+          No checkpoints found
         </p>
         <p className="font-inter mt-2 text-sm text-white/60">
-          New DUI checkpoints will appear here when they are added to the
-          database.
+          Add rows to the Checkpoints table or check Supabase RLS for
+          authenticated read access.
         </p>
       </section>
     );
@@ -24,11 +37,9 @@ export function UpcomingCheckpoints({
     <section className="rounded-xl border border-white/10 bg-white/5">
       <div className="border-b border-white/10 px-5 py-4 md:px-6">
         <h2 className="font-montserrat text-lg font-semibold text-white">
-          Upcoming checkpoints
+          {title}
         </h2>
-        <p className="font-inter mt-1 text-sm text-white/60">
-          Sorted by date — next scheduled DUI checkpoints in California
-        </p>
+        <p className="font-inter mt-1 text-sm text-white/60">{subtitle}</p>
       </div>
 
       <ul className="divide-y divide-white/10">
@@ -39,6 +50,15 @@ export function UpcomingCheckpoints({
           >
             <div className="min-w-0 flex-1 space-y-2">
               <div className="flex flex-wrap items-center gap-2">
+                {isCheckpointUpcoming(checkpoint.Date) ? (
+                  <span className="font-montserrat inline-flex items-center rounded-full bg-emerald-500/15 px-2.5 py-0.5 text-xs font-semibold text-emerald-300">
+                    Upcoming
+                  </span>
+                ) : (
+                  <span className="font-montserrat inline-flex items-center rounded-full bg-white/10 px-2.5 py-0.5 text-xs font-semibold text-white/60">
+                    Past
+                  </span>
+                )}
                 <span className="font-montserrat inline-flex items-center rounded-full bg-[#F57E3A]/15 px-2.5 py-0.5 text-xs font-semibold text-[#F57E3A]">
                   {checkpoint.State}
                 </span>

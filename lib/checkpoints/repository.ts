@@ -8,6 +8,7 @@ import {
   type CheckpointStats,
   type CheckpointUpdate,
   type CheckpointsListParams,
+  type DashboardCheckpointsResponse,
 } from "@/lib/checkpoints/types";
 
 const LIST_COLUMNS =
@@ -40,10 +41,16 @@ export async function listCheckpoints(params: CheckpointsListParams = {}) {
     query = query.lte("Date", params.toDate);
   }
 
-  query = query
-    .order("Date", { ascending: true })
-    .order("County", { ascending: true })
-    .order("City", { ascending: true });
+  if (params.latest) {
+    query = query
+      .order("Date", { ascending: false })
+      .order("created_at", { ascending: false });
+  } else {
+    query = query
+      .order("Date", { ascending: true })
+      .order("County", { ascending: true })
+      .order("City", { ascending: true });
+  }
 
   const limit = params.limit ?? 50;
   const offset = params.offset ?? 0;
@@ -60,6 +67,33 @@ export async function listCheckpoints(params: CheckpointsListParams = {}) {
 
 export async function getUpcomingCheckpoints(limit = 10) {
   return listCheckpoints({ upcoming: true, limit });
+}
+
+export async function getLatestCheckpoints(limit = 12) {
+  return listCheckpoints({ latest: true, limit });
+}
+
+/** Upcoming first; if none (e.g. all dates in the past), return latest records. */
+export async function getDashboardCheckpoints(
+  limit = 12,
+): Promise<DashboardCheckpointsResponse> {
+  const upcoming = await listCheckpoints({ upcoming: true, limit });
+
+  if (upcoming.error) {
+    return { data: [], listType: "upcoming", error: upcoming.error };
+  }
+
+  if (upcoming.data.length > 0) {
+    return { data: upcoming.data, listType: "upcoming", error: null };
+  }
+
+  const latest = await listCheckpoints({ latest: true, limit });
+
+  return {
+    data: latest.data,
+    listType: "latest",
+    error: latest.error,
+  };
 }
 
 export async function getCheckpointById(id: number) {

@@ -4,9 +4,10 @@ import { CheckpointKpiCards } from "@/components/dashboard/checkpoint-kpi-cards"
 import { UpcomingCheckpoints } from "@/components/dashboard/upcoming-checkpoints";
 import {
   fetchCheckpointStatsFromApi,
-  fetchUpcomingCheckpointsFromApi,
+  fetchDashboardCheckpointsFromApi,
 } from "@/lib/checkpoints/api-fetch";
 import type { CheckpointListItem, CheckpointStats } from "@/lib/checkpoints/types";
+import { useRouter } from "next/navigation";
 import { useCallback, useEffect, useState } from "react";
 
 function DashboardSkeleton() {
@@ -25,39 +26,43 @@ function DashboardSkeleton() {
   );
 }
 
+/** Client-side refresh via REST API (optional). */
 export function DashboardApiContent() {
+  const router = useRouter();
   const [loading, setLoading] = useState(true);
   const [stats, setStats] = useState<CheckpointStats | null>(null);
   const [checkpoints, setCheckpoints] = useState<CheckpointListItem[]>([]);
+  const [listType, setListType] = useState<"upcoming" | "latest">("latest");
   const [error, setError] = useState<string | null>(null);
 
   const loadData = useCallback(async () => {
     setLoading(true);
     setError(null);
 
-    const [statsResult, upcomingResult] = await Promise.all([
+    const [statsResult, listResult] = await Promise.all([
       fetchCheckpointStatsFromApi(),
-      fetchUpcomingCheckpointsFromApi(12),
+      fetchDashboardCheckpointsFromApi(12),
     ]);
 
-    const errors = [statsResult.error, upcomingResult.error].filter(Boolean);
-
-    if (errors.length > 0) {
-      setError(errors.join(" · "));
+    if (statsResult.error?.includes("401") || listResult.error?.includes("401")) {
+      router.push("/auth/login");
+      return;
     }
 
+    const errors = [statsResult.error, listResult.error].filter(Boolean);
+    if (errors.length > 0) setError(errors.join(" · "));
+
     setStats(statsResult.data);
-    setCheckpoints(upcomingResult.data);
+    setCheckpoints(listResult.data);
+    setListType(listResult.listType);
     setLoading(false);
-  }, []);
+  }, [router]);
 
   useEffect(() => {
     loadData();
   }, [loadData]);
 
-  if (loading) {
-    return <DashboardSkeleton />;
-  }
+  if (loading) return <DashboardSkeleton />;
 
   return (
     <>
@@ -79,7 +84,7 @@ export function DashboardApiContent() {
 
       {stats ? <CheckpointKpiCards stats={stats} /> : null}
 
-      <UpcomingCheckpoints checkpoints={checkpoints} />
+      <UpcomingCheckpoints checkpoints={checkpoints} listType={listType} />
     </>
   );
 }
