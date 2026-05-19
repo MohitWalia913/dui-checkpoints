@@ -15,9 +15,15 @@ export function AuthTestimonialPanel() {
         }}
       />
 
-      {/* Orange ambient glow */}
-      <div className="pointer-events-none absolute -right-24 top-1/4 h-[480px] w-[480px] rounded-full bg-[#F57E3A]/20 blur-[100px]" />
-      <div className="pointer-events-none absolute -left-20 bottom-1/4 h-[380px] w-[380px] rounded-full bg-[#F57E3A]/10 blur-[80px]" />
+      {/* Animated orange ambient glow */}
+      <div
+        className="pointer-events-none absolute inset-0 overflow-hidden"
+        aria-hidden
+      >
+        <div className="absolute -right-28 top-[12%] h-[520px] w-[520px] animate-auth-glow-a rounded-full bg-[#F57E3A]/25 blur-[120px] motion-reduce:animate-none" />
+        <div className="absolute -left-24 bottom-[8%] h-[420px] w-[420px] animate-auth-glow-b rounded-full bg-[#F57E3A]/15 blur-[100px] motion-reduce:animate-none" />
+        <div className="absolute right-[5%] top-[42%] h-[380px] w-[380px] animate-auth-glow-c rounded-full bg-[#F57E3A]/20 blur-[90px] motion-reduce:animate-none" />
+      </div>
 
       <div className="relative z-10 flex w-full flex-col justify-center gap-10 px-8 py-16 lg:px-12 xl:gap-12 xl:px-16 xl:py-20">
         <div className="max-w-2xl">

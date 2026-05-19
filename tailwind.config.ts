@@ -67,9 +67,26 @@ export default {
           from: { transform: "translateX(0)" },
           to: { transform: "translateX(-50%)" },
         },
+        "auth-glow-a": {
+          "0%, 100%": { transform: "translate(0, 0) scale(1)" },
+          "33%": { transform: "translate(-48px, 36px) scale(1.12)" },
+          "66%": { transform: "translate(32px, -28px) scale(0.92)" },
+        },
+        "auth-glow-b": {
+          "0%, 100%": { transform: "translate(0, 0) scale(1)" },
+          "50%": { transform: "translate(56px, -44px) scale(1.15)" },
+        },
+        "auth-glow-c": {
+          "0%, 100%": { transform: "translate(0, 0) scale(1)" },
+          "25%": { transform: "translate(-36px, 24px) scale(1.08)" },
+          "75%": { transform: "translate(40px, -32px) scale(0.94)" },
+        },
       },
       animation: {
         "auth-marquee": "auth-marquee 45s linear infinite",
+        "auth-glow-a": "auth-glow-a 14s ease-in-out infinite",
+        "auth-glow-b": "auth-glow-b 18s ease-in-out infinite",
+        "auth-glow-c": "auth-glow-c 22s ease-in-out infinite",
       },
     },
   },

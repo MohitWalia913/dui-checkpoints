@@ -1,0 +1,124 @@
+"use client";
+
+import Image from "next/image";
+import Link from "next/link";
+import { usePathname } from "next/navigation";
+import {
+  BookOpen,
+  LayoutDashboard,
+  Map,
+  Megaphone,
+} from "lucide-react";
+import type { DashboardUser } from "@/components/dashboard/dashboard-shell";
+import { NavUser } from "@/components/nav-user";
+import {
+  Sidebar,
+  SidebarContent,
+  SidebarFooter,
+  SidebarGroup,
+  SidebarGroupLabel,
+  SidebarHeader,
+  SidebarMenu,
+  SidebarMenuButton,
+  SidebarMenuItem,
+  SidebarRail,
+} from "@/components/ui/sidebar";
+import logo from "@/app/logo.png";
+
+const NAV_ITEMS = [
+  {
+    title: "Dashboard",
+    url: "/dashboard",
+    icon: LayoutDashboard,
+  },
+  {
+    title: "Checkpoint Map",
+    url: "/map",
+    icon: Map,
+  },
+  {
+    title: "Report Checkpoint",
+    url: "/report",
+    icon: Megaphone,
+  },
+  {
+    title: "Resources",
+    url: "/resources",
+    icon: BookOpen,
+  },
+] as const;
+
+export function AppSidebar({
+  user,
+  ...props
+}: React.ComponentProps<typeof Sidebar> & { user: DashboardUser }) {
+  const pathname = usePathname();
+
+  return (
+    <Sidebar
+      collapsible="icon"
+      className="font-montserrat border-r border-[#1a2d4a]"
+      {...props}
+    >
+      <SidebarHeader>
+        <SidebarMenu>
+          <SidebarMenuItem>
+            <SidebarMenuButton
+              size="lg"
+              asChild
+              className="hover:bg-[#F57E3A]/15 data-[active=true]:bg-[#F57E3A]/20"
+            >
+              <Link href="/dashboard">
+                <Image
+                  src={logo}
+                  alt="DUI Checkpoints Locator — Statewide, Real-time Alerts"
+                  className="h-9 w-auto max-w-[200px] object-contain object-left group-data-[collapsible=icon]:hidden"
+                  priority
+                />
+                <span className="flex hidden size-8 items-center justify-center rounded-md bg-[#F57E3A]/20 group-data-[collapsible=icon]:flex">
+                  <Map className="size-5 text-[#F57E3A]" aria-hidden />
+                </span>
+              </Link>
+            </SidebarMenuButton>
+          </SidebarMenuItem>
+        </SidebarMenu>
+      </SidebarHeader>
+
+      <SidebarContent>
+        <SidebarGroup>
+          <SidebarGroupLabel className="text-white/50 uppercase tracking-wider">
+            Navigation
+          </SidebarGroupLabel>
+          <SidebarMenu>
+            {NAV_ITEMS.map((item) => {
+              const isActive =
+                pathname === item.url ||
+                (item.url !== "/dashboard" && pathname.startsWith(item.url));
+
+              return (
+                <SidebarMenuItem key={item.title}>
+                  <SidebarMenuButton
+                    asChild
+                    tooltip={item.title}
+                    isActive={isActive}
+                    className="text-white/90 hover:bg-[#F57E3A]/15 hover:text-white data-[active=true]:bg-[#F57E3A] data-[active=true]:text-white"
+                  >
+                    <Link href={item.url}>
+                      <item.icon className="text-[#F57E3A] group-data-[active=true]/menu-button:text-white" />
+                      <span>{item.title}</span>
+                    </Link>
+                  </SidebarMenuButton>
+                </SidebarMenuItem>
+              );
+            })}
+          </SidebarMenu>
+        </SidebarGroup>
+      </SidebarContent>
+
+      <SidebarFooter>
+        <NavUser user={user} />
+      </SidebarFooter>
+      <SidebarRail />
+    </Sidebar>
+  );
+}
