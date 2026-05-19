@@ -1,31 +1,8 @@
-import Image from "next/image";
-import { AUTH_TESTIMONIAL } from "@/components/auth/constants";
-
-function Stars() {
-  return (
-    <div className="flex gap-1" aria-hidden>
-      {Array.from({ length: 5 }).map((_, i) => (
-        <Image
-          key={i}
-          src="/star.png"
-          alt=""
-          width={18}
-          height={18}
-          className="h-[18px] w-[18px]"
-        />
-      ))}
-    </div>
-  );
-}
+import { AuthTestimonialMarquee } from "@/components/auth/auth-testimonial-marquee";
 
 export function AuthTestimonialPanel() {
-  const { quote, name, role, avatar } = AUTH_TESTIMONIAL;
-
   return (
-    <aside
-      className="relative hidden min-h-svh w-full overflow-hidden bg-[#040F20] lg:flex lg:w-1/2 lg:flex-col lg:items-center lg:justify-center"
-      aria-hidden
-    >
+    <aside className="relative hidden min-h-svh w-full overflow-hidden bg-[#040F20] lg:flex lg:w-1/2 lg:flex-col lg:items-center lg:justify-center">
       {/* Grid pattern */}
       <div
         className="pointer-events-none absolute inset-0 opacity-[0.35]"
@@ -43,7 +20,7 @@ export function AuthTestimonialPanel() {
       <div className="pointer-events-none absolute -left-16 bottom-1/4 h-[320px] w-[320px] rounded-full bg-[#F57E3A]/10 blur-[80px]" />
 
       <div className="relative z-10 mx-auto w-full max-w-[480px] px-10 py-16 xl:px-14">
-        <div className="mb-10 max-w-md">
+        <div className="mb-8 max-w-md">
           <p className="font-montserrat text-sm font-semibold uppercase tracking-wider text-[#F57E3A]">
             Trusted statewide
           </p>
@@ -53,31 +30,7 @@ export function AuthTestimonialPanel() {
           </h2>
         </div>
 
-        <article className="rounded-2xl border border-white/10 bg-white p-8 shadow-[0_20px_50px_rgba(0,0,0,0.35)]">
-          <p className="font-montserrat text-[16px] font-medium leading-[1.65] text-[#5C6573]">
-            {quote}
-          </p>
-          <div className="mt-6">
-            <Stars />
-          </div>
-          <div className="mt-6 flex items-center gap-3 border-t border-[#E8EAED] pt-6">
-            <Image
-              src={avatar}
-              alt=""
-              width={48}
-              height={48}
-              className="h-12 w-12 shrink-0 rounded-full object-cover"
-            />
-            <div>
-              <p className="font-montserrat text-[15px] font-semibold text-[#040F20]">
-                {name}
-              </p>
-              <p className="font-montserrat text-sm font-medium text-[#8B939F]">
-                {role}
-              </p>
-            </div>
-          </div>
-        </article>
+        <AuthTestimonialMarquee />
       </div>
     </aside>
   );
