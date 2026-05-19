@@ -3,9 +3,15 @@ import { NextResponse } from "next/server";
 
 export async function requireApiUser() {
   const supabase = await createClient();
-  const { data, error } = await supabase.auth.getClaims();
+  const { data: claimsData, error: claimsError } =
+    await supabase.auth.getClaims();
+  const { data: sessionData, error: sessionError } =
+    await supabase.auth.getSession();
 
-  if (error || !data?.claims) {
+  const hasClaims = !claimsError && claimsData?.claims;
+  const hasSession = !sessionError && sessionData?.session;
+
+  if (!hasClaims && !hasSession) {
     return {
       supabase,
       user: null,
@@ -13,5 +19,9 @@ export async function requireApiUser() {
     };
   }
 
-  return { supabase, user: data.claims, response: null };
+  return {
+    supabase,
+    user: claimsData?.claims ?? sessionData?.session?.user ?? null,
+    response: null,
+  };
 }
