@@ -9,8 +9,10 @@ const defaultUrl = process.env.VERCEL_URL
 
 export const metadata: Metadata = {
   metadataBase: new URL(defaultUrl),
-  title: "Next.js and Supabase Starter Kit",
-  description: "The fastest way to build apps with Next.js and Supabase",
+  title:
+    "California DUI Checkpoints Locator Map & Real-Time Database | DUI Checkpoints Locator",
+  description:
+    "Stay informed with real-time DUI checkpoints and incident mapping across California. Statewide coverage, live alerts, and checkpoint data updated every 24 hours.",
 };
 
 const montserrat = Montserrat({
