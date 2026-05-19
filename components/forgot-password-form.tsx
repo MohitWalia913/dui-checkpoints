@@ -1,18 +1,15 @@
 "use client";
 
+import { AuthField } from "@/components/auth/auth-field";
+import { AuthPageHeader } from "@/components/auth/auth-page-header";
+import {
+  AuthErrorMessage,
+  AuthFooterText,
+  AuthInlineLink,
+  AuthSubmitButton,
+} from "@/components/auth/auth-ui";
 import { cn } from "@/lib/utils";
 import { createClient } from "@/lib/supabase/client";
-import { Button } from "@/components/ui/button";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import Link from "next/link";
 import { useState } from "react";
 
 export function ForgotPasswordForm({
@@ -31,7 +28,6 @@ export function ForgotPasswordForm({
     setError(null);
 
     try {
-      // The url which will be included in the email. This URL needs to be configured in your redirect URLs in the Supabase dashboard at https://supabase.com/dashboard/project/_/auth/url-configuration
       const { error } = await supabase.auth.resetPasswordForEmail(email, {
         redirectTo: `${window.location.origin}/auth/update-password`,
       });
@@ -44,62 +40,55 @@ export function ForgotPasswordForm({
     }
   };
 
+  if (success) {
+    return (
+      <div className={cn("w-full", className)} {...props}>
+        <AuthPageHeader
+          title="Check your email"
+          description="Password reset instructions sent"
+        />
+        <p className="font-montserrat text-[15px] font-medium leading-relaxed text-[#5C6573]">
+          If you registered using your email and password, you will receive a
+          password reset email.
+        </p>
+        <AuthFooterText className="mt-8">
+          <AuthInlineLink href="/auth/login">Back to log in</AuthInlineLink>
+        </AuthFooterText>
+      </div>
+    );
+  }
+
   return (
-    <div className={cn("flex flex-col gap-6", className)} {...props}>
-      {success ? (
-        <Card>
-          <CardHeader>
-            <CardTitle className="text-2xl">Check Your Email</CardTitle>
-            <CardDescription>Password reset instructions sent</CardDescription>
-          </CardHeader>
-          <CardContent>
-            <p className="text-sm text-muted-foreground">
-              If you registered using your email and password, you will receive
-              a password reset email.
-            </p>
-          </CardContent>
-        </Card>
-      ) : (
-        <Card>
-          <CardHeader>
-            <CardTitle className="text-2xl">Reset Your Password</CardTitle>
-            <CardDescription>
-              Type in your email and we&apos;ll send you a link to reset your
-              password
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <form onSubmit={handleForgotPassword}>
-              <div className="flex flex-col gap-6">
-                <div className="grid gap-2">
-                  <Label htmlFor="email">Email</Label>
-                  <Input
-                    id="email"
-                    type="email"
-                    placeholder="m@example.com"
-                    required
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                  />
-                </div>
-                {error && <p className="text-sm text-red-500">{error}</p>}
-                <Button type="submit" className="w-full" disabled={isLoading}>
-                  {isLoading ? "Sending..." : "Send reset email"}
-                </Button>
-              </div>
-              <div className="mt-4 text-center text-sm">
-                Already have an account?{" "}
-                <Link
-                  href="/auth/login"
-                  className="underline underline-offset-4"
-                >
-                  Login
-                </Link>
-              </div>
-            </form>
-          </CardContent>
-        </Card>
-      )}
+    <div className={cn("w-full", className)} {...props}>
+      <AuthPageHeader
+        title="Reset your password"
+        description="Enter your email and we'll send you a link to reset your password."
+      />
+
+      <form onSubmit={handleForgotPassword} className="space-y-5">
+        <AuthField
+          id="email"
+          label="Email"
+          type="email"
+          icon="email"
+          placeholder="you@example.com"
+          required
+          value={email}
+          onChange={(e) => setEmail(e.target.value)}
+          autoComplete="email"
+        />
+
+        {error ? <AuthErrorMessage message={error} /> : null}
+
+        <AuthSubmitButton disabled={isLoading}>
+          {isLoading ? "Sending..." : "Send reset email"}
+        </AuthSubmitButton>
+      </form>
+
+      <AuthFooterText>
+        Already have an account?{" "}
+        <AuthInlineLink href="/auth/login">Log in</AuthInlineLink>
+      </AuthFooterText>
     </div>
   );
 }

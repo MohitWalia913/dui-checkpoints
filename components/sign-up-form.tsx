@@ -1,18 +1,15 @@
 "use client";
 
+import { AuthField } from "@/components/auth/auth-field";
+import { AuthPageHeader } from "@/components/auth/auth-page-header";
+import {
+  AuthErrorMessage,
+  AuthFooterText,
+  AuthInlineLink,
+  AuthSubmitButton,
+} from "@/components/auth/auth-ui";
 import { cn } from "@/lib/utils";
 import { createClient } from "@/lib/supabase/client";
-import { Button } from "@/components/ui/button";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 
@@ -57,64 +54,62 @@ export function SignUpForm({
   };
 
   return (
-    <div className={cn("flex flex-col gap-6", className)} {...props}>
-      <Card>
-        <CardHeader>
-          <CardTitle className="text-2xl">Sign up</CardTitle>
-          <CardDescription>Create a new account</CardDescription>
-        </CardHeader>
-        <CardContent>
-          <form onSubmit={handleSignUp}>
-            <div className="flex flex-col gap-6">
-              <div className="grid gap-2">
-                <Label htmlFor="email">Email</Label>
-                <Input
-                  id="email"
-                  type="email"
-                  placeholder="m@example.com"
-                  required
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                />
-              </div>
-              <div className="grid gap-2">
-                <div className="flex items-center">
-                  <Label htmlFor="password">Password</Label>
-                </div>
-                <Input
-                  id="password"
-                  type="password"
-                  required
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                />
-              </div>
-              <div className="grid gap-2">
-                <div className="flex items-center">
-                  <Label htmlFor="repeat-password">Repeat Password</Label>
-                </div>
-                <Input
-                  id="repeat-password"
-                  type="password"
-                  required
-                  value={repeatPassword}
-                  onChange={(e) => setRepeatPassword(e.target.value)}
-                />
-              </div>
-              {error && <p className="text-sm text-red-500">{error}</p>}
-              <Button type="submit" className="w-full" disabled={isLoading}>
-                {isLoading ? "Creating an account..." : "Sign up"}
-              </Button>
-            </div>
-            <div className="mt-4 text-center text-sm">
-              Already have an account?{" "}
-              <Link href="/auth/login" className="underline underline-offset-4">
-                Login
-              </Link>
-            </div>
-          </form>
-        </CardContent>
-      </Card>
+    <div className={cn("w-full", className)} {...props}>
+      <AuthPageHeader
+        title="Create your account"
+        description="Get real-time DUI checkpoint alerts and tools built for California drivers."
+      />
+
+      <form onSubmit={handleSignUp} className="space-y-5">
+        <AuthField
+          id="email"
+          label="Email"
+          type="email"
+          icon="email"
+          placeholder="you@example.com"
+          required
+          value={email}
+          onChange={(e) => setEmail(e.target.value)}
+          autoComplete="email"
+        />
+
+        <AuthField
+          id="password"
+          label="Password"
+          type="password"
+          icon="password"
+          showPasswordToggle
+          placeholder="Create a password"
+          required
+          value={password}
+          onChange={(e) => setPassword(e.target.value)}
+          autoComplete="new-password"
+        />
+
+        <AuthField
+          id="repeat-password"
+          label="Confirm password"
+          type="password"
+          icon="password"
+          showPasswordToggle
+          placeholder="Re-enter your password"
+          required
+          value={repeatPassword}
+          onChange={(e) => setRepeatPassword(e.target.value)}
+          autoComplete="new-password"
+        />
+
+        {error ? <AuthErrorMessage message={error} /> : null}
+
+        <AuthSubmitButton disabled={isLoading}>
+          {isLoading ? "Creating an account..." : "Sign up"}
+        </AuthSubmitButton>
+      </form>
+
+      <AuthFooterText>
+        Already have an account?{" "}
+        <AuthInlineLink href="/auth/login">Log in</AuthInlineLink>
+      </AuthFooterText>
     </div>
   );
 }
