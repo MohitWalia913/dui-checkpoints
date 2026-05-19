@@ -3,7 +3,14 @@ import {
   isCheckpointUpcoming,
 } from "@/lib/checkpoints/date";
 import type { CheckpointListItem } from "@/lib/checkpoints/types";
-import { Calendar, Clock, ExternalLink, MapPin } from "lucide-react";
+import {
+  Calendar,
+  Clock,
+  ChevronRight,
+  ExternalLink,
+  MapPin,
+} from "lucide-react";
+import Link from "next/link";
 
 export function UpcomingCheckpoints({
   checkpoints,
@@ -46,9 +53,12 @@ export function UpcomingCheckpoints({
         {checkpoints.map((checkpoint) => (
           <li
             key={checkpoint.id}
-            className="flex flex-col gap-4 px-5 py-5 transition-colors hover:bg-white/[0.03] md:flex-row md:items-start md:justify-between md:px-6"
+            className="flex flex-col gap-4 px-5 py-5 md:flex-row md:items-start md:justify-between md:px-6"
           >
-            <div className="min-w-0 flex-1 space-y-2">
+            <Link
+              href={`/dashboard/checkpoints/${checkpoint.id}`}
+              className="group min-w-0 flex-1 space-y-2"
+            >
               <div className="flex flex-wrap items-center gap-2">
                 {isCheckpointUpcoming(checkpoint.Date) ? (
                   <span className="font-montserrat inline-flex items-center rounded-full bg-emerald-500/15 px-2.5 py-0.5 text-xs font-semibold text-emerald-300">
@@ -67,7 +77,7 @@ export function UpcomingCheckpoints({
                 </span>
               </div>
 
-              <p className="font-montserrat flex items-start gap-2 text-base font-semibold text-white">
+              <p className="font-montserrat flex items-start gap-2 text-base font-semibold text-white group-hover:text-[#F57E3A]">
                 <MapPin
                   className="mt-0.5 size-4 shrink-0 text-[#F57E3A]"
                   aria-hidden
@@ -85,7 +95,12 @@ export function UpcomingCheckpoints({
                   {checkpoint.Time}
                 </span>
               </div>
-            </div>
+
+              <span className="font-montserrat inline-flex items-center gap-1 text-sm font-semibold text-[#F57E3A]">
+                View details
+                <ChevronRight className="size-4 transition-transform group-hover:translate-x-0.5" />
+              </span>
+            </Link>
 
             <div className="flex shrink-0 flex-wrap gap-2">
               {checkpoint.mapurl ? (

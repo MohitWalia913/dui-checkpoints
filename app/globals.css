@@ -91,6 +91,16 @@
   --sidebar-ring: hsl(217.2 91.2% 59.8%);
 }
 
+/* Leaflet map (dashboard checkpoint detail) */
+.leaflet-container {
+  font-family: var(--font-inter), sans-serif;
+  z-index: 0;
+}
+
+.leaflet-popup-content-wrapper {
+  border-radius: 0.5rem;
+}
+
 @theme inline {
   --color-sidebar: var(--sidebar);
   --color-sidebar-foreground: var(--sidebar-foreground);
