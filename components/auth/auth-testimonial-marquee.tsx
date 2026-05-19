@@ -2,6 +2,12 @@
 
 import Image from "next/image";
 import { AUTH_TESTIMONIALS } from "@/components/auth/constants";
+import { cn } from "@/lib/utils";
+
+const MARQUEE_ITEMS = [...AUTH_TESTIMONIALS, ...AUTH_TESTIMONIALS];
+
+const EDGE_MASK =
+  "linear-gradient(to right, transparent 0%, black 10%, black 90%, transparent 100%)";
 
 function Stars() {
   return (
@@ -25,9 +31,15 @@ function TestimonialCard({
   name,
   role,
   avatar,
-}: (typeof AUTH_TESTIMONIALS)[number]) {
+  className,
+}: (typeof AUTH_TESTIMONIALS)[number] & { className?: string }) {
   return (
-    <article className="shrink-0 rounded-2xl border border-white/10 bg-white p-6 shadow-[0_16px_40px_rgba(0,0,0,0.3)]">
+    <article
+      className={cn(
+        "w-[min(340px,78vw)] shrink-0 rounded-2xl border border-white/10 bg-white p-6 shadow-[0_16px_40px_rgba(0,0,0,0.3)] sm:w-[360px]",
+        className,
+      )}
+    >
       <p className="font-montserrat text-[15px] font-medium leading-[1.65] text-[#5C6573]">
         {quote}
       </p>
@@ -55,34 +67,32 @@ function TestimonialCard({
   );
 }
 
-const EDGE_MASK =
-  "linear-gradient(to bottom, transparent 0%, black 14%, black 86%, transparent 100%)";
-
 export function AuthTestimonialMarquee() {
   return (
-    <div className="relative w-full">
-      {/* Edge fade overlays (reinforces mask on dark bg) */}
+    <div
+      className="relative w-full overflow-hidden py-4"
+      role="region"
+      aria-label="Customer reviews"
+    >
       <div
-        className="pointer-events-none absolute inset-x-0 top-0 z-10 h-16 bg-gradient-to-b from-[#040F20] to-transparent"
+        className="pointer-events-none absolute inset-y-0 left-0 z-10 w-16 bg-gradient-to-r from-[#040F20] via-[#040F20]/80 to-transparent sm:w-28"
         aria-hidden
       />
       <div
-        className="pointer-events-none absolute inset-x-0 bottom-0 z-10 h-16 bg-gradient-to-t from-[#040F20] to-transparent"
+        className="pointer-events-none absolute inset-y-0 right-0 z-10 w-16 bg-gradient-to-l from-[#040F20] via-[#040F20]/80 to-transparent sm:w-28"
         aria-hidden
       />
 
       <div
-        role="region"
-        aria-label="Customer reviews"
-        className="max-h-[min(520px,58vh)] overflow-y-auto overscroll-contain px-0.5 py-8 [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden"
+        className="overflow-hidden"
         style={{
           maskImage: EDGE_MASK,
           WebkitMaskImage: EDGE_MASK,
         }}
       >
-        <div className="flex flex-col gap-5">
-          {AUTH_TESTIMONIALS.map((item) => (
-            <TestimonialCard key={item.name} {...item} />
+        <div className="flex w-max animate-auth-marquee gap-5 motion-reduce:animate-none hover:[animation-play-state:paused]">
+          {MARQUEE_ITEMS.map((item, index) => (
+            <TestimonialCard key={`${item.name}-${index}`} {...item} />
           ))}
         </div>
       </div>

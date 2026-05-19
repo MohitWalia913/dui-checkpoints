@@ -62,6 +62,15 @@ export default {
         montserrat: ["var(--font-montserrat)", "sans-serif"],
         inter: ["var(--font-inter)", "sans-serif"],
       },
+      keyframes: {
+        "auth-marquee": {
+          from: { transform: "translateX(0)" },
+          to: { transform: "translateX(-50%)" },
+        },
+      },
+      animation: {
+        "auth-marquee": "auth-marquee 45s linear infinite",
+      },
     },
   },
   plugins: [tailwindcssAnimate],

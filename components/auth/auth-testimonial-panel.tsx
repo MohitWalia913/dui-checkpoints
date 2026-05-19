@@ -2,7 +2,7 @@ import { AuthTestimonialMarquee } from "@/components/auth/auth-testimonial-marqu
 
 export function AuthTestimonialPanel() {
   return (
-    <aside className="relative hidden min-h-svh w-full overflow-hidden bg-[#040F20] lg:flex lg:w-1/2 lg:flex-col lg:items-center lg:justify-center">
+    <aside className="relative hidden min-h-svh w-full flex-1 overflow-hidden bg-[#040F20] lg:flex lg:min-w-0 lg:flex-col lg:justify-center">
       {/* Grid pattern */}
       <div
         className="pointer-events-none absolute inset-0 opacity-[0.35]"
@@ -16,15 +16,15 @@ export function AuthTestimonialPanel() {
       />
 
       {/* Orange ambient glow */}
-      <div className="pointer-events-none absolute -right-20 top-1/4 h-[420px] w-[420px] rounded-full bg-[#F57E3A]/20 blur-[100px]" />
-      <div className="pointer-events-none absolute -left-16 bottom-1/4 h-[320px] w-[320px] rounded-full bg-[#F57E3A]/10 blur-[80px]" />
+      <div className="pointer-events-none absolute -right-24 top-1/4 h-[480px] w-[480px] rounded-full bg-[#F57E3A]/20 blur-[100px]" />
+      <div className="pointer-events-none absolute -left-20 bottom-1/4 h-[380px] w-[380px] rounded-full bg-[#F57E3A]/10 blur-[80px]" />
 
-      <div className="relative z-10 mx-auto w-full max-w-[480px] px-10 py-16 xl:px-14">
-        <div className="mb-8 max-w-md">
+      <div className="relative z-10 flex w-full flex-col justify-center gap-10 px-8 py-16 lg:px-12 xl:gap-12 xl:px-16 xl:py-20">
+        <div className="max-w-2xl">
           <p className="font-montserrat text-sm font-semibold uppercase tracking-wider text-[#F57E3A]">
             Trusted statewide
           </p>
-          <h2 className="font-montserrat mt-3 text-[28px] font-bold leading-tight text-white xl:text-[32px]">
+          <h2 className="font-montserrat mt-3 text-[28px] font-bold leading-tight text-white lg:text-[34px] xl:text-[38px]">
             Real-time DUI checkpoint alerts across{" "}
             <span className="text-[#F57E3A]">California</span>
           </h2>
