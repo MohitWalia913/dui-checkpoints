@@ -25,6 +25,9 @@ export async function listCheckpoints(params: CheckpointsListParams = {}) {
   if (params.upcoming) {
     query = query.gte("Date", today);
   }
+  if (params.past) {
+    query = query.lt("Date", today);
+  }
   if (params.state) {
     query = query.eq("State", params.state);
   }
@@ -65,8 +68,12 @@ export async function listCheckpoints(params: CheckpointsListParams = {}) {
   };
 }
 
-export async function getUpcomingCheckpoints(limit = 10) {
+export async function getUpcomingCheckpoints(limit = 50) {
   return listCheckpoints({ upcoming: true, limit });
+}
+
+export async function getPastCheckpoints(limit = 50) {
+  return listCheckpoints({ past: true, latest: true, limit });
 }
 
 export async function getLatestCheckpoints(limit = 12) {

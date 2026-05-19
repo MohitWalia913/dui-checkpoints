@@ -45,6 +45,7 @@ export type CheckpointStats = {
 
 export type CheckpointsListParams = {
   upcoming?: boolean;
+  past?: boolean;
   /** Newest first (dashboard fallback when no future dates exist) */
   latest?: boolean;
   county?: string;

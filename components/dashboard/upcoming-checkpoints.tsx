@@ -43,10 +43,28 @@ export function UpcomingCheckpoints({
   return (
     <section className="rounded-xl border border-white/10 bg-white/5">
       <div className="border-b border-white/10 px-5 py-4 md:px-6">
-        <h2 className="font-montserrat text-lg font-semibold text-white">
-          {title}
-        </h2>
-        <p className="font-inter mt-1 text-sm text-white/60">{subtitle}</p>
+        <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+          <div>
+            <h2 className="font-montserrat text-lg font-semibold text-white">
+              {title}
+            </h2>
+            <p className="font-inter mt-1 text-sm text-white/60">{subtitle}</p>
+          </div>
+          <div className="flex flex-wrap gap-3">
+            <Link
+              href="/dashboard/checkpoints/upcoming"
+              className="font-montserrat text-sm font-semibold text-[#F57E3A] hover:underline"
+            >
+              All upcoming
+            </Link>
+            <Link
+              href="/dashboard/checkpoints/past"
+              className="font-montserrat text-sm font-semibold text-white/70 hover:text-white"
+            >
+              Past events
+            </Link>
+          </div>
+        </div>
       </div>
 
       <ul className="divide-y divide-white/10">

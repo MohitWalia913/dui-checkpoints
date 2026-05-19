@@ -19,6 +19,8 @@ export async function GET(request: NextRequest) {
   const upcoming =
     searchParams.get("upcoming") === "true" ||
     searchParams.get("upcoming") === "1";
+  const past =
+    searchParams.get("past") === "true" || searchParams.get("past") === "1";
   const latest =
     searchParams.get("latest") === "true" ||
     searchParams.get("latest") === "1";
@@ -41,6 +43,7 @@ export async function GET(request: NextRequest) {
 
   const result = await listCheckpoints({
     upcoming: upcoming || undefined,
+    past: past || undefined,
     latest: latest || undefined,
     state: searchParams.get("state") ?? undefined,
     county: searchParams.get("county") ?? undefined,
