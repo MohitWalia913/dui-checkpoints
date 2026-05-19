@@ -63,7 +63,7 @@ export function NavUser({ user }: { user: DashboardUser }) {
             </SidebarMenuButton>
           </DropdownMenuTrigger>
           <DropdownMenuContent
-            className="w-(--radix-dropdown-menu-trigger-width) min-w-56 rounded-lg border-[#E8EAED] font-montserrat"
+            className="min-w-56 rounded-lg border border-white/10 bg-[#0a1628] font-montserrat text-white w-[var(--radix-dropdown-menu-trigger-width)]"
             side={isMobile ? "bottom" : "right"}
             align="end"
             sideOffset={4}
@@ -76,19 +76,19 @@ export function NavUser({ user }: { user: DashboardUser }) {
                   </AvatarFallback>
                 </Avatar>
                 <div className="grid flex-1 text-left text-sm leading-tight">
-                  <span className="truncate font-semibold text-[#040F20]">
+                  <span className="truncate font-semibold text-white">
                     {user.name}
                   </span>
-                  <span className="truncate text-xs text-[#5C6573]">
+                  <span className="truncate text-xs text-white/60">
                     {user.email}
                   </span>
                 </div>
               </div>
             </DropdownMenuLabel>
-            <DropdownMenuSeparator />
+            <DropdownMenuSeparator className="bg-white/10" />
             <DropdownMenuItem
               onClick={logout}
-              className="cursor-pointer text-[#040F20] focus:bg-[#F57E3A]/10 focus:text-[#040F20]"
+              className="cursor-pointer text-white focus:bg-[#F57E3A]/15 focus:text-white"
             >
               <LogOut className="text-[#F57E3A]" />
               Log out

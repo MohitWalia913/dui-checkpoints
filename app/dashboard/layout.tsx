@@ -38,8 +38,8 @@ async function AuthenticatedDashboard({
 
 function DashboardLoading() {
   return (
-    <div className="flex min-h-svh items-center justify-center bg-[#F5F6F8]">
-      <p className="font-montserrat text-sm font-medium text-[#5C6573]">
+    <div className="flex min-h-svh items-center justify-center bg-[#040F20]">
+      <p className="font-montserrat text-sm font-medium text-white/70">
         Loading dashboard…
       </p>
     </div>
