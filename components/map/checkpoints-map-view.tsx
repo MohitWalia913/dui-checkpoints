@@ -127,6 +127,9 @@ function MarkerClusterLayer({
   const markerByIdRef = useRef<Record<number, LeafletMarker>>({});
   const handlersRef = useRef({ onMarkerClick, onHover });
   handlersRef.current = { onMarkerClick, onHover };
+  /** Latest selection for marker build without re-clearing layers on every select. */
+  const selectionRef = useRef({ selectedId, hoveredId });
+  selectionRef.current = { selectedId, hoveredId };
   const [ready, setReady] = useState(false);
 
   useEffect(() => {
@@ -176,8 +179,9 @@ function MarkerClusterLayer({
       markerByIdRef.current = {};
 
       checkpoints.forEach((checkpoint) => {
-        const isActive = selectedId === checkpoint.id;
-        const isHovered = hoveredId === checkpoint.id;
+        const { selectedId: sid, hoveredId: hid } = selectionRef.current;
+        const isActive = sid === checkpoint.id;
+        const isHovered = hid === checkpoint.id;
         const marker = L.marker(
           [checkpoint.coordinates.lat, checkpoint.coordinates.lng],
           {
@@ -202,32 +206,87 @@ function MarkerClusterLayer({
     return () => {
       cancelled = true;
     };
+  }, [checkpoints, ready]);
+
+  /** Update marker icons when selection/hover changes without clearing the cluster. */
+  useEffect(() => {
+    if (!ready) return;
+
+    void import("leaflet").then(({ default: L }) => {
+      for (const checkpoint of checkpoints) {
+        const marker = markerByIdRef.current[checkpoint.id];
+        if (!marker) continue;
+        const isActive = selectedId === checkpoint.id;
+        const isHovered = hoveredId === checkpoint.id;
+        marker.setIcon(
+          createCheckpointMarkerIcon(L, checkpoint.status, {
+            active: isActive,
+            hovered: isHovered,
+          }),
+        );
+      }
+    });
   }, [checkpoints, selectedId, hoveredId, ready]);
 
   useEffect(() => {
     if (!ready || focusMarkerId == null) return;
-    const group = groupRef.current;
-    const marker = markerByIdRef.current[focusMarkerId];
-    if (!group || !marker) return;
 
-    const groupWithZoomToShow = group as LayerGroup & {
-      zoomToShowLayer?: (layer: LayerGroup | LeafletMarker, cb?: () => void) => void;
+    let cancelled = false;
+    let rafId = 0;
+    let attempts = 0;
+    const maxAttempts = 24;
+
+    const tryFocus = () => {
+      if (cancelled) return;
+      const group = groupRef.current;
+      if (!group) return;
+
+      const marker = markerByIdRef.current[focusMarkerId];
+      const hasLayerFn = group.hasLayer?.bind(group);
+      const markerOnGroup =
+        marker &&
+        typeof marker.getLatLng === "function" &&
+        (!hasLayerFn || hasLayerFn(marker));
+
+      if (!markerOnGroup) {
+        if (attempts++ < maxAttempts) {
+          rafId = requestAnimationFrame(tryFocus);
+        }
+        return;
+      }
+
+      const latLng = marker.getLatLng();
+      const groupWithZoomToShow = group as LayerGroup & {
+        zoomToShowLayer?: (layer: LeafletMarker, cb?: () => void) => void;
+      };
+
+      try {
+        if (typeof groupWithZoomToShow.zoomToShowLayer === "function") {
+          groupWithZoomToShow.zoomToShowLayer(marker, () => {
+            if (cancelled) return;
+            map.setView(marker.getLatLng(), Math.max(map.getZoom(), 17), {
+              animate: true,
+            });
+          });
+          return;
+        }
+      } catch {
+        // Detached / timing issues with cluster — fall back to setView.
+      }
+
+      map.setView(latLng, Math.max(map.getZoom(), 17), {
+        animate: true,
+      });
     };
 
-    if (typeof groupWithZoomToShow.zoomToShowLayer === "function") {
-      groupWithZoomToShow.zoomToShowLayer(marker, () => {
-        const latLng = marker.getLatLng();
-        map.setView(latLng, Math.max(map.getZoom(), 17), {
-          animate: true,
-        });
-      });
-      return;
-    }
-
-    const latLng = marker.getLatLng();
-    map.setView(latLng, Math.max(map.getZoom(), 17), {
-      animate: true,
+    rafId = requestAnimationFrame(() => {
+      requestAnimationFrame(tryFocus);
     });
+
+    return () => {
+      cancelled = true;
+      cancelAnimationFrame(rafId);
+    };
   }, [focusMarkerId, focusToken, map, ready]);
 
   return null;
