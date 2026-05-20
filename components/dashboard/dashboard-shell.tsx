@@ -9,6 +9,8 @@ import {
   SidebarTrigger,
 } from "@/components/ui/sidebar";
 import { TooltipProvider } from "@/components/ui/tooltip";
+import { usePathname } from "next/navigation";
+import { useEffect, useRef, useState } from "react";
 
 const sidebarTheme = {
   "--sidebar": "hsl(218, 78%, 7%)",
@@ -33,9 +35,27 @@ export function DashboardShell({
   user: DashboardUser;
   children: React.ReactNode;
 }) {
+  const pathname = usePathname();
+  const isMapRoute =
+    pathname === "/dashboard/map" || pathname.startsWith("/dashboard/map/");
+  const [sidebarOpen, setSidebarOpen] = useState(!isMapRoute);
+  const wasMapRouteRef = useRef(isMapRoute);
+
+  useEffect(() => {
+    const wasMapRoute = wasMapRouteRef.current;
+    if (isMapRoute && !wasMapRoute) {
+      setSidebarOpen(false);
+    } else if (!isMapRoute && wasMapRoute) {
+      setSidebarOpen(true);
+    }
+    wasMapRouteRef.current = isMapRoute;
+  }, [isMapRoute]);
+
   return (
     <TooltipProvider delayDuration={0}>
       <SidebarProvider
+        open={sidebarOpen}
+        onOpenChange={setSidebarOpen}
         className="dark flex min-h-svh w-full bg-[#040F20] text-white"
         style={sidebarTheme}
       >

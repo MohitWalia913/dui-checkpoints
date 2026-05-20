@@ -75,6 +75,7 @@ export function AppSidebar({
             <SidebarMenuButton
               size="lg"
               asChild
+              tooltip="DUI Checkpoints Locator"
               className="hover:bg-[#F57E3A]/15 data-[active=true]:bg-[#F57E3A]/20"
             >
               <Link href="/dashboard">
@@ -84,9 +85,14 @@ export function AppSidebar({
                   className="h-9 w-auto max-w-[200px] object-contain object-left group-data-[collapsible=icon]:hidden"
                   priority
                 />
-                <span className="flex hidden size-8 items-center justify-center rounded-md bg-[#F57E3A]/20 group-data-[collapsible=icon]:flex">
-                  <Map className="size-5 text-[#F57E3A]" aria-hidden />
-                </span>
+                <Image
+                  src="/favicon.svg"
+                  alt="DUI Checkpoints Locator"
+                  width={28}
+                  height={28}
+                  className="hidden rounded-sm group-data-[collapsible=icon]:block"
+                  priority
+                />
               </Link>
             </SidebarMenuButton>
           </SidebarMenuItem>

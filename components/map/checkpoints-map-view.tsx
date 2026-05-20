@@ -28,6 +28,10 @@ import "leaflet.markercluster/dist/MarkerCluster.Default.css";
 
 const CALIFORNIA_CENTER: [number, number] = [36.7783, -119.4179];
 const DEFAULT_ZOOM = 6;
+const CALIFORNIA_BOUNDS: [[number, number], [number, number]] = [
+  [32.3, -124.6],
+  [42.1, -114.1],
+];
 
 function createPopupContent(checkpoint: MapCheckpoint): HTMLElement {
   const wrapper = document.createElement("div");
@@ -132,29 +136,15 @@ function SelectedCheckpointController({
   return null;
 }
 
-function FitBoundsOnLoad({
-  checkpoints,
-  hasActiveSelection,
-}: {
-  checkpoints: MapCheckpoint[];
-  hasActiveSelection: boolean;
-}) {
+function FitCaliforniaOnLoad() {
   const map = useMap();
   const fitted = useRef(false);
 
   useEffect(() => {
-    if (fitted.current || checkpoints.length === 0 || hasActiveSelection) return;
-
-    void import("leaflet").then(({ default: L }) => {
-      const bounds = L.latLngBounds(
-        checkpoints.map((c) => [c.coordinates.lat, c.coordinates.lng]),
-      );
-      if (bounds.isValid()) {
-        map.fitBounds(bounds.pad(0.12), { animate: false, maxZoom: 10 });
-        fitted.current = true;
-      }
-    });
-  }, [checkpoints, hasActiveSelection, map]);
+    if (fitted.current) return;
+    map.fitBounds(CALIFORNIA_BOUNDS, { animate: false });
+    fitted.current = true;
+  }, [map]);
 
   return null;
 }
@@ -382,7 +372,7 @@ export function CheckpointsMapView({
       className="checkpoint-locator-map h-full w-full"
       scrollWheelZoom
       preferCanvas
-      style={{ background: "#0a1628" }}
+      style={{ background: "#e2e8f0" }}
     >
       <MapBaseTileLayer mapLayer={mapLayer} />
       <MapViewportController flyTarget={flyTarget} />
@@ -390,10 +380,7 @@ export function CheckpointsMapView({
         selectedCheckpoint={selectedCheckpoint}
         focusToken={focusToken}
       />
-      <FitBoundsOnLoad
-        checkpoints={checkpoints}
-        hasActiveSelection={selectedCheckpoint != null}
-      />
+      <FitCaliforniaOnLoad />
       <MarkerClusterLayer
         checkpoints={checkpoints}
         selectedId={selectedCheckpoint?.id ?? null}

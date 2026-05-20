@@ -13,8 +13,8 @@ const CheckpointsMapView = dynamic(
   {
     ssr: false,
     loading: () => (
-      <div className="flex h-full min-h-[280px] items-center justify-center bg-[#0a1628]">
-        <p className="font-montserrat text-sm text-white/50">Loading map…</p>
+      <div className="flex h-full min-h-[280px] items-center justify-center bg-slate-100">
+        <p className="font-montserrat text-sm text-slate-600">Loading map…</p>
       </div>
     ),
   },
@@ -78,7 +78,7 @@ export function CheckpointsLocator({
     "all",
   );
   const [countyFilter, setCountyFilter] = useState("");
-  const [mapLayer, setMapLayer] = useState<MapLayerStyle>("dark");
+  const [mapLayer, setMapLayer] = useState<MapLayerStyle>("standard");
   const [selected, setSelected] = useState<MapCheckpoint | null>(null);
   const [hoveredId, setHoveredId] = useState<number | null>(null);
   const [dialogOpen, setDialogOpen] = useState(false);
