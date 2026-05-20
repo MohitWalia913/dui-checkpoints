@@ -103,7 +103,7 @@ export function AppShowcase() {
                   className="flex transition-transform duration-500 ease-out"
                   style={{
                     transform: `translateX(-${activeIndex * (100 / visibleSlides)}%)`,
-                  }}
+                  }} 
                 >
                   {PHONE_SLIDES.map(({ src, alt }, i) => (
                     <div
