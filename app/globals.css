@@ -101,10 +101,25 @@
   border-radius: 0.5rem;
 }
 
-/* Checkpoint locator map */
+/* Checkpoint locator map — keep Leaflet panes below modals/dialogs */
 .checkpoint-locator-map.leaflet-container {
   font-family: var(--font-inter), sans-serif;
   z-index: 0;
+}
+
+.checkpoint-locator-map .leaflet-pane,
+.checkpoint-locator-map .leaflet-top,
+.checkpoint-locator-map .leaflet-bottom,
+.checkpoint-locator-map .leaflet-control-container {
+  z-index: 1 !important;
+}
+
+.checkpoint-locator-map .leaflet-marker-pane {
+  z-index: 2 !important;
+}
+
+.checkpoint-locator-map .leaflet-popup-pane {
+  z-index: 3 !important;
 }
 
 .checkpoint-map-marker,

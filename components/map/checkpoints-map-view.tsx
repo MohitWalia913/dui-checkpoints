@@ -9,12 +9,11 @@ import {
 import { createZonePolygon } from "@/lib/map/zone-polygon";
 import type { MapCheckpoint } from "@/lib/checkpoints/map-checkpoint";
 import type { LatLng } from "@/lib/checkpoints/coordinates";
-import type { LayerGroup, Map as LeafletMap } from "leaflet";
+import type { LayerGroup, Map as LeafletMap, TileLayer as LeafletTileLayer } from "leaflet";
 import { useEffect, useMemo, useRef, useState } from "react";
 import {
   MapContainer,
   Polygon,
-  TileLayer,
   useMap,
 } from "react-leaflet";
 
@@ -24,6 +23,42 @@ import "leaflet.markercluster/dist/MarkerCluster.Default.css";
 
 const CALIFORNIA_CENTER: [number, number] = [36.7783, -119.4179];
 const DEFAULT_ZOOM = 6;
+
+function MapBaseTileLayer({ mapLayer }: { mapLayer: MapLayerStyle }) {
+  const map = useMap();
+  const activeLayerRef = useRef<LeafletTileLayer | null>(null);
+
+  useEffect(() => {
+    const tile = MAP_TILE_LAYERS[mapLayer];
+
+    void import("leaflet").then(({ default: L }) => {
+      if (activeLayerRef.current) {
+        map.removeLayer(activeLayerRef.current);
+        activeLayerRef.current = null;
+      }
+
+      const layer = L.tileLayer(tile.url, {
+        attribution: tile.attribution,
+        maxZoom: tile.maxZoom,
+        maxNativeZoom: tile.maxNativeZoom ?? tile.maxZoom,
+        crossOrigin: true,
+      });
+
+      layer.addTo(map);
+      activeLayerRef.current = layer;
+      map.invalidateSize();
+    });
+
+    return () => {
+      if (activeLayerRef.current) {
+        map.removeLayer(activeLayerRef.current);
+        activeLayerRef.current = null;
+      }
+    };
+  }, [map, mapLayer]);
+
+  return null;
+}
 
 function MapViewportController({
   flyTarget,
@@ -177,8 +212,6 @@ export function CheckpointsMapView({
   onSelect: (checkpoint: MapCheckpoint) => void;
   onHover: (id: number | null) => void;
 }) {
-  const tile = MAP_TILE_LAYERS[mapLayer];
-
   const zonePositions = useMemo(() => {
     if (!selectedCheckpoint) return null;
     return createZonePolygon(selectedCheckpoint.coordinates);
@@ -192,12 +225,7 @@ export function CheckpointsMapView({
       scrollWheelZoom
       style={{ background: "#0a1628" }}
     >
-      <TileLayer
-        key={mapLayer}
-        attribution={tile.attribution}
-        url={tile.url}
-        maxZoom={tile.maxZoom}
-      />
+      <MapBaseTileLayer mapLayer={mapLayer} />
       <MapViewportController flyTarget={flyTarget} />
       <FitBoundsOnLoad checkpoints={checkpoints} />
       <MarkerClusterLayer

@@ -56,7 +56,7 @@ export function CheckpointDetailDialog({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-h-[min(90vh,640px)] overflow-y-auto sm:max-w-xl">
+      <DialogContent className="z-[20001] max-h-[min(90vh,640px)] overflow-y-auto sm:max-w-xl">
         <DialogHeader>
           <div className="flex flex-wrap items-center gap-2">
             <StatusBadge date={checkpoint.Date} />
