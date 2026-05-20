@@ -114,4 +114,9 @@ div#mobile-menu a {  font-size: 18px !important;}
 .four-logo-inner-box { padding: 0px !important; width: 100% !important; max-width: 100% !important; min-width: 100% !important;}
 .four-logo-inner-box img { width: 100% !important; max-width: 70%; }
  }
+ @media (max-width: 480px) {
+.protect-right-inner {flex-direction: column; row-gap: 20px; align-items: flex-start;}
+.protect-right-inner .protect-right-inner-text { width:100%; max-width:100%;}
+.report-right-image-box { width: 100%;}
+ }
  

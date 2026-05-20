@@ -114,10 +114,10 @@ export function ReportCheckpoint() {
           </div>
 
           {/* Right — app promo card */}
-          <div className="relative w-full  max-w-full lg:max-w-[697px] rounded-2xl lg:mt-[85px] bg-white shadow-[0_0_14px_rgba(0,0,0,0.25)] rounded-[20px] p-[25px] md:p-[30px] lg:p-[35px] xl:p-[40px]">
-            <div className="flex justify-between md:gap-[20px] lg:gap-[20px] lg:grid-cols-2 lg:items-center lg:gap-4">
-              <div className="relative z-10 max-w-md">
-                <h2 className="font-inter text-[24px] font-semibold leading-[160%] text-[#242E4E]">
+          <div className="protect-right relative w-full  max-w-full lg:max-w-[697px] rounded-2xl lg:mt-[85px] bg-white shadow-[0_0_14px_rgba(0,0,0,0.25)] rounded-[20px] p-[25px] md:p-[30px] lg:p-[35px] xl:p-[40px]">
+            <div className="protect-right-inner flex justify-between md:gap-[20px] lg:gap-[20px] lg:grid-cols-2 lg:items-center lg:gap-4">
+              <div className="protect-right-inner-text relative z-10 max-w-md">
+                <h2 className="font-inter text-[20px] md:text-[24px] font-semibold leading-[160%] text-[#242E4E]">
                   Protect Your Rights.
                   <span className=" block text-[#F57E3A]">
                   Download the App Today.
