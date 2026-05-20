@@ -39,7 +39,7 @@ const NAV_ITEMS = [
   },
   {
     title: "Map",
-    url: "/map",
+    url: "/dashboard/map",
     icon: Map,
   },
   {
@@ -103,8 +103,11 @@ export function AppSidebar({
                   : item.url === "/dashboard/checkpoints"
                     ? pathname === "/dashboard/checkpoints" ||
                       pathname.startsWith("/dashboard/checkpoints/")
-                    : pathname === item.url ||
-                      pathname.startsWith(`${item.url}/`);
+                    : item.url === "/dashboard/map"
+                      ? pathname === "/dashboard/map" ||
+                        pathname.startsWith("/dashboard/map/")
+                      : pathname === item.url ||
+                        pathname.startsWith(`${item.url}/`);
 
               return (
                 <SidebarMenuItem key={item.title}>

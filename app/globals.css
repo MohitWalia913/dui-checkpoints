@@ -101,6 +101,30 @@
   border-radius: 0.5rem;
 }
 
+/* Checkpoint locator map */
+.checkpoint-locator-map.leaflet-container {
+  font-family: var(--font-inter), sans-serif;
+  z-index: 0;
+}
+
+.checkpoint-map-marker,
+.checkpoint-cluster-marker {
+  background: transparent !important;
+  border: none !important;
+}
+
+.marker-cluster-small,
+.marker-cluster-medium,
+.marker-cluster-large {
+  background: transparent !important;
+}
+
+.marker-cluster-small div,
+.marker-cluster-medium div,
+.marker-cluster-large div {
+  background: transparent !important;
+}
+
 @theme inline {
   --color-sidebar: var(--sidebar);
   --color-sidebar-foreground: var(--sidebar-foreground);

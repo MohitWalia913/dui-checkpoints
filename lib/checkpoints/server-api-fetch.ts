@@ -85,6 +85,18 @@ export async function fetchUpcomingCheckpointsFromApiServer(limit = 50) {
   };
 }
 
+export async function fetchMapCheckpointsFromApiServer(limit = 250) {
+  const result = await fetchFromAppApi<{ data: CheckpointListItem[] }>(
+    `/api/checkpoints?limit=${limit}`,
+  );
+
+  return {
+    data: result.data?.data ?? [],
+    error: result.error,
+    status: result.status,
+  };
+}
+
 export async function fetchPastCheckpointsFromApiServer(limit = 50) {
   const result = await fetchFromAppApi<{ data: CheckpointListItem[] }>(
     `/api/checkpoints?past=true&latest=true&limit=${limit}`,
