@@ -126,10 +126,10 @@ export function AppSidebar({
                     asChild
                     tooltip={item.title}
                     isActive={isActive}
-                    className="text-white/90 hover:bg-[#F57E3A]/15 hover:text-white data-[active=true]:bg-[#F57E3A] data-[active=true]:text-white"
+                    className="text-white/90 hover:bg-[#F57E3A]/15 hover:text-white data-[active=true]:bg-[#F57E3A] data-[active=true]:text-white [&>svg]:text-[#F57E3A] data-[active=true]:[&>svg]:text-white"
                   >
                     <Link href={item.url}>
-                      <item.icon className="text-[#F57E3A] peer-data-[active=true]/menu-button:text-white" />
+                      <item.icon />
                       <span>{item.title}</span>
                     </Link>
                   </SidebarMenuButton>
