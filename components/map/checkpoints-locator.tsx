@@ -333,7 +333,7 @@ export function CheckpointsLocator({
 
   return (
     <>
-      <div className="flex min-h-0 flex-1 flex-col overflow-hidden lg:flex-row">
+      <div className="flex h-full min-h-0 flex-1 flex-col overflow-hidden lg:flex-row">
         <div className="h-[44vh] min-h-0 shrink-0 overflow-hidden lg:h-full lg:max-h-none lg:min-h-0 lg:flex-none">
           <CheckpointListPanel
             checkpoints={filteredCheckpoints}
@@ -353,7 +353,7 @@ export function CheckpointsLocator({
 
         <div
           ref={mapSectionRef}
-          className="relative min-h-[56vh] min-w-0 flex-1 lg:min-h-0"
+          className="relative min-h-[56vh] min-w-0 flex-1 overflow-hidden lg:h-full lg:min-h-0"
         >
           <CheckpointsMapView
             checkpoints={checkpointsForMap}

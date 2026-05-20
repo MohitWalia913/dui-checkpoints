@@ -19,10 +19,8 @@ import Map, { Layer, Popup, Source, type MapRef } from "react-map-gl/maplibre";
 
 import "maplibre-gl/dist/maplibre-gl.css";
 
-const DEFAULT_MAP_BOUNDS: [[number, number], [number, number]] = [
-  [-126.2, 30.8],
-  [-108.8, 43.6],
-];
+const CALIFORNIA_CENTER: [number, number] = [-119.4179, 36.7783];
+const DEFAULT_MAP_ZOOM = 5.6;
 
 const CALIFORNIA_BOUNDARY: Feature<Polygon> = {
   type: "Feature",
@@ -215,9 +213,11 @@ export function CheckpointsMapView({
 
   const handleMapLoad = () => {
     if (hasFittedRef.current || !mapRef.current) return;
-    mapRef.current.fitBounds(DEFAULT_MAP_BOUNDS, {
-      padding: 24,
-      duration: 0,
+    mapRef.current.jumpTo({
+      center: CALIFORNIA_CENTER,
+      zoom: DEFAULT_MAP_ZOOM,
+      pitch: 0,
+      bearing: 0,
     });
     hasFittedRef.current = true;
   };
@@ -271,7 +271,11 @@ export function CheckpointsMapView({
       <Map
         ref={mapRef}
         mapStyle={mapStyle}
-        initialViewState={{ longitude: -119.4179, latitude: 36.7783, zoom: 5.6 }}
+        initialViewState={{
+          longitude: CALIFORNIA_CENTER[0],
+          latitude: CALIFORNIA_CENTER[1],
+          zoom: DEFAULT_MAP_ZOOM,
+        }}
         interactiveLayerIds={["clusters", "unclustered-point"]}
         onLoad={handleMapLoad}
         onClick={handleMapClick}
