@@ -334,7 +334,7 @@ export function CheckpointsLocator({
   return (
     <>
       <div className="flex min-h-0 flex-1 flex-col overflow-hidden lg:flex-row">
-        <div className="h-[44vh] shrink-0 lg:h-auto lg:max-h-none lg:min-h-0 lg:flex-none">
+        <div className="h-[44vh] min-h-0 shrink-0 overflow-hidden lg:h-full lg:max-h-none lg:min-h-0 lg:flex-none">
           <CheckpointListPanel
             checkpoints={filteredCheckpoints}
             selectedId={selected?.id ?? null}

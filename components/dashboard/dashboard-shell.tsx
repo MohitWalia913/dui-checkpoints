@@ -75,7 +75,9 @@ export function DashboardShell({
             </div>
             <HeaderHelpCtas />
           </header>
-          <main className="relative flex flex-1 flex-col">{children}</main>
+          <main className="relative flex min-h-0 flex-1 flex-col overflow-hidden">
+            {children}
+          </main>
         </SidebarInset>
         <DashboardOnboarding userEmail={user.email} />
       </SidebarProvider>

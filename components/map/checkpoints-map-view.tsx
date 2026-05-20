@@ -19,9 +19,9 @@ import Map, { Layer, Popup, Source, type MapRef } from "react-map-gl/maplibre";
 
 import "maplibre-gl/dist/maplibre-gl.css";
 
-const CALIFORNIA_BOUNDS: [[number, number], [number, number]] = [
-  [-124.6, 32.3],
-  [-114.1, 42.1],
+const DEFAULT_MAP_BOUNDS: [[number, number], [number, number]] = [
+  [-126.2, 30.8],
+  [-108.8, 43.6],
 ];
 
 const CALIFORNIA_BOUNDARY: Feature<Polygon> = {
@@ -215,7 +215,7 @@ export function CheckpointsMapView({
 
   const handleMapLoad = () => {
     if (hasFittedRef.current || !mapRef.current) return;
-    mapRef.current.fitBounds(CALIFORNIA_BOUNDS, {
+    mapRef.current.fitBounds(DEFAULT_MAP_BOUNDS, {
       padding: 24,
       duration: 0,
     });
