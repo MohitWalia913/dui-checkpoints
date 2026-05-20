@@ -23,43 +23,43 @@ export function Header() {
 
   return (
     <header className="relative z-50 w-full bg-[#040F20]">
-      <div className="mx-auto flex h-[72px] max-w-[1440px] items-center justify-between px-6 md:px-10 lg:h-[80px] lg:px-14">
-        <Link href="/" className="relative shrink-0" onClick={() => setMenuOpen(false)}>
+      <div className="main-header-inner-row mx-auto flex h-[72px] max-w-[1440px] items-center justify-between px-6 md:px-10 lg:h-[80px] lg:px-14">
+        <Link href="/" className="logo-img-box relative shrink-0" onClick={() => setMenuOpen(false)}>
           <Image
             src={logo}
             alt="DUI Checkpoints Locator — Statewide, Real-time Alerts"
             priority
-            className="h-[44px] w-auto md:h-[48px] lg:h-[52px]"
+            className="h-[44px] w-auto md:h-[52px] lg:h-[57px]"
           />
         </Link>
 
         {/* Desktop navigation */}
-        <div className="hidden items-center gap-10 lg:flex">
+        <div className="nav-containerarapper hidden items-center gap-10 lg:flex">
           <nav
-            className="flex items-center gap-8 xl:gap-10"
+            className="flex items-center gap-[20px] xl:gap-[40px]"
             aria-label="Main navigation"
           >
             {NAV_LINKS.map(({ href, label }) => (
               <Link
                 key={href}
                 href={href}
-                className="font-montserrat text-sm font-medium leading-[22px] text-white transition-opacity hover:opacity-80"
+                className="font-montserrat text-[14px] font-medium leading-[22px] text-white transition-opacity hover:opacity-80"
               >
                 {label}
               </Link>
             ))}
           </nav>
 
-          <div className="flex items-center gap-[15px]">
+          <div className="two-btn flex items-center gap-[15px]">
             <Link
-              href="/auth/login"
-              className="font-inter inline-flex items-center justify-center border border-white px-[25px] py-[10px] text-[20.8px] font-medium leading-4 text-white transition-opacity hover:opacity-90"
+              href="/login"
+              className="same-btn "
             >
               Login
             </Link>
             <Link
-              href="/auth/sign-up"
-              className="font-inter inline-flex items-center justify-center bg-[#F57E3A] px-[25px] py-[10px] text-[20.8px] font-medium leading-4 text-white transition-opacity hover:opacity-90"
+              href="/sign-up"
+              className="same-btn same-ext-btn"
             >
               Get Started
             </Link>
@@ -69,8 +69,8 @@ export function Header() {
         {/* Mobile: CTA + hamburger */}
         <div className="flex items-center gap-3 lg:hidden">
           <Link
-            href="/auth/sign-up"
-            className="font-inter inline-flex items-center justify-center bg-[#F57E3A] px-4 py-2 text-base font-medium leading-4 text-white sm:px-5 sm:py-2.5 sm:text-[18px]"
+            href="/sign-up"
+            className=" hidden font-inter inline-flex items-center justify-center bg-[#F57E3A] px-4 py-2 text-base font-medium leading-4 text-white sm:px-5 sm:py-2.5 sm:text-[18px]"
           >
             Get Started
           </Link>
@@ -128,17 +128,17 @@ export function Header() {
             </Link>
           ))}
 
-          <div className="mt-8 flex flex-col gap-4">
+          <div className="two-btn mt-8 flex flex-col gap-4">
             <Link
-              href="/auth/login"
-              className="font-inter inline-flex w-full items-center justify-center border border-white px-[25px] py-[10px] text-[20.8px] font-medium leading-4 text-white"
+              href="/login"
+              className="same-btn  font-inter inline-flex w-full items-center justify-center border border-white px-[25px] py-[10px] text-[20.8px] font-medium leading-4 text-white"
               onClick={() => setMenuOpen(false)}
             >
               Login
             </Link>
             <Link
-              href="/auth/sign-up"
-              className="font-inter inline-flex w-full items-center justify-center bg-[#F57E3A] px-[25px] py-[10px] text-[20.8px] font-medium leading-4 text-white"
+              href="/sign-up"
+              className="same-btn  same-ext-btn font-inter inline-flex w-full items-center justify-center bg-[#F57E3A] px-[25px] py-[10px] text-[20.8px] font-medium leading-4 text-white"
               onClick={() => setMenuOpen(false)}
             >
               Get Started
