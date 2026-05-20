@@ -24,12 +24,7 @@ export default async function DashboardPage() {
         <h1 className="font-montserrat mt-2 text-3xl font-bold text-white md:text-4xl">
           Dashboard
         </h1>
-        <p className="font-inter mt-3 max-w-2xl text-base leading-relaxed text-white/70">
-          Live DUI checkpoint data loaded from{" "}
-          <code className="rounded bg-white/10 px-1.5 py-0.5 text-sm">
-            /api/checkpoints
-          </code>
-        </p>
+
       </div>
 
       {errorMessage ? (

@@ -35,23 +35,23 @@ export function SidebarHelpCtas() {
           type="button"
           onClick={() => setDuiOpen(true)}
           className={cn(
-            "font-montserrat flex w-full items-stretch gap-0 overflow-hidden rounded-xl text-left transition-all duration-200",
+            "font-montserrat flex w-full items-stretch gap-0 overflow-hidden rounded-lg text-left transition-all duration-200",
             "border border-[#F57E3A]/40 bg-[#F57E3A] hover:brightness-105 active:scale-[0.99]",
-            "group-data-[collapsible=icon]:size-10 group-data-[collapsible=icon]:justify-center group-data-[collapsible=icon]:p-0",
+            "group-data-[collapsible=icon]:size-9 group-data-[collapsible=icon]:justify-center group-data-[collapsible=icon]:p-0",
           )}
           aria-label="Find a DUI — speak with a lawyer"
         >
-          <span className="flex w-11 shrink-0 items-center justify-center bg-[#040F20]/25 group-data-[collapsible=icon]:w-full group-data-[collapsible=icon]:bg-transparent">
-            <Phone className="size-4 text-white" aria-hidden />
+          <span className="flex w-9 shrink-0 items-center justify-center bg-[#040F20]/25 group-data-[collapsible=icon]:w-full group-data-[collapsible=icon]:bg-transparent">
+            <Phone className="h-3.5 w-3.5 text-white" aria-hidden />
           </span>
-          <span className="flex min-w-0 flex-1 flex-col justify-center gap-0.5 py-2.5 pr-3 pl-2 group-data-[collapsible=icon]:hidden">
-            <span className="text-[10px] font-medium leading-tight text-white/90">
+          <span className="flex min-w-0 flex-1 flex-col justify-center gap-0 py-1.5 pr-2 pl-1.5 group-data-[collapsible=icon]:hidden">
+            <span className="text-[9px] font-medium leading-tight text-white/90">
               Call us now to speak with a lawyer
             </span>
-            <span className="text-sm font-bold leading-tight text-white">
+            <span className="text-xs font-bold leading-tight text-white">
               Got a DUI?
             </span>
-            <span className="text-[10px] font-medium text-white/85">
+            <span className="text-[9px] font-medium leading-tight text-white/85">
               Call us anytime 24/7
             </span>
           </span>

@@ -54,11 +54,7 @@ const NAV_ITEMS = [
     url: "/report",
     icon: Megaphone,
   },
-  {
-    title: "Resources",
-    url: "/resources",
-    icon: BookOpen,
-  },
+
 ] as const;
 
 export function AppSidebar({
