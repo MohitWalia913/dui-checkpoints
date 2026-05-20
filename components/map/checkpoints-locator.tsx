@@ -86,6 +86,7 @@ export function CheckpointsLocator({
   const [detailLoading, setDetailLoading] = useState(false);
   const [detailError, setDetailError] = useState<string | null>(null);
   const [focusToken, setFocusToken] = useState(0);
+  const [resetViewToken, setResetViewToken] = useState(0);
   const [flyTarget, setFlyTarget] = useState<{
     center: MapCheckpoint["coordinates"];
     zoom: number;
@@ -125,6 +126,13 @@ export function CheckpointsLocator({
       return haystack.includes(q);
     });
   }, [allCheckpoints, searchQuery, statusFilter, countyFilter]);
+
+  useEffect(() => {
+    setSelected(null);
+    setHoveredId(null);
+    setFlyTarget(null);
+    setResetViewToken((prev) => prev + 1);
+  }, [statusFilter, countyFilter, searchQuery]);
 
   const [coordOverrides, setCoordOverrides] = useState<
     Partial<Record<number, LatLng>>
@@ -360,6 +368,7 @@ export function CheckpointsLocator({
             selectedCheckpoint={selectedForMap}
             hoveredId={hoveredId}
             focusToken={focusToken}
+            resetViewToken={resetViewToken}
             mapLayer={mapLayer}
             flyTarget={flyTarget}
             onMarkerClick={handleMarkerClick}

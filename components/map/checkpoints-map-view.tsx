@@ -122,6 +122,7 @@ export function CheckpointsMapView({
   selectedCheckpoint,
   hoveredId,
   focusToken,
+  resetViewToken,
   mapLayer,
   flyTarget,
   onMarkerClick,
@@ -131,6 +132,7 @@ export function CheckpointsMapView({
   selectedCheckpoint: MapCheckpoint | null;
   hoveredId: number | null;
   focusToken: number;
+  resetViewToken: number;
   mapLayer: MapLayerStyle;
   flyTarget: { center: LatLng; zoom: number } | null;
   onMarkerClick: (checkpoint: MapCheckpoint) => void;
@@ -222,6 +224,18 @@ export function CheckpointsMapView({
     });
   }, [selectedCheckpoint, focusToken]);
 
+  useEffect(() => {
+    if (!mapRef.current) return;
+    mapRef.current.easeTo({
+      center: CALIFORNIA_CENTER,
+      zoom: DEFAULT_MAP_ZOOM,
+      pitch: 0,
+      bearing: 0,
+      duration: 350,
+      essential: true,
+    });
+  }, [resetViewToken]);
+
   const handleMapLoad = () => {
     if (hasFittedRef.current || !mapRef.current) return;
     mapRef.current.jumpTo({
@@ -282,6 +296,7 @@ export function CheckpointsMapView({
         onClick={handleMapClick}
         onMouseMove={handleMapMouseMove}
         onMouseLeave={() => onHover(null)}
+        scrollZoom={false}
         style={{ width: "100%", height: "100%", background: "#e2e8f0" }}
       >
         <Source id="checkpoints" type="geojson" data={checkpointsGeoJson}>
