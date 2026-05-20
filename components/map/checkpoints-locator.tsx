@@ -76,6 +76,7 @@ export function CheckpointsLocator({
   const [detail, setDetail] = useState<Checkpoint | null>(null);
   const [detailLoading, setDetailLoading] = useState(false);
   const [detailError, setDetailError] = useState<string | null>(null);
+  const [focusToken, setFocusToken] = useState(0);
   const [flyTarget, setFlyTarget] = useState<{
     center: MapCheckpoint["coordinates"];
     zoom: number;
@@ -224,6 +225,7 @@ export function CheckpointsLocator({
           });
         })();
       }
+      setFocusToken((prev) => prev + 1);
 
       if (
         typeof window !== "undefined" &&
@@ -258,6 +260,7 @@ export function CheckpointsLocator({
           });
         })();
       }
+      setFocusToken((prev) => prev + 1);
       void loadDetail(checkpoint.id);
     },
     [loadDetail, applyGeocodeIfNeeded],
@@ -321,6 +324,7 @@ export function CheckpointsLocator({
             checkpoints={checkpointsForMap}
             selectedCheckpoint={selectedForMap}
             hoveredId={hoveredId}
+            focusToken={focusToken}
             mapLayer={mapLayer}
             flyTarget={flyTarget}
             onMarkerClick={handleMarkerClick}

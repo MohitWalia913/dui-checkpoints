@@ -9,7 +9,12 @@ import {
 import { createZonePolygon } from "@/lib/map/zone-polygon";
 import type { MapCheckpoint } from "@/lib/checkpoints/map-checkpoint";
 import type { LatLng } from "@/lib/checkpoints/coordinates";
-import type { LayerGroup, Map as LeafletMap, TileLayer as LeafletTileLayer } from "leaflet";
+import type {
+  LayerGroup,
+  Map as LeafletMap,
+  Marker as LeafletMarker,
+  TileLayer as LeafletTileLayer,
+} from "leaflet";
 import { useEffect, useMemo, useRef, useState } from "react";
 import {
   MapContainer,
@@ -104,17 +109,22 @@ function MarkerClusterLayer({
   checkpoints,
   selectedId,
   hoveredId,
+  focusMarkerId,
+  focusToken,
   onMarkerClick,
   onHover,
 }: {
   checkpoints: MapCheckpoint[];
   selectedId: number | null;
   hoveredId: number | null;
+  focusMarkerId: number | null;
+  focusToken: number;
   onMarkerClick: (checkpoint: MapCheckpoint) => void;
   onHover: (id: number | null) => void;
 }) {
   const map = useMap();
   const groupRef = useRef<LayerGroup | null>(null);
+  const markerByIdRef = useRef<Record<number, LeafletMarker>>({});
   const handlersRef = useRef({ onMarkerClick, onHover });
   handlersRef.current = { onMarkerClick, onHover };
   const [ready, setReady] = useState(false);
@@ -163,6 +173,7 @@ function MarkerClusterLayer({
       if (cancelled) return;
 
       group.clearLayers();
+      markerByIdRef.current = {};
 
       checkpoints.forEach((checkpoint) => {
         const isActive = selectedId === checkpoint.id;
@@ -184,6 +195,7 @@ function MarkerClusterLayer({
         marker.on("mouseout", () => handlersRef.current.onHover(null));
 
         group.addLayer(marker);
+        markerByIdRef.current[checkpoint.id] = marker;
       });
     });
 
@@ -192,6 +204,32 @@ function MarkerClusterLayer({
     };
   }, [checkpoints, selectedId, hoveredId, ready]);
 
+  useEffect(() => {
+    if (!ready || focusMarkerId == null) return;
+    const group = groupRef.current;
+    const marker = markerByIdRef.current[focusMarkerId];
+    if (!group || !marker) return;
+
+    const groupWithZoomToShow = group as LayerGroup & {
+      zoomToShowLayer?: (layer: LayerGroup | LeafletMarker, cb?: () => void) => void;
+    };
+
+    if (typeof groupWithZoomToShow.zoomToShowLayer === "function") {
+      groupWithZoomToShow.zoomToShowLayer(marker, () => {
+        const latLng = marker.getLatLng();
+        map.setView(latLng, Math.max(map.getZoom(), 17), {
+          animate: true,
+        });
+      });
+      return;
+    }
+
+    const latLng = marker.getLatLng();
+    map.setView(latLng, Math.max(map.getZoom(), 17), {
+      animate: true,
+    });
+  }, [focusMarkerId, focusToken, map, ready]);
+
   return null;
 }
 
@@ -199,6 +237,7 @@ export function CheckpointsMapView({
   checkpoints,
   selectedCheckpoint,
   hoveredId,
+  focusToken,
   mapLayer,
   flyTarget,
   onMarkerClick,
@@ -207,6 +246,7 @@ export function CheckpointsMapView({
   checkpoints: MapCheckpoint[];
   selectedCheckpoint: MapCheckpoint | null;
   hoveredId: number | null;
+  focusToken: number;
   mapLayer: MapLayerStyle;
   flyTarget: { center: LatLng; zoom: number } | null;
   onMarkerClick: (checkpoint: MapCheckpoint) => void;
@@ -232,6 +272,8 @@ export function CheckpointsMapView({
         checkpoints={checkpoints}
         selectedId={selectedCheckpoint?.id ?? null}
         hoveredId={hoveredId}
+        focusMarkerId={selectedCheckpoint?.id ?? null}
+        focusToken={focusToken}
         onMarkerClick={onMarkerClick}
         onHover={onHover}
       />
