@@ -160,36 +160,46 @@ export function CheckpointsLocator({
     setDetail(result.data);
   }, []);
 
-  const applyGeocodeIfNeeded = useCallback((checkpoint: MapCheckpoint) => {
-    if (hasPreciseMapCoordinates(checkpoint.mapurl)) return;
-    const q = buildGeocodeQuery(checkpoint);
-    void fetch(`/api/geocode?q=${encodeURIComponent(q)}`)
-      .then((r) => r.json())
-      .then(
-        (json: {
+  const applyGeocodeIfNeeded = useCallback(
+    async (checkpoint: MapCheckpoint): Promise<LatLng | null> => {
+      if (hasPreciseMapCoordinates(checkpoint.mapurl)) {
+        return checkpoint.coordinates;
+      }
+
+      const cached = coordOverrides[checkpoint.id];
+      if (cached) {
+        return cached;
+      }
+
+      const q = buildGeocodeQuery(checkpoint);
+      try {
+        const response = await fetch(`/api/geocode?q=${encodeURIComponent(q)}`);
+        const json = (await response.json().catch(() => ({}))) as {
           data?: { lat: number; lng: number } | null;
-        }) => {
-          const lat = json?.data?.lat;
-          const lng = json?.data?.lng;
-          if (
-            lat != null &&
-            lng != null &&
-            Number.isFinite(lat) &&
-            Number.isFinite(lng)
-          ) {
-            setCoordOverrides((prev) => ({
-              ...prev,
-              [checkpoint.id]: { lat, lng },
-            }));
-            setFlyTarget({
-              center: { lat, lng },
-              zoom: 18,
-            });
-          }
-        },
-      )
-      .catch(() => {});
-  }, []);
+        };
+        const lat = json?.data?.lat;
+        const lng = json?.data?.lng;
+        if (
+          lat != null &&
+          lng != null &&
+          Number.isFinite(lat) &&
+          Number.isFinite(lng)
+        ) {
+          const resolved = { lat, lng };
+          setCoordOverrides((prev) => ({
+            ...prev,
+            [checkpoint.id]: resolved,
+          }));
+          return resolved;
+        }
+      } catch {
+        // keep graceful fallback
+      }
+
+      return null;
+    },
+    [coordOverrides],
+  );
 
   const handleListItemSelect = useCallback(
     (checkpoint: MapCheckpoint) => {
@@ -200,14 +210,19 @@ export function CheckpointsLocator({
       setDetailError(null);
 
       const precise = hasPreciseMapCoordinates(checkpoint.mapurl);
-      const zoom = precise ? 18 : 15;
-      setFlyTarget({
-        center: checkpoint.coordinates,
-        zoom,
-      });
-
-      if (!precise) {
-        applyGeocodeIfNeeded(checkpoint);
+      if (precise) {
+        setFlyTarget({
+          center: checkpoint.coordinates,
+          zoom: 18,
+        });
+      } else {
+        void (async () => {
+          const resolved = await applyGeocodeIfNeeded(checkpoint);
+          setFlyTarget({
+            center: resolved ?? checkpoint.coordinates,
+            zoom: resolved ? 18 : 15,
+          });
+        })();
       }
 
       if (
@@ -229,12 +244,19 @@ export function CheckpointsLocator({
       setHoveredId(checkpoint.id);
       setDialogOpen(true);
       const precise = hasPreciseMapCoordinates(checkpoint.mapurl);
-      setFlyTarget({
-        center: checkpoint.coordinates,
-        zoom: precise ? 18 : 17,
-      });
-      if (!precise) {
-        applyGeocodeIfNeeded(checkpoint);
+      if (precise) {
+        setFlyTarget({
+          center: checkpoint.coordinates,
+          zoom: 18,
+        });
+      } else {
+        void (async () => {
+          const resolved = await applyGeocodeIfNeeded(checkpoint);
+          setFlyTarget({
+            center: resolved ?? checkpoint.coordinates,
+            zoom: resolved ? 18 : 17,
+          });
+        })();
       }
       void loadDetail(checkpoint.id);
     },
