@@ -13,9 +13,9 @@ import {
   authLinkClassName,
 } from "@/components/auth/auth-ui";
 import { cn } from "@/lib/utils";
+import { redirectToDashboard } from "@/lib/auth/redirect-after-sign-in";
 import { createClient } from "@/lib/supabase/client";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
 import { useState } from "react";
 
 export function LoginForm({
@@ -26,7 +26,6 @@ export function LoginForm({
   const [password, setPassword] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
-  const router = useRouter();
   const {
     signInWithGoogle,
     isGoogleLoading,
@@ -49,10 +48,10 @@ export function LoginForm({
         password,
       });
       if (error) throw error;
-      router.push("/dashboard");
+      redirectToDashboard();
+      return;
     } catch (error: unknown) {
       setError(error instanceof Error ? error.message : "An error occurred");
-    } finally {
       setIsLoading(false);
     }
   };
