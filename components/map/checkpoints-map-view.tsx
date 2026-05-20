@@ -29,6 +29,18 @@ import "leaflet.markercluster/dist/MarkerCluster.Default.css";
 const CALIFORNIA_CENTER: [number, number] = [36.7783, -119.4179];
 const DEFAULT_ZOOM = 6;
 
+function createPopupContent(checkpoint: MapCheckpoint): HTMLElement {
+  const wrapper = document.createElement("div");
+  const title = document.createElement("strong");
+  title.textContent = checkpoint.Location;
+  const sub = document.createElement("div");
+  sub.textContent = `${checkpoint.City}, ${checkpoint.County}`;
+  wrapper.appendChild(title);
+  wrapper.appendChild(document.createElement("br"));
+  wrapper.appendChild(sub);
+  return wrapper;
+}
+
 function MapBaseTileLayer({ mapLayer }: { mapLayer: MapLayerStyle }) {
   const map = useMap();
   const activeLayerRef = useRef<LeafletTileLayer | null>(null);
@@ -79,17 +91,24 @@ function MapViewportController({
       flyTarget.zoom,
       { duration: 1.15, easeLinearity: 0.25 },
     );
+    map.invalidateSize();
   }, [flyTarget, map]);
 
   return null;
 }
 
-function FitBoundsOnLoad({ checkpoints }: { checkpoints: MapCheckpoint[] }) {
+function FitBoundsOnLoad({
+  checkpoints,
+  hasActiveSelection,
+}: {
+  checkpoints: MapCheckpoint[];
+  hasActiveSelection: boolean;
+}) {
   const map = useMap();
   const fitted = useRef(false);
 
   useEffect(() => {
-    if (fitted.current || checkpoints.length === 0) return;
+    if (fitted.current || checkpoints.length === 0 || hasActiveSelection) return;
 
     void import("leaflet").then(({ default: L }) => {
       const bounds = L.latLngBounds(
@@ -100,7 +119,7 @@ function FitBoundsOnLoad({ checkpoints }: { checkpoints: MapCheckpoint[] }) {
         fitted.current = true;
       }
     });
-  }, [checkpoints, map]);
+  }, [checkpoints, hasActiveSelection, map]);
 
   return null;
 }
@@ -197,6 +216,7 @@ function MarkerClusterLayer({
           handlersRef.current.onHover(checkpoint.id),
         );
         marker.on("mouseout", () => handlersRef.current.onHover(null));
+        marker.bindPopup(createPopupContent(checkpoint));
 
         group.addLayer(marker);
         markerByIdRef.current[checkpoint.id] = marker;
@@ -267,6 +287,8 @@ function MarkerClusterLayer({
             map.setView(marker.getLatLng(), Math.max(map.getZoom(), 17), {
               animate: true,
             });
+            marker.openPopup();
+            map.invalidateSize();
           });
           return;
         }
@@ -277,6 +299,8 @@ function MarkerClusterLayer({
       map.setView(latLng, Math.max(map.getZoom(), 17), {
         animate: true,
       });
+      marker.openPopup();
+      map.invalidateSize();
     };
 
     rafId = requestAnimationFrame(() => {
@@ -287,7 +311,7 @@ function MarkerClusterLayer({
       cancelled = true;
       cancelAnimationFrame(rafId);
     };
-  }, [focusMarkerId, focusToken, map, ready]);
+  }, [focusMarkerId, focusToken, checkpoints, map, ready]);
 
   return null;
 }
@@ -326,7 +350,10 @@ export function CheckpointsMapView({
     >
       <MapBaseTileLayer mapLayer={mapLayer} />
       <MapViewportController flyTarget={flyTarget} />
-      <FitBoundsOnLoad checkpoints={checkpoints} />
+      <FitBoundsOnLoad
+        checkpoints={checkpoints}
+        hasActiveSelection={selectedCheckpoint != null}
+      />
       <MarkerClusterLayer
         checkpoints={checkpoints}
         selectedId={selectedCheckpoint?.id ?? null}
