@@ -183,7 +183,7 @@ export function CheckpointListPanel({
                     </span>
                     <span className="inline-flex items-center gap-1">
                       <Clock className="size-3 text-[#F57E3A]" aria-hidden />
-                      {checkpoint.Time}
+                      {checkpoint.Time || "—"}
                     </span>
                   </div>
                 </button>

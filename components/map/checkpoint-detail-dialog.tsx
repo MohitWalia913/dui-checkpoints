@@ -83,7 +83,7 @@ export function CheckpointDetailDialog({
             </span>
             <span className="inline-flex items-center gap-1.5">
               <Clock className="size-4 text-[#F57E3A]" aria-hidden />
-              {checkpoint.Time}
+              {checkpoint.Time || "—"}
             </span>
           </div>
 
