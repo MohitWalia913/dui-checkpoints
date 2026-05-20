@@ -9,6 +9,37 @@ export type LatLng = {
 export function parseCoordinatesFromMapUrl(mapurl: string | null): LatLng | null {
   if (!mapurl) return null;
 
+  try {
+    if (/^https?:\/\//i.test(mapurl)) {
+      const u = new URL(mapurl);
+      const q = u.searchParams.get("q");
+      if (q) {
+        const trimmed = q.trim();
+        const coordPair = trimmed.match(/^(-?\d+\.?\d*)[\s,]+(-?\d+\.?\d*)$/);
+        if (coordPair) {
+          const lat = Number(coordPair[1]);
+          const lng = Number(coordPair[2]);
+          if (Number.isFinite(lat) && Number.isFinite(lng) && Math.abs(lat) <= 90) {
+            return { lat, lng };
+          }
+        }
+      }
+      const ll = u.searchParams.get("ll");
+      if (ll) {
+        const parts = ll.split(",");
+        if (parts.length >= 2) {
+          const lat = Number(parts[0]);
+          const lng = Number(parts[1]);
+          if (Number.isFinite(lat) && Number.isFinite(lng)) {
+            return { lat, lng };
+          }
+        }
+      }
+    }
+  } catch {
+    /* ignore invalid URLs */
+  }
+
   const precise = mapurl.match(/!3d(-?\d+\.?\d*)!4d(-?\d+\.?\d*)/i);
   if (precise) {
     return { lat: Number(precise[1]), lng: Number(precise[2]) };
@@ -25,6 +56,24 @@ export function parseCoordinatesFromMapUrl(mapurl: string | null): LatLng | null
   }
 
   return null;
+}
+
+/** True when mapurl contains parseable lat/lng (not city / state fallback). */
+export function hasPreciseMapCoordinates(mapurl: string | null): boolean {
+  return parseCoordinatesFromMapUrl(mapurl) !== null;
+}
+
+/** Address string for geocoding when map URL has no coordinates. */
+export function buildGeocodeQuery(checkpoint: {
+  Location: string;
+  City: string;
+  County: string;
+  State: string;
+}): string {
+  return [checkpoint.Location, checkpoint.City, checkpoint.County, checkpoint.State || "USA"]
+    .map((s) => s?.trim())
+    .filter(Boolean)
+    .join(", ");
 }
 
 const CITY_FALLBACKS: Record<string, LatLng> = {

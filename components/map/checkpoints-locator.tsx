@@ -21,11 +21,16 @@ const CheckpointsMapView = dynamic(
 );
 import type { MapCheckpoint } from "@/lib/checkpoints/map-checkpoint";
 import { toMapCheckpoints } from "@/lib/checkpoints/map-checkpoint";
+import {
+  buildGeocodeQuery,
+  hasPreciseMapCoordinates,
+  type LatLng,
+} from "@/lib/checkpoints/coordinates";
 import type { CheckpointListItem } from "@/lib/checkpoints/types";
 import type { Checkpoint } from "@/lib/checkpoints/types";
 import type { MapLayerStyle } from "@/lib/map/tile-layers";
 import { cn } from "@/lib/utils";
-import { useCallback, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
 async function fetchCheckpointDetail(id: number): Promise<{
   data: Checkpoint | null;
@@ -110,6 +115,35 @@ export function CheckpointsLocator({
     });
   }, [allCheckpoints, searchQuery, statusFilter, countyFilter]);
 
+  const [coordOverrides, setCoordOverrides] = useState<
+    Partial<Record<number, LatLng>>
+  >({});
+
+  const checkpointDataKey = useMemo(
+    () => initialCheckpoints.map((c) => c.id).join(","),
+    [initialCheckpoints],
+  );
+
+  useEffect(() => {
+    setCoordOverrides({});
+  }, [checkpointDataKey]);
+
+  const checkpointsForMap = useMemo(
+    () =>
+      filteredCheckpoints.map((c) => ({
+        ...c,
+        coordinates: coordOverrides[c.id] ?? c.coordinates,
+      })),
+    [filteredCheckpoints, coordOverrides],
+  );
+
+  const selectedForMap = useMemo((): MapCheckpoint | null => {
+    if (!selected) return null;
+    const o = coordOverrides[selected.id];
+    if (!o) return selected;
+    return { ...selected, coordinates: o };
+  }, [selected, coordOverrides]);
+
   const loadDetail = useCallback(async (id: number) => {
     setDetailLoading(true);
     setDetailError(null);
@@ -126,39 +160,85 @@ export function CheckpointsLocator({
     setDetail(result.data);
   }, []);
 
-  const handleListItemSelect = useCallback((checkpoint: MapCheckpoint) => {
-    setSelected(checkpoint);
-    setHoveredId(checkpoint.id);
-    setDialogOpen(false);
-    setDetail(null);
-    setDetailError(null);
-    setFlyTarget({
-      center: checkpoint.coordinates,
-      zoom: 15,
-    });
-    if (
-      typeof window !== "undefined" &&
-      window.matchMedia("(max-width: 1023px)").matches
-    ) {
-      mapSectionRef.current?.scrollIntoView({
-        behavior: "smooth",
-        block: "nearest",
-      });
-    }
+  const applyGeocodeIfNeeded = useCallback((checkpoint: MapCheckpoint) => {
+    if (hasPreciseMapCoordinates(checkpoint.mapurl)) return;
+    const q = buildGeocodeQuery(checkpoint);
+    void fetch(`/api/geocode?q=${encodeURIComponent(q)}`)
+      .then((r) => r.json())
+      .then(
+        (json: {
+          data?: { lat: number; lng: number } | null;
+        }) => {
+          const lat = json?.data?.lat;
+          const lng = json?.data?.lng;
+          if (
+            lat != null &&
+            lng != null &&
+            Number.isFinite(lat) &&
+            Number.isFinite(lng)
+          ) {
+            setCoordOverrides((prev) => ({
+              ...prev,
+              [checkpoint.id]: { lat, lng },
+            }));
+            setFlyTarget({
+              center: { lat, lng },
+              zoom: 18,
+            });
+          }
+        },
+      )
+      .catch(() => {});
   }, []);
+
+  const handleListItemSelect = useCallback(
+    (checkpoint: MapCheckpoint) => {
+      setSelected(checkpoint);
+      setHoveredId(checkpoint.id);
+      setDialogOpen(false);
+      setDetail(null);
+      setDetailError(null);
+
+      const precise = hasPreciseMapCoordinates(checkpoint.mapurl);
+      const zoom = precise ? 18 : 15;
+      setFlyTarget({
+        center: checkpoint.coordinates,
+        zoom,
+      });
+
+      if (!precise) {
+        applyGeocodeIfNeeded(checkpoint);
+      }
+
+      if (
+        typeof window !== "undefined" &&
+        window.matchMedia("(max-width: 1023px)").matches
+      ) {
+        mapSectionRef.current?.scrollIntoView({
+          behavior: "smooth",
+          block: "nearest",
+        });
+      }
+    },
+    [applyGeocodeIfNeeded],
+  );
 
   const handleMarkerClick = useCallback(
     (checkpoint: MapCheckpoint) => {
       setSelected(checkpoint);
       setHoveredId(checkpoint.id);
       setDialogOpen(true);
+      const precise = hasPreciseMapCoordinates(checkpoint.mapurl);
       setFlyTarget({
         center: checkpoint.coordinates,
-        zoom: 15,
+        zoom: precise ? 18 : 17,
       });
+      if (!precise) {
+        applyGeocodeIfNeeded(checkpoint);
+      }
       void loadDetail(checkpoint.id);
     },
-    [loadDetail],
+    [loadDetail, applyGeocodeIfNeeded],
   );
 
   if (loadError) {
@@ -216,8 +296,8 @@ export function CheckpointsLocator({
           className="relative min-h-[56vh] min-w-0 flex-1 lg:min-h-0"
         >
           <CheckpointsMapView
-            checkpoints={filteredCheckpoints}
-            selectedCheckpoint={selected}
+            checkpoints={checkpointsForMap}
+            selectedCheckpoint={selectedForMap}
             hoveredId={hoveredId}
             mapLayer={mapLayer}
             flyTarget={flyTarget}
