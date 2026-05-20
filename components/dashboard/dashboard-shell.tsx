@@ -1,6 +1,7 @@
 "use client";
 
 import { AppSidebar } from "@/components/app-sidebar";
+import { DashboardOnboarding } from "@/components/onboarding/dashboard-onboarding";
 import { Separator } from "@/components/ui/separator";
 import {
   SidebarInset,
@@ -52,8 +53,9 @@ export function DashboardShell({
               </span>
             </div>
           </header>
-          <main className="flex flex-1 flex-col">{children}</main>
+          <main className="relative flex flex-1 flex-col">{children}</main>
         </SidebarInset>
+        <DashboardOnboarding userEmail={user.email} />
       </SidebarProvider>
     </TooltipProvider>
   );

@@ -9,7 +9,9 @@ import {
   LayoutDashboard,
   Map,
   Megaphone,
+  Scale,
 } from "lucide-react";
+import { SidebarHelpCtas } from "@/components/dashboard/sidebar-help-ctas";
 import type { DashboardUser } from "@/components/dashboard/dashboard-shell";
 import { NavUser } from "@/components/nav-user";
 import {
@@ -41,6 +43,11 @@ const NAV_ITEMS = [
     title: "Map",
     url: "/dashboard/map",
     icon: Map,
+  },
+  {
+    title: "Legal",
+    url: "/dashboard/legal",
+    icon: Scale,
   },
   {
     title: "Report Checkpoint",
@@ -106,8 +113,11 @@ export function AppSidebar({
                     : item.url === "/dashboard/map"
                       ? pathname === "/dashboard/map" ||
                         pathname.startsWith("/dashboard/map/")
-                      : pathname === item.url ||
-                        pathname.startsWith(`${item.url}/`);
+                      : item.url === "/dashboard/legal"
+                        ? pathname === "/dashboard/legal" ||
+                          pathname.startsWith("/dashboard/legal/")
+                        : pathname === item.url ||
+                          pathname.startsWith(`${item.url}/`);
 
               return (
                 <SidebarMenuItem key={item.title}>
@@ -129,7 +139,8 @@ export function AppSidebar({
         </SidebarGroup>
       </SidebarContent>
 
-      <SidebarFooter>
+      <SidebarFooter className="gap-0 border-t border-white/10 pt-2">
+        <SidebarHelpCtas />
         <NavUser user={user} />
       </SidebarFooter>
       <SidebarRail />
