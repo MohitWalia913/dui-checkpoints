@@ -81,6 +81,7 @@ export function CheckpointsLocator({
     center: MapCheckpoint["coordinates"];
     zoom: number;
   } | null>(null);
+  const selectionRequestRef = useRef(0);
   const mapSectionRef = useRef<HTMLDivElement | null>(null);
 
   const counties = useMemo(() => {
@@ -145,6 +146,20 @@ export function CheckpointsLocator({
     return { ...selected, coordinates: o };
   }, [selected, coordOverrides]);
 
+  useEffect(() => {
+    if (!selected) return;
+
+    const stillVisible = filteredCheckpoints.some((c) => c.id === selected.id);
+    if (stillVisible) return;
+
+    setSelected(null);
+    setHoveredId(null);
+    setDialogOpen(false);
+    setDetail(null);
+    setDetailError(null);
+    setFlyTarget(null);
+  }, [filteredCheckpoints, selected]);
+
   const loadDetail = useCallback(async (id: number) => {
     setDetailLoading(true);
     setDetailError(null);
@@ -204,6 +219,7 @@ export function CheckpointsLocator({
 
   const handleListItemSelect = useCallback(
     (checkpoint: MapCheckpoint) => {
+      const requestId = ++selectionRequestRef.current;
       setSelected(checkpoint);
       setHoveredId(checkpoint.id);
       setDialogOpen(false);
@@ -219,6 +235,7 @@ export function CheckpointsLocator({
       } else {
         void (async () => {
           const resolved = await applyGeocodeIfNeeded(checkpoint);
+          if (selectionRequestRef.current !== requestId) return;
           setFlyTarget({
             center: resolved ?? checkpoint.coordinates,
             zoom: resolved ? 18 : 15,
@@ -242,6 +259,7 @@ export function CheckpointsLocator({
 
   const handleMarkerClick = useCallback(
     (checkpoint: MapCheckpoint) => {
+      const requestId = ++selectionRequestRef.current;
       setSelected(checkpoint);
       setHoveredId(checkpoint.id);
       setDialogOpen(true);
@@ -254,6 +272,7 @@ export function CheckpointsLocator({
       } else {
         void (async () => {
           const resolved = await applyGeocodeIfNeeded(checkpoint);
+          if (selectionRequestRef.current !== requestId) return;
           setFlyTarget({
             center: resolved ?? checkpoint.coordinates,
             zoom: resolved ? 18 : 17,
