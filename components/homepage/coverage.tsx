@@ -23,7 +23,7 @@ export function Coverage() {
             <span className="text-[#F57E3A]">California</span>
           </h3>
 
-          <span className="font-inter mt-4 block max-w-md text-[18px] font-normal leading-[1.6] text-white/85">
+          <span className="font-inter mt-4 block max-w-md text-[18px] font-normal leading-[1.6] text-white">
             Stay informed with live DUI checkpoint data from across California.
           </span>
 
@@ -37,14 +37,14 @@ export function Coverage() {
                   height={24}
                   className="h-6 w-6 shrink-0"
                 />
-                <span className="font-inter text-[18px] font-normal leading-[1.6] text-white">
+                <span className="font-inter text-[16px]  md:text-[18px]font-normal leading-[1.6] text-white">
                   {item}
                 </span>
               </li>
             ))}
           </ul>
 
-          <div className="mt-10 flex flex-wrap items-center gap-4">
+          <div className="mt-10  gap-[15px] flex flex-wrap items-center md:gap-[25px]">
             <Link
               href="#"
               className="transition-opacity hover:opacity-90"
@@ -53,9 +53,9 @@ export function Coverage() {
               <Image
                 src="/googleplay.png"
                 alt="Get it on Google Play"
-                width={180}
-                height={54}
-                className="h-[48px] w-auto sm:h-[52px]"
+                width={200}
+                height={60}
+                className="h-[60px] w-auto sm:h-[52px]"
               />
             </Link>
 
@@ -67,9 +67,9 @@ export function Coverage() {
               <Image
                 src="/appstore.png"
                 alt="Download on the App Store"
-                width={180}
-                height={54}
-                className="h-[48px] w-auto sm:h-[52px]"
+                width={200}
+                height={60}
+                className="h-[60px] w-auto sm:h-[52px]"
               />
             </Link>
           </div>

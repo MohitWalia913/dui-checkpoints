@@ -61,6 +61,10 @@ export default {
       fontFamily: {
         montserrat: ["var(--font-montserrat)", "sans-serif"],
         inter: ["var(--font-inter)", "sans-serif"],
+        'open-sans': [
+          'Open Sans',
+          'sans-serif',
+        ],
       },
     },
   },

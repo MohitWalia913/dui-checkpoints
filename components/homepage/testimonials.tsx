@@ -59,24 +59,24 @@ function TestimonialCard({
   avatar,
 }: (typeof TESTIMONIALS)[number]) {
   return (
-    <article className="h-full rounded-2xl bg-white p-6 shadow-lg">
+    <article className="h-full rounded-2xl bg-white p-6 shadow-lg bg-white p-[20px] border-solid border-[#F57E3A] border-t-[0.2px] border-r-[0.2px] border-b-[0.2px] border-l-[2px] rounded-[15px]">
       <Stars />
-      <p className="font-inter mt-4 text-[15px] font-normal leading-[1.6] text-[#5C6573]">
+      <p className="font-open-sans mt-4 text-[16px] font-normal leading-[1.6] text-[#7A7A7A]">
         {quote}
       </p>
-      <div className="mt-6 flex items-center gap-3 border-t border-gray-100 pt-5">
+      <div className="mt-[20px] flex items-center gap-3 md:mt-[30px] lg:mt-[30px]">
         <Image
           src={avatar}
           alt=""
-          width={48}
-          height={48}
-          className="h-12 w-12 shrink-0 rounded-full object-cover"
+          width={60}
+          height={60}
+          className="h-13 w-13 shrink-0 rounded-full object-cover"
         />
         <div>
-          <p className="font-inter text-base font-semibold text-[#040F20]">
+          <p className="font-open-sans text-[20px] md:text-[22px] lg:text-[24px] font-bold text-[#000000]">
             {name}
-          </p>
-          <p className="font-inter text-sm font-normal text-[#5C6573]">
+          </p>  
+          <p className="font-open-sans text-[16px] font-normal text-[#7A7A7A]">
             {location}
           </p>
         </div>
@@ -121,26 +121,28 @@ export function Testimonials() {
   const goNext = () => goTo(activeIndex + 1);
 
   return (
-    <section className="w-full bg-[#040F20] py-16 md:py-20 lg:py-24">
-      <div className="mx-auto max-w-[1440px] px-6 md:px-10 lg:px-14">
-        <div className="grid gap-10 lg:grid-cols-[minmax(0,400px)_1fr] lg:gap-10 xl:gap-14">
-          <div className="lg:pt-4">
-            <h2 className="font-inter text-[32px] font-bold leading-tight text-white sm:text-[40px] lg:text-[48px] lg:leading-[56px]">
+    <section className="trusted-block w-full bg-[#040F20] py-16 md:py-16 lg:py-20">
+      <div className="mx-auto max-w-[full] px-6 md:px-10 lg:px-14 md:!px-[0px]">
+        <div className="grid items-center grid-cols-1 md:grid-cols-2 gap-[30px]">
+          <div className="w-full lg:pt-0">
+            <div className="grid-left-inner w-full max-w-full md:max-w-[624px] ml-auto">
+            <h2 className="font-inter text-[28px] font-bold leading-tight text-white sm:text-[32px] md:text-[36px] lg:text-[40px] lg:leading-[50px] xl:text-[46px] xl:leading-[54px]">
               Trusted by Thousands. Avoid Unnecessary Delays
             </h2>
-            <p className="font-inter mt-4 max-w-md text-[18px] font-normal leading-[1.6] text-white/70">
+            <p className="font-inter mt-4 max-w-full text-[18px] font-normal leading-[1.6] text-white/80">
               Stay informed about DUI checkpoints and make smarter travel
               decisions across California.
             </p>
+           </div>
           </div>
 
-          <div className="min-w-0 lg:-mr-6 xl:-mr-10">
+          <div className="w-full lg:-mr-6 xl:-mr-10">
             <div className="flex items-stretch gap-2 sm:gap-3">
               <button
                 type="button"
                 onClick={goPrev}
                 disabled={activeIndex === 0}
-                className="flex h-9 w-9 shrink-0 self-center items-center justify-center rounded-full bg-white/10 text-white transition-colors hover:bg-white/20 disabled:cursor-not-allowed disabled:opacity-30"
+                className="flex hidden  h-9 w-9 shrink-0 self-center items-center justify-center rounded-full bg-white/10 text-white transition-colors hover:bg-white/20 disabled:cursor-not-allowed disabled:opacity-30"
                 aria-label="Previous testimonial"
               >
                 <ChevronLeft className="h-5 w-5" strokeWidth={2} />
@@ -148,7 +150,7 @@ export function Testimonials() {
 
               <div className="min-w-0 flex-1 overflow-hidden">
                 <div
-                  className="flex transition-transform duration-500 ease-out"
+                  className="trusted-right-box-slider flex transition-transform duration-500 ease-out"
                   style={{
                     transform: `translateX(-${activeIndex * cardWidthPercent}%)`,
                   }}
@@ -156,7 +158,7 @@ export function Testimonials() {
                   {TESTIMONIALS.map((testimonial) => (
                     <div
                       key={testimonial.name}
-                      className="box-border shrink-0 pr-4"
+                      className="box-border bordeer-box-trust-slide shrink-0 pr-4"
                       style={{ width: `${cardWidthPercent}%` }}
                     >
                       <TestimonialCard {...testimonial} />
@@ -169,14 +171,14 @@ export function Testimonials() {
                 type="button"
                 onClick={goNext}
                 disabled={activeIndex >= maxIndex}
-                className="flex h-9 w-9 shrink-0 self-center items-center justify-center rounded-full bg-white/10 text-white transition-colors hover:bg-white/20 disabled:cursor-not-allowed disabled:opacity-30"
+                className="flex hidden h-9 w-9 shrink-0 self-center items-center justify-center rounded-full bg-white/10 text-white transition-colors hover:bg-white/20 disabled:cursor-not-allowed disabled:opacity-30"
                 aria-label="Next testimonial"
               >
                 <ChevronRight className="h-5 w-5" strokeWidth={2} />
               </button>
             </div>
 
-            <div className="mt-6 flex justify-center gap-2 lg:justify-start">
+            <div className="mt-10 flex justify-center gap-2 lg:justify-start">
               {TESTIMONIALS.map((_, i) => (
                 <button
                   key={i}
@@ -195,19 +197,19 @@ export function Testimonials() {
           </div>
         </div>
 
-        <div className="mt-14 border-t border-white/10 pt-10 md:mt-16">
-          <div className="flex flex-wrap items-center justify-center gap-6 md:gap-0 md:divide-x md:divide-white/15">
+        <div className="mt-8 border-t border-white/10 pt-10 md:mt-10">
+          <div className="four-logo flex flex-wrap items-center gap-6 md:gap-0 md:divide-x md:divide-white/15 mx-auto max-w-[1440px] px-6 md:px-10 lg:px-14 justify-start">
             {PARTNER_LOGOS.map(({ src, alt }) => (
               <div
                 key={src}
-                className="flex items-center justify-center px-4 md:px-8 lg:px-12"
+                className=" four-logo-inner-box flex items-center justify-center px-4 md:px-8 lg:px-12"
               >
                 <Image
                   src={src}
                   alt={alt}
                   width={160}
                   height={48}
-                  className="h-10 w-auto max-w-[140px] object-contain opacity-90 sm:h-12 sm:max-w-[160px] lg:max-w-[180px]"
+                  className="h-auto w-full max-w-max object-contain opacity-90"
                 />
               </div>
             ))}
