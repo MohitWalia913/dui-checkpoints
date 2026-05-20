@@ -13,24 +13,35 @@ const PHONE_SLIDES = [
   { src: "/five.png", alt: "DUI Checkpoints Locator app screen" },
 ] as const;
 
-const VISIBLE_DESKTOP = 3;
-const SLIDE_STEP_PERCENT = 22;
+// Responsive visible slides
+const getVisibleSlides = (width: number) => {
+  if (width <= 480) return 1;
+  if (width <= 599) return 2;
+  if (width <= 767) return 3;
+  if (width <= 1024) return 3;
+  return 5;
+};
+
+const getSlideStepPercent = (visible: number) => {
+  return 100 / visible;
+};
+  
 
 export function AppShowcase() {
   const [activeIndex, setActiveIndex] = useState(0);
-  const [isDesktop, setIsDesktop] = useState(false);
-
+  const [visibleSlides, setVisibleSlides] = useState(3);
   const total = PHONE_SLIDES.length;
-  const maxIndex = isDesktop
-    ? Math.max(0, total - VISIBLE_DESKTOP)
-    : total - 1;
+  // Always allow sliding, even if all slides are visible (for demo/UX)
+  const maxIndex = total - visibleSlides >= 0 ? total - visibleSlides : 0;
 
   useEffect(() => {
-    const mq = window.matchMedia("(min-width: 1024px)");
-    const update = () => setIsDesktop(mq.matches);
-    update();
-    mq.addEventListener("change", update);
-    return () => mq.removeEventListener("change", update);
+    function handleResize() {
+      const width = window.innerWidth;
+      setVisibleSlides(getVisibleSlides(width));
+    }
+    handleResize();
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
   }, []);
 
   useEffect(() => {
@@ -91,15 +102,25 @@ export function AppShowcase() {
                 <div
                   className="flex transition-transform duration-500 ease-out"
                   style={{
-                    transform: isDesktop
-                      ? `translateX(-${activeIndex * SLIDE_STEP_PERCENT}%)`
-                      : `translateX(-${activeIndex * 100}%)`,
+                    transform: `translateX(-${activeIndex * (100 / visibleSlides)}%)`,
                   }}
                 >
                   {PHONE_SLIDES.map(({ src, alt }, i) => (
                     <div
                       key={src}
-                      className="flex w-full shrink-0 justify-center px-2 lg:w-[22%] lg:px-1.5"
+                      className="flex w-full shrink-0 justify-center px-2"
+                      style={{
+                        maxWidth:
+                          visibleSlides === 1
+                            ? '100%'
+                            : visibleSlides === 2
+                            ? '25%'
+                            : visibleSlides === 3
+                            ? '33.33%'
+                            : visibleSlides === 5
+                            ? '20%'
+                            : '20.33%'
+                      }}
                     >
                       <Image
                         src={src}
@@ -107,9 +128,8 @@ export function AppShowcase() {
                         width={220}
                         height={440}
                         className={`h-auto w-auto max-w-[200px] object-contain lg:max-h-[400px] lg:w-full lg:max-w-[180px] ${
-                          !isDesktop ||
-                          (i >= activeIndex &&
-                            i < activeIndex + VISIBLE_DESKTOP)
+                          i >= activeIndex &&
+                          i < activeIndex + visibleSlides
                             ? "opacity-100"
                             : "opacity-60"
                         }`}
@@ -135,7 +155,7 @@ export function AppShowcase() {
                 <button
                   key={i}
                   type="button"
-                  onClick={() => goTo(isDesktop ? Math.min(i, maxIndex) : i)}
+                  onClick={() => goTo(Math.min(i, maxIndex))}
                   className={`h-2.5 rounded-full transition-all ${
                     i === activeIndex
                       ? "w-6 bg-[#F57E3A]"

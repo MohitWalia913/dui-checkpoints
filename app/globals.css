@@ -102,6 +102,9 @@
 .trusted-block .trusted-right-box-slider .bordeer-box-trust-slide {  width: 66.6667% !important;}
 .grid-left-inner { padding-left: 40px;}
 div#mobile-menu a {  font-size: 18px !important;}
+.calfornia-left-cil-inner-box {
+    max-width: 100%;
+}
 }
 
  @media (max-width: 767px) {
