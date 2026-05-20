@@ -64,15 +64,15 @@ export function Hero() {
 
             <Link
               href="/map"
-              className="font-inter mt-8 inline-flex items-center gap-4 rounded-full border border-white/25 bg-black px-6 py-3.5 text-white transition-opacity hover:opacity-90 lg:mt-10"
+              className="hover-window font-inter mt-8 inline-flex items-center gap-4 rounded-[10px] border border-white/10 bg-black px-6 py-3.5 text-white transition-opacity hover:opacity-90"
             >
               <Monitor
                 className="h-8 w-8 shrink-0 stroke-[1.5]"
                 aria-hidden
               />
               <span className="flex flex-col text-left leading-tight">
-                <span className="text-sm font-normal leading-5">Use On</span>
-                <span className="text-lg font-semibold leading-6">
+                <span className="text-[16px] font-normal leading-5">Use On</span>
+                <span className="text-[18px] mt-[8px] font-semibold leading-6 md:text-[25px]">
                   Web Browser
                 </span>
               </span>
@@ -104,8 +104,8 @@ export function Hero() {
 
             {/* Device mockups — phone left & up, legal right & down */}
             <div className="md:absolute inset-0 z-10 flex items-end justify-center pb-2 lg:justify-end lg:pb-0">
-              <div className="relative flex w-full max-w-[560px] items-end justify-center lg:justify-end">
-                <div className="relative z-20 w-[54%] max-w-[300px] shrink-0 translate-y-0 sm:max-w-[320px] lg:max-w-[340px]">
+              <div className="relative flex gap-[33px] w-full max-w-[668px] items-end justify-center lg:justify-end">
+                <div className="relative">
                   <Image
                     src="/bgphone.png"
                     alt="DUI Checkpoints Locator map app on mobile"
@@ -116,7 +116,7 @@ export function Hero() {
                   />
                 </div>
 
-                <div className="relative z-10 -ml-10 mb-6 w-[50%] max-w-[270px] shrink-0 sm:-ml-14 sm:mb-8 lg:-ml-16 lg:mb-10 lg:max-w-[290px]">
+                <div className="relative">
                   <Image
                     src="/bglegal.png"
                     alt="Legal information and DUI help resources"

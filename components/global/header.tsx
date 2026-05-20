@@ -70,7 +70,7 @@ export function Header() {
         <div className="flex items-center gap-3 lg:hidden">
           <Link
             href="/sign-up"
-            className="font-inter inline-flex items-center justify-center bg-[#F57E3A] px-4 py-2 text-base font-medium leading-4 text-white sm:px-5 sm:py-2.5 sm:text-[18px]"
+            className=" hidden font-inter inline-flex items-center justify-center bg-[#F57E3A] px-4 py-2 text-base font-medium leading-4 text-white sm:px-5 sm:py-2.5 sm:text-[18px]"
           >
             Get Started
           </Link>
@@ -128,17 +128,17 @@ export function Header() {
             </Link>
           ))}
 
-          <div className="mt-8 flex flex-col gap-4">
+          <div className="two-btn mt-8 flex flex-col gap-4">
             <Link
               href="/login"
-              className="font-inter inline-flex w-full items-center justify-center border border-white px-[25px] py-[10px] text-[20.8px] font-medium leading-4 text-white"
+              className="same-btn  font-inter inline-flex w-full items-center justify-center border border-white px-[25px] py-[10px] text-[20.8px] font-medium leading-4 text-white"
               onClick={() => setMenuOpen(false)}
             >
               Login
             </Link>
             <Link
               href="/sign-up"
-              className="font-inter inline-flex w-full items-center justify-center bg-[#F57E3A] px-[25px] py-[10px] text-[20.8px] font-medium leading-4 text-white"
+              className="same-btn  same-ext-btn font-inter inline-flex w-full items-center justify-center bg-[#F57E3A] px-[25px] py-[10px] text-[20.8px] font-medium leading-4 text-white"
               onClick={() => setMenuOpen(false)}
             >
               Get Started

@@ -70,123 +70,48 @@
   }
 }
 
-.main-header-inner-row {
-    padding-top: 20px;
-    padding-bottom: 20px;
-}
-
-
-.main-header-inner-row .logo-img-box {
-    width: 200px;
-    max-width: 100%;
-}
-
-.main-header-inner-row .logo-img-box img {
-    width: 100%; max-width: 100%; object-fit: cover;
-}
- 
-.main-header-inner-row  nav {
-    margin-right: 115px;
-}
- 
-
-.main-header-inner-row  nav  ul li a  {
-font-family: 'Montserrat' !important;
-font-style: normal;
-font-weight: 500 !important;
-font-size: 14px !important;
-line-height: 22px;
-color: #FFFFFF !important;
-
-}
-
-.two-btn {
-    gap: 20px;
-}
-
-.two-btn .same-btn {
-    border: 1px solid #fff;
-    padding: 12.5px 26px;
-    font-family: 'Inter';
-    font-style: normal;
-    font-weight: 500 !important;
-    font-size: 20.8px;
-    line-height: 16px;
-    text-align: center;
-    color: #FFFFFF;
-     text-transform:capitalize;
-     box-shadow: none;
-}
-
-.two-btn .same-btn:hover {
-    border-color:#F57E3A; background:#F57E3A; transition: all 0.3s ease;
-}
-
-
-.two-btn .same-btn.same-ext-btn {
-    background: #F57E3A;
-    border-color: #F57E3A;
-}
-
+.main-header-inner-row { padding-top: 20px;  padding-bottom: 20px;}
+.main-header-inner-row .logo-img-box {   width: 200px; max-width: 100%;}
+.main-header-inner-row .logo-img-box img { width: 100%; max-width: 100%; object-fit: cover;}
+.main-header-inner-row  nav { margin-right: 115px;}
+.main-header-inner-row  nav  ul li a  { font-family: 'Montserrat' !important; font-style: normal;font-weight: 500 !important;font-size: 14px !important;line-height: 22px;color: #FFFFFF !important;}
+.two-btn { gap: 20px;}
+.two-btn .same-btn {  border: 1px solid #fff;  padding: 12.5px 26px;  font-family: 'Inter';  font-style: normal;  font-weight: 500 !important;  font-size: 20.8px;  line-height: 16px;  text-align: center;  color: #FFFFFF; text-transform:capitalize; box-shadow: none;}
+.two-btn .same-btn:hover {  border-color:#F57E3A; background:#F57E3A; transition: all 0.3s ease;}
+.two-btn .same-btn.same-ext-btn {  background: #F57E3A; border-color: #F57E3A;}
 .two-btn .same-btn.same-ext-btn:hover { background:transparent; color:#F57E3A;}
-
-.banner-main {
-    position: relative;
-    z-index: 1;
-    padding-top: 64px;
-}
-
+.banner-main { position: relative; z-index: 1;  padding-top: 120px;}
 .hover-window:hover {background:#f57e3a; transition:all 0.3s;}
 
- @media (max-width: 1440px) {
-   .grid-left-inner {
-    padding-left: 56px;
-}
-    }
- @media (max-width: 1366px) {
-   .trusted-block .trusted-right-box-slider .bordeer-box-trust-slide {
-    width: 50% !important;
-}
-    }
- @media (max-width: 1024px) {
-  .four-logo { display:grid; grid-template-columns:1fr 1fr 1fr 1fr;}
 
-.four-logo-inner-box {
-    padding: 0px 20px;
+/***********Responsive-start-here***********/
+ @media (max-width: 1440px) { .grid-left-inner { padding-left: 56px;}
+ .banner-main { padding-top: 0px;}
+  }
+
+ @media (max-width: 1366px) {
+  .trusted-block .trusted-right-box-slider .bordeer-box-trust-slide { width: 50% !important;}
+  }
+
+ @media (max-width: 1199px) {.main-header-inner-row nav { margin-right: 50px;}
+  }
+
+ @media (max-width: 1024px) {
+.four-logo { display:grid; grid-template-columns:1fr 1fr 1fr 1fr;}
+.four-logo-inner-box {  padding: 0px 20px;}
+.trusted-block .trusted-right-box-slider .bordeer-box-trust-slide {  width: 66.6667% !important;}
+.grid-left-inner { padding-left: 40px;}
+div#mobile-menu a {  font-size: 18px !important;}
 }
-.trusted-block .trusted-right-box-slider .bordeer-box-trust-slide {
-    width: 66.6667% !important;
-}
-.grid-left-inner {
-    padding-left: 40px;
-}
-    }
 
  @media (max-width: 767px) {
-.trusted-block .trusted-right-box-slider .bordeer-box-trust-slide {
-    width: 86.9565% !important;
-}
- .grid-left-inner {
-    padding-left: 0px;
-}
+.trusted-block .trusted-right-box-slider .bordeer-box-trust-slide { width: 86.9565% !important;}
+.grid-left-inner { padding-left: 0px;}
  }
- 
+
  @media (max-width: 640px) {
-.four-logo {
-    grid-template-columns: 1fr 1fr;
-    display: grid;
-    gap: 30px;
-    padding:0px !important
-}
-.four-logo-inner-box {
-    padding: 0px !important;
-    width: 100% !important;
-    max-width: 100% !important;
-    min-width: 100% !important;
-}
-.four-logo-inner-box img {
-    width: 100% !important;
-    max-width: 70%;
-}
+.four-logo { grid-template-columns: 1fr 1fr;  display: grid; gap: 30px; padding:0px !important}
+.four-logo-inner-box { padding: 0px !important; width: 100% !important; max-width: 100% !important; min-width: 100% !important;}
+.four-logo-inner-box img { width: 100% !important; max-width: 70%; }
  }
  

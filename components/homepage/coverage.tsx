@@ -10,10 +10,11 @@ const BULLETS = [
 
 export function Coverage() {
   return (
-    <section className="relative w-full overflow-hidden bg-[#040F20]">
+    <section className="relative w-full overflow-hidden bg-[#040F20] pl-[56px]">
       <div className="grid lg:grid-cols-2">
         {/* Left — copy & CTAs */}
-        <div className="relative z-10 flex flex-col justify-center px-6 py-16 md:px-10 md:py-20 lg:px-14 lg:py-24">
+        <div className="relative z-10 flex flex-col justify-center !pl-[0px] px-6 py-16 md:px-10 md:py-20 lg:px-14 lg:py-24">
+          <div className="calfornia-left-cil-inner-box w-full max-w-[479px] ml-auto"> 
           <span className="font-inter text-[16px] font-normal uppercase leading-6 text-[#F57E3A]">
             Statewide Coverage
           </span>
@@ -74,6 +75,7 @@ export function Coverage() {
             </Link>
           </div>
         </div>
+         </div>
 
         {/* Right — California map */}
         <div className="relative min-h-[320px] lg:min-h-[520px]">
