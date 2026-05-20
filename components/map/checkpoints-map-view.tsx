@@ -46,39 +46,10 @@ const CALIFORNIA_BOUNDARY: Feature<Polygon> = {
   },
 };
 
-const CLUSTER_LAYER: CircleLayerSpecification = {
-  id: "clusters",
-  type: "circle",
-  source: "checkpoints",
-  filter: ["has", "point_count"],
-  paint: {
-    "circle-color": "#F57E3A",
-    "circle-radius": ["step", ["get", "point_count"], 16, 25, 20, 75, 24],
-    "circle-stroke-width": 2,
-    "circle-stroke-color": "#FFFFFF",
-  },
-};
-
-const CLUSTER_COUNT_LAYER: SymbolLayerSpecification = {
-  id: "cluster-count",
-  type: "symbol",
-  source: "checkpoints",
-  filter: ["has", "point_count"],
-  layout: {
-    "text-field": ["get", "point_count_abbreviated"],
-    "text-font": ["Open Sans Bold", "Arial Unicode MS Bold"],
-    "text-size": 12,
-  },
-  paint: {
-    "text-color": "#FFFFFF",
-  },
-};
-
 const UNCLUSTERED_LAYER: CircleLayerSpecification = {
   id: "unclustered-point",
   type: "circle",
   source: "checkpoints",
-  filter: ["!", ["has", "point_count"]],
   paint: {
     "circle-color": [
       "match",
@@ -94,6 +65,30 @@ const UNCLUSTERED_LAYER: CircleLayerSpecification = {
     "circle-stroke-color": "#FFFFFF",
   },
 };
+
+function isUndisclosedLocation(location: string): boolean {
+  return /undisclosed|unknown|tbd/i.test(location);
+}
+
+function createCirclePolygon(
+  center: LatLng,
+  radiusMeters = 4800,
+  points = 28,
+): [number, number][][] {
+  const ring: [number, number][] = [];
+  const latRad = (center.lat * Math.PI) / 180;
+  const meterToLat = 1 / 111_320;
+  const meterToLng = 1 / (111_320 * Math.cos(latRad));
+
+  for (let i = 0; i < points; i++) {
+    const angle = (i / points) * 2 * Math.PI;
+    const lat = center.lat + Math.sin(angle) * radiusMeters * meterToLat;
+    const lng = center.lng + Math.cos(angle) * radiusMeters * meterToLng;
+    ring.push([lng, lat]);
+  }
+  ring.push(ring[0]);
+  return [ring];
+}
 
 const SELECTED_LAYER: CircleLayerSpecification = {
   id: "selected-point",
@@ -164,6 +159,22 @@ export function CheckpointsMapView({
     }),
     [checkpoints],
   );
+  const undisclosedAreasGeoJson = useMemo<FeatureCollection<Polygon>>(
+    () => ({
+      type: "FeatureCollection",
+      features: checkpoints
+        .filter((checkpoint) => isUndisclosedLocation(checkpoint.Location))
+        .map((checkpoint) => ({
+          type: "Feature" as const,
+          properties: { id: checkpoint.id },
+          geometry: {
+            type: "Polygon" as const,
+            coordinates: createCirclePolygon(checkpoint.coordinates),
+          },
+        })),
+    }),
+    [checkpoints],
+  );
 
   const selectedFilter = useMemo<FilterSpecification>(
     () => ["==", ["get", "id"], selectedCheckpoint?.id ?? -1],
@@ -229,16 +240,6 @@ export function CheckpointsMapView({
     const feature = event.features?.[0];
     if (!feature) return;
 
-    if (feature.layer.id === "clusters") {
-      const [lng, lat] = (feature.geometry as Point).coordinates;
-      map.easeTo({
-        center: [lng, lat],
-        zoom: Math.min(map.getZoom() + 2, 14),
-        duration: 350,
-      });
-      return;
-    }
-
     if (feature.layer.id !== "unclustered-point") return;
 
     const checkpointId = Number(feature.properties?.id);
@@ -276,19 +277,30 @@ export function CheckpointsMapView({
           latitude: CALIFORNIA_CENTER[1],
           zoom: DEFAULT_MAP_ZOOM,
         }}
-        interactiveLayerIds={["clusters", "unclustered-point"]}
+        interactiveLayerIds={["unclustered-point"]}
         onLoad={handleMapLoad}
         onClick={handleMapClick}
         onMouseMove={handleMapMouseMove}
         onMouseLeave={() => onHover(null)}
         style={{ width: "100%", height: "100%", background: "#e2e8f0" }}
       >
-        <Source id="checkpoints" type="geojson" data={checkpointsGeoJson} cluster clusterRadius={50}>
-          <Layer {...CLUSTER_LAYER} />
-          <Layer {...CLUSTER_COUNT_LAYER} />
+        <Source id="checkpoints" type="geojson" data={checkpointsGeoJson}>
           <Layer {...UNCLUSTERED_LAYER} />
           <Layer {...HOVERED_LAYER} filter={hoveredFilter} />
           <Layer {...SELECTED_LAYER} filter={selectedFilter} />
+        </Source>
+
+        <Source id="undisclosed-areas" type="geojson" data={undisclosedAreasGeoJson}>
+          <Layer
+            id="undisclosed-areas-fill"
+            type="fill"
+            paint={{ "fill-color": "#F57E3A", "fill-opacity": 0.14 }}
+          />
+          <Layer
+            id="undisclosed-areas-line"
+            type="line"
+            paint={{ "line-color": "#F57E3A", "line-width": 2, "line-opacity": 0.75 }}
+          />
         </Source>
 
         <Source id="california-boundary" type="geojson" data={CALIFORNIA_BOUNDARY}>

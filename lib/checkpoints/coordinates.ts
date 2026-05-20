@@ -70,7 +70,15 @@ export function buildGeocodeQuery(checkpoint: {
   County: string;
   State: string;
 }): string {
-  return [checkpoint.Location, checkpoint.City, checkpoint.County, checkpoint.State || "USA"]
+  const location = checkpoint.Location?.trim() ?? "";
+  const isUndisclosedLocation = /undisclosed|unknown|tbd/i.test(location);
+
+  return [
+    isUndisclosedLocation ? "" : location,
+    checkpoint.City,
+    checkpoint.County,
+    checkpoint.State || "USA",
+  ]
     .map((s) => s?.trim())
     .filter(Boolean)
     .join(", ");
