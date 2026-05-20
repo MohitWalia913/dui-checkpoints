@@ -2,7 +2,10 @@
 
 import { AuthField } from "@/components/auth/auth-field";
 import { AuthPageHeader } from "@/components/auth/auth-page-header";
+import { GoogleSignInButton } from "@/components/auth/google-sign-in-button";
+import { useGoogleSignIn } from "@/components/auth/use-google-sign-in";
 import {
+  AuthDivider,
   AuthErrorMessage,
   AuthFooterText,
   AuthInlineLink,
@@ -23,12 +26,21 @@ export function SignUpForm({
   const [error, setError] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const router = useRouter();
+  const {
+    signInWithGoogle,
+    isGoogleLoading,
+    googleError,
+    setGoogleError,
+  } = useGoogleSignIn();
+
+  const isBusy = isLoading || isGoogleLoading;
 
   const handleSignUp = async (e: React.FormEvent) => {
     e.preventDefault();
     const supabase = createClient();
     setIsLoading(true);
     setError(null);
+    setGoogleError(null);
 
     if (password !== repeatPassword) {
       setError("Passwords do not match");
@@ -60,6 +72,20 @@ export function SignUpForm({
         description="Get real-time DUI checkpoint alerts and tools built for California drivers."
       />
 
+      <GoogleSignInButton
+        onClick={signInWithGoogle}
+        isLoading={isGoogleLoading}
+        disabled={isLoading}
+      />
+
+      {googleError ? (
+        <div className="mt-3">
+          <AuthErrorMessage message={googleError} />
+        </div>
+      ) : null}
+
+      <AuthDivider />
+
       <form onSubmit={handleSignUp} className="space-y-5">
         <AuthField
           id="email"
@@ -71,6 +97,7 @@ export function SignUpForm({
           value={email}
           onChange={(e) => setEmail(e.target.value)}
           autoComplete="email"
+          disabled={isBusy}
         />
 
         <AuthField
@@ -84,6 +111,7 @@ export function SignUpForm({
           value={password}
           onChange={(e) => setPassword(e.target.value)}
           autoComplete="new-password"
+          disabled={isBusy}
         />
 
         <AuthField
@@ -97,11 +125,12 @@ export function SignUpForm({
           value={repeatPassword}
           onChange={(e) => setRepeatPassword(e.target.value)}
           autoComplete="new-password"
+          disabled={isBusy}
         />
 
         {error ? <AuthErrorMessage message={error} /> : null}
 
-        <AuthSubmitButton disabled={isLoading}>
+        <AuthSubmitButton disabled={isBusy}>
           {isLoading ? "Creating an account..." : "Sign up"}
         </AuthSubmitButton>
       </form>

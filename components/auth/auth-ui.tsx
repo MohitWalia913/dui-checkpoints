@@ -66,6 +66,18 @@ export function AuthInlineLink({
   );
 }
 
+export function AuthDivider({ label = "or" }: { label?: string }) {
+  return (
+    <div className="relative my-6 flex items-center" role="separator">
+      <div className="h-px flex-1 bg-[#E2E5EA]" />
+      <span className="font-montserrat px-4 text-xs font-semibold uppercase tracking-wider text-[#9AA3AF]">
+        {label}
+      </span>
+      <div className="h-px flex-1 bg-[#E2E5EA]" />
+    </div>
+  );
+}
+
 export function AuthErrorMessage({ message }: { message: string }) {
   return (
     <p

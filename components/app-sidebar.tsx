@@ -38,7 +38,7 @@ const NAV_ITEMS = [
     icon: CalendarClock,
   },
   {
-    title: "Checkpoint Map",
+    title: "Map",
     url: "/map",
     icon: Map,
   },
