@@ -10,10 +10,11 @@ const BULLETS = [
 
 export function Coverage() {
   return (
-    <section className="relative w-full overflow-hidden bg-[#040F20]">
+    <section className="relative w-full overflow-hidden pl-[24px] bg-[#040F20] md:pl-[40px] lg:pl-[56px]">
       <div className="grid lg:grid-cols-2">
         {/* Left — copy & CTAs */}
-        <div className="relative z-10 flex flex-col justify-center px-6 py-16 md:px-10 md:py-20 lg:px-14 lg:py-24">
+        <div className="relative z-10 flex flex-col justify-center !pl-[0px] px-6 py-16 md:px-10 md:py-20 lg:px-14 lg:py-24">
+          <div className="calfornia-left-cil-inner-box w-full max-w-[479px] ml-auto"> 
           <span className="font-inter text-[16px] font-normal uppercase leading-6 text-[#F57E3A]">
             Statewide Coverage
           </span>
@@ -23,7 +24,7 @@ export function Coverage() {
             <span className="text-[#F57E3A]">California</span>
           </h3>
 
-          <span className="font-inter mt-4 block max-w-md text-[18px] font-normal leading-[1.6] text-white/85">
+          <span className="font-inter mt-4 block max-w-md text-[18px] font-normal leading-[1.6] text-white">
             Stay informed with live DUI checkpoint data from across California.
           </span>
 
@@ -37,14 +38,14 @@ export function Coverage() {
                   height={24}
                   className="h-6 w-6 shrink-0"
                 />
-                <span className="font-inter text-[18px] font-normal leading-[1.6] text-white">
+                <span className="font-inter text-[16px]  md:text-[18px]font-normal leading-[1.6] text-white">
                   {item}
                 </span>
               </li>
             ))}
           </ul>
 
-          <div className="mt-10 flex flex-wrap items-center gap-4">
+          <div className="mt-10  gap-[15px] flex flex-wrap items-center md:gap-[25px]">
             <Link
               href="#"
               className="transition-opacity hover:opacity-90"
@@ -53,9 +54,9 @@ export function Coverage() {
               <Image
                 src="/googleplay.png"
                 alt="Get it on Google Play"
-                width={180}
-                height={54}
-                className="h-[48px] w-auto sm:h-[52px]"
+                width={200}
+                height={60}
+                className="h-[60px] w-auto sm:h-[52px]"
               />
             </Link>
 
@@ -67,13 +68,14 @@ export function Coverage() {
               <Image
                 src="/appstore.png"
                 alt="Download on the App Store"
-                width={180}
-                height={54}
-                className="h-[48px] w-auto sm:h-[52px]"
+                width={200}
+                height={60}
+                className="h-[60px] w-auto sm:h-[52px]"
               />
             </Link>
           </div>
         </div>
+         </div>
 
         {/* Right — California map */}
         <div className="relative min-h-[320px] lg:min-h-[520px]">
