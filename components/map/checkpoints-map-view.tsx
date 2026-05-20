@@ -97,6 +97,41 @@ function MapViewportController({
   return null;
 }
 
+function SelectedCheckpointController({
+  selectedCheckpoint,
+  focusToken,
+}: {
+  selectedCheckpoint: MapCheckpoint | null;
+  focusToken: number;
+}) {
+  const map = useMap();
+
+  useEffect(() => {
+    if (!selectedCheckpoint) return;
+
+    const lat = Number.parseFloat(String(selectedCheckpoint.coordinates.lat));
+    const lng = Number.parseFloat(String(selectedCheckpoint.coordinates.lng));
+    if (!Number.isFinite(lat) || !Number.isFinite(lng)) return;
+    if (Math.abs(lat) > 90 || Math.abs(lng) > 180) return;
+    if (lat === 0 || lng === 0) return;
+
+    map.flyTo([lat, lng], 16, {
+      animate: true,
+      duration: 1.5,
+    });
+
+    const timeoutId = window.setTimeout(() => {
+      map.invalidateSize();
+    }, 300);
+
+    return () => {
+      window.clearTimeout(timeoutId);
+    };
+  }, [selectedCheckpoint, focusToken, map]);
+
+  return null;
+}
+
 function FitBoundsOnLoad({
   checkpoints,
   hasActiveSelection,
@@ -346,10 +381,15 @@ export function CheckpointsMapView({
       zoom={DEFAULT_ZOOM}
       className="checkpoint-locator-map h-full w-full"
       scrollWheelZoom
+      preferCanvas
       style={{ background: "#0a1628" }}
     >
       <MapBaseTileLayer mapLayer={mapLayer} />
       <MapViewportController flyTarget={flyTarget} />
+      <SelectedCheckpointController
+        selectedCheckpoint={selectedCheckpoint}
+        focusToken={focusToken}
+      />
       <FitBoundsOnLoad
         checkpoints={checkpoints}
         hasActiveSelection={selectedCheckpoint != null}

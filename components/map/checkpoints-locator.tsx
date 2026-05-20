@@ -32,6 +32,15 @@ import type { MapLayerStyle } from "@/lib/map/tile-layers";
 import { cn } from "@/lib/utils";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
+function normalizeLatLng(input: LatLng): LatLng | null {
+  const lat = Number.parseFloat(String(input.lat));
+  const lng = Number.parseFloat(String(input.lng));
+  if (!Number.isFinite(lat) || !Number.isFinite(lng)) return null;
+  if (Math.abs(lat) > 90 || Math.abs(lng) > 180) return null;
+  if (lat === 0 || lng === 0) return null;
+  return { lat, lng };
+}
+
 async function fetchCheckpointDetail(id: number): Promise<{
   data: Checkpoint | null;
   error: string | null;
@@ -226,19 +235,23 @@ export function CheckpointsLocator({
       setDetail(null);
       setDetailError(null);
 
-      const precise = hasPreciseMapCoordinates(checkpoint.mapurl);
-      if (precise) {
+      const normalized = normalizeLatLng(checkpoint.coordinates);
+      if (normalized) {
         setFlyTarget({
-          center: checkpoint.coordinates,
-          zoom: 18,
+          center: normalized,
+          zoom: 16,
         });
-      } else {
+      }
+
+      const precise = hasPreciseMapCoordinates(checkpoint.mapurl);
+      if (!precise) {
         void (async () => {
           const resolved = await applyGeocodeIfNeeded(checkpoint);
           if (selectionRequestRef.current !== requestId) return;
+          const safeResolved = resolved ? normalizeLatLng(resolved) : null;
           setFlyTarget({
-            center: resolved ?? checkpoint.coordinates,
-            zoom: resolved ? 18 : 15,
+            center: safeResolved ?? normalized ?? checkpoint.coordinates,
+            zoom: safeResolved ? 16 : 15,
           });
         })();
       }
@@ -263,19 +276,22 @@ export function CheckpointsLocator({
       setSelected(checkpoint);
       setHoveredId(checkpoint.id);
       setDialogOpen(true);
-      const precise = hasPreciseMapCoordinates(checkpoint.mapurl);
-      if (precise) {
+      const normalized = normalizeLatLng(checkpoint.coordinates);
+      if (normalized) {
         setFlyTarget({
-          center: checkpoint.coordinates,
-          zoom: 18,
+          center: normalized,
+          zoom: 16,
         });
-      } else {
+      }
+      const precise = hasPreciseMapCoordinates(checkpoint.mapurl);
+      if (!precise) {
         void (async () => {
           const resolved = await applyGeocodeIfNeeded(checkpoint);
           if (selectionRequestRef.current !== requestId) return;
+          const safeResolved = resolved ? normalizeLatLng(resolved) : null;
           setFlyTarget({
-            center: resolved ?? checkpoint.coordinates,
-            zoom: resolved ? 18 : 17,
+            center: safeResolved ?? normalized ?? checkpoint.coordinates,
+            zoom: safeResolved ? 16 : 15,
           });
         })();
       }
