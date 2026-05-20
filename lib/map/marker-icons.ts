@@ -1,5 +1,9 @@
 import type { CheckpointMapStatus } from "@/lib/checkpoints/map-checkpoint";
-import L from "leaflet";
+import type { DivIcon, DivIconOptions } from "leaflet";
+
+type LeafletIconApi = {
+  divIcon: (options: DivIconOptions) => DivIcon;
+};
 
 const UPCOMING_COLOR = "#10B981";
 const PAST_COLOR = "#64748B";
@@ -28,9 +32,10 @@ function markerHtml(
 }
 
 export function createCheckpointMarkerIcon(
+  L: LeafletIconApi,
   status: CheckpointMapStatus,
   options?: { active?: boolean; hovered?: boolean },
-): L.DivIcon {
+): DivIcon {
   const fill = status === "upcoming" ? UPCOMING_COLOR : PAST_COLOR;
   const active = options?.active ?? false;
   const hovered = options?.hovered ?? false;
@@ -44,9 +49,12 @@ export function createCheckpointMarkerIcon(
   });
 }
 
-export function createClusterIcon(cluster: {
-  getChildCount: () => number;
-}): L.DivIcon {
+export function createClusterIcon(
+  L: LeafletIconApi,
+  cluster: {
+    getChildCount: () => number;
+  },
+): DivIcon {
   const count = cluster.getChildCount();
   const size = count < 10 ? 40 : count < 25 ? 46 : 52;
 

@@ -12,14 +12,28 @@ export type MapCheckpoint = CheckpointListItem & {
   status: CheckpointMapStatus;
 };
 
-export function toMapCheckpoint(item: CheckpointListItem): MapCheckpoint {
+function isValidCoordinate({ lat, lng }: LatLng): boolean {
+  return (
+    Number.isFinite(lat) &&
+    Number.isFinite(lng) &&
+    Math.abs(lat) <= 90 &&
+    Math.abs(lng) <= 180
+  );
+}
+
+export function toMapCheckpoint(item: CheckpointListItem): MapCheckpoint | null {
+  const coordinates = resolveCheckpointCoordinates(item);
+  if (!isValidCoordinate(coordinates)) return null;
+
   return {
     ...item,
-    coordinates: resolveCheckpointCoordinates(item),
+    coordinates,
     status: isCheckpointUpcoming(item.Date) ? "upcoming" : "past",
   };
 }
 
 export function toMapCheckpoints(items: CheckpointListItem[]): MapCheckpoint[] {
-  return items.map(toMapCheckpoint);
+  return items
+    .map(toMapCheckpoint)
+    .filter((item): item is MapCheckpoint => item !== null);
 }

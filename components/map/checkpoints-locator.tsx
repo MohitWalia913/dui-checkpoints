@@ -2,8 +2,23 @@
 
 import { CheckpointDetailDialog } from "@/components/map/checkpoint-detail-dialog";
 import { CheckpointListPanel } from "@/components/map/checkpoint-list-panel";
-import { CheckpointsMapView } from "@/components/map/checkpoints-map-view";
 import { MapLayerControl } from "@/components/map/map-layer-control";
+import dynamic from "next/dynamic";
+
+const CheckpointsMapView = dynamic(
+  () =>
+    import("@/components/map/checkpoints-map-view").then(
+      (m) => m.CheckpointsMapView,
+    ),
+  {
+    ssr: false,
+    loading: () => (
+      <div className="flex h-full min-h-[280px] items-center justify-center bg-[#0a1628]">
+        <p className="font-montserrat text-sm text-white/50">Loading map…</p>
+      </div>
+    ),
+  },
+);
 import type { MapCheckpoint } from "@/lib/checkpoints/map-checkpoint";
 import { toMapCheckpoints } from "@/lib/checkpoints/map-checkpoint";
 import type { CheckpointListItem } from "@/lib/checkpoints/types";
