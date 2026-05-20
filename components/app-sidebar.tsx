@@ -129,7 +129,7 @@ export function AppSidebar({
                     className="text-white/90 hover:bg-[#F57E3A]/15 hover:text-white data-[active=true]:bg-[#F57E3A] data-[active=true]:text-white"
                   >
                     <Link href={item.url}>
-                      <item.icon className="text-[#F57E3A] group-data-[active=true]/menu-button:text-white" />
+                      <item.icon className="text-[#F57E3A] peer-data-[active=true]/menu-button:text-white" />
                       <span>{item.title}</span>
                     </Link>
                   </SidebarMenuButton>

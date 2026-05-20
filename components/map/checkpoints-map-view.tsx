@@ -7,7 +7,12 @@ import {
 import type { MapCheckpoint } from "@/lib/checkpoints/map-checkpoint";
 import type { LatLng } from "@/lib/checkpoints/coordinates";
 import type { Feature, FeatureCollection, Point, Polygon } from "geojson";
-import type { MapLayerMouseEvent, StyleSpecification } from "maplibre-gl";
+import type {
+  FilterSpecification,
+  MapLayerMouseEvent,
+  StyleSpecification,
+  SymbolLayerSpecification,
+} from "maplibre-gl";
 import type { CircleLayerSpecification } from "react-map-gl/maplibre";
 import { useEffect, useMemo, useRef } from "react";
 import Map, { Layer, Popup, Source, type MapRef } from "react-map-gl/maplibre";
@@ -56,7 +61,7 @@ const CLUSTER_LAYER: CircleLayerSpecification = {
   },
 };
 
-const CLUSTER_COUNT_LAYER = {
+const CLUSTER_COUNT_LAYER: SymbolLayerSpecification = {
   id: "cluster-count",
   type: "symbol",
   source: "checkpoints",
@@ -69,7 +74,7 @@ const CLUSTER_COUNT_LAYER = {
   paint: {
     "text-color": "#FFFFFF",
   },
-} as const;
+};
 
 const UNCLUSTERED_LAYER: CircleLayerSpecification = {
   id: "unclustered-point",
@@ -162,11 +167,11 @@ export function CheckpointsMapView({
     [checkpoints],
   );
 
-  const selectedFilter = useMemo(
+  const selectedFilter = useMemo<FilterSpecification>(
     () => ["==", ["get", "id"], selectedCheckpoint?.id ?? -1],
     [selectedCheckpoint?.id],
   );
-  const hoveredFilter = useMemo(
+  const hoveredFilter = useMemo<FilterSpecification>(
     () => ["==", ["get", "id"], hoveredId ?? -1],
     [hoveredId],
   );
@@ -262,51 +267,52 @@ export function CheckpointsMapView({
   };
 
   return (
-    <Map
-      ref={mapRef}
-      className="checkpoint-locator-map h-full w-full"
-      mapStyle={mapStyle}
-      initialViewState={{ longitude: -119.4179, latitude: 36.7783, zoom: 5.6 }}
-      interactiveLayerIds={["clusters", "unclustered-point"]}
-      onLoad={handleMapLoad}
-      onClick={handleMapClick}
-      onMouseMove={handleMapMouseMove}
-      onMouseLeave={() => onHover(null)}
-      style={{ background: "#e2e8f0" }}
-    >
-      <Source id="checkpoints" type="geojson" data={checkpointsGeoJson} cluster clusterRadius={50}>
-        <Layer {...CLUSTER_LAYER} />
-        <Layer {...CLUSTER_COUNT_LAYER} />
-        <Layer {...UNCLUSTERED_LAYER} />
-        <Layer {...HOVERED_LAYER} filter={hoveredFilter} />
-        <Layer {...SELECTED_LAYER} filter={selectedFilter} />
-      </Source>
+    <div className="checkpoint-locator-map h-full w-full">
+      <Map
+        ref={mapRef}
+        mapStyle={mapStyle}
+        initialViewState={{ longitude: -119.4179, latitude: 36.7783, zoom: 5.6 }}
+        interactiveLayerIds={["clusters", "unclustered-point"]}
+        onLoad={handleMapLoad}
+        onClick={handleMapClick}
+        onMouseMove={handleMapMouseMove}
+        onMouseLeave={() => onHover(null)}
+        style={{ width: "100%", height: "100%", background: "#e2e8f0" }}
+      >
+        <Source id="checkpoints" type="geojson" data={checkpointsGeoJson} cluster clusterRadius={50}>
+          <Layer {...CLUSTER_LAYER} />
+          <Layer {...CLUSTER_COUNT_LAYER} />
+          <Layer {...UNCLUSTERED_LAYER} />
+          <Layer {...HOVERED_LAYER} filter={hoveredFilter} />
+          <Layer {...SELECTED_LAYER} filter={selectedFilter} />
+        </Source>
 
-      <Source id="california-boundary" type="geojson" data={CALIFORNIA_BOUNDARY}>
-        <Layer
-          id="california-boundary-line"
-          type="line"
-          paint={{ "line-color": "#F57E3A", "line-width": 3, "line-opacity": 0.95 }}
-        />
-      </Source>
+        <Source id="california-boundary" type="geojson" data={CALIFORNIA_BOUNDARY}>
+          <Layer
+            id="california-boundary-line"
+            type="line"
+            paint={{ "line-color": "#F57E3A", "line-width": 3, "line-opacity": 0.95 }}
+          />
+        </Source>
 
-      {selectedCheckpoint ? (
-        <Popup
-          longitude={selectedCheckpoint.coordinates.lng}
-          latitude={selectedCheckpoint.coordinates.lat}
-          closeButton={false}
-          closeOnClick={false}
-          anchor="top"
-          offset={12}
-        >
-          <div className="font-sans text-sm">
-            <p className="font-semibold text-[#040F20]">{selectedCheckpoint.Location}</p>
-            <p className="text-[#5C6573]">
-              {selectedCheckpoint.City}, {selectedCheckpoint.County}
-            </p>
-          </div>
-        </Popup>
-      ) : null}
-    </Map>
+        {selectedCheckpoint ? (
+          <Popup
+            longitude={selectedCheckpoint.coordinates.lng}
+            latitude={selectedCheckpoint.coordinates.lat}
+            closeButton={false}
+            closeOnClick={false}
+            anchor="top"
+            offset={12}
+          >
+            <div className="font-sans text-sm">
+              <p className="font-semibold text-[#040F20]">{selectedCheckpoint.Location}</p>
+              <p className="text-[#5C6573]">
+                {selectedCheckpoint.City}, {selectedCheckpoint.County}
+              </p>
+            </div>
+          </Popup>
+        ) : null}
+      </Map>
+    </div>
   );
 }

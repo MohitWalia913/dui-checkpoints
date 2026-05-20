@@ -20,67 +20,21 @@ import { useState } from "react";
 const UBER_URL = "https://m.uber.com/ul/";
 const LYFT_URL = "https://ride.lyft.com/";
 
-export function SidebarHelpCtas() {
-  const [duiOpen, setDuiOpen] = useState(false);
-  const [rideOpen, setRideOpen] = useState(false);
+function HelpCtaDialogs({
+  duiOpen,
+  rideOpen,
+  setDuiOpen,
+  setRideOpen,
+}: {
+  duiOpen: boolean;
+  rideOpen: boolean;
+  setDuiOpen: (open: boolean) => void;
+  setRideOpen: (open: boolean) => void;
+}) {
   const tel = legalHelpTelHref();
 
   return (
     <>
-      <div className="flex flex-col gap-2 px-2 pb-2 group-data-[collapsible=icon]:items-center group-data-[collapsible=icon]:px-0">
-        <p className="font-montserrat px-2 text-[10px] font-semibold uppercase tracking-wider text-white/45 group-data-[collapsible=icon]:hidden">
-          Quick help
-        </p>
-        <button
-          type="button"
-          onClick={() => setDuiOpen(true)}
-          className={cn(
-            "font-montserrat flex w-full items-stretch gap-0 overflow-hidden rounded-lg text-left transition-all duration-200",
-            "border border-[#F57E3A]/40 bg-[#F57E3A] hover:brightness-105 active:scale-[0.99]",
-            "group-data-[collapsible=icon]:size-9 group-data-[collapsible=icon]:justify-center group-data-[collapsible=icon]:p-0",
-          )}
-          aria-label="Find a DUI — speak with a lawyer"
-        >
-          <span className="flex w-9 shrink-0 items-center justify-center bg-[#040F20]/25 group-data-[collapsible=icon]:w-full group-data-[collapsible=icon]:bg-transparent">
-            <Phone className="h-3.5 w-3.5 text-white" aria-hidden />
-          </span>
-          <span className="flex min-w-0 flex-1 flex-col justify-center gap-0 py-1.5 pr-2 pl-1.5 group-data-[collapsible=icon]:hidden">
-            <span className="text-[9px] font-medium leading-tight text-white/90">
-              Call us now to speak with a lawyer
-            </span>
-            <span className="text-xs font-bold leading-tight text-white">
-              Got a DUI?
-            </span>
-            <span className="text-[9px] font-medium leading-tight text-white/85">
-              Call us anytime 24/7
-            </span>
-          </span>
-        </button>
-
-        <button
-          type="button"
-          onClick={() => setRideOpen(true)}
-          className={cn(
-            "font-montserrat flex w-full items-stretch gap-0 overflow-hidden rounded-xl text-left transition-all duration-200",
-            "border border-white/15 bg-[#0a1628] hover:border-[#F57E3A]/35 hover:bg-[#0d1a30]",
-            "group-data-[collapsible=icon]:size-10 group-data-[collapsible=icon]:justify-center group-data-[collapsible=icon]:p-0",
-          )}
-          aria-label="Find a ride — Uber or Lyft"
-        >
-          <span className="flex w-11 shrink-0 items-center justify-center bg-[#F57E3A] group-data-[collapsible=icon]:w-full group-data-[collapsible=icon]:rounded-lg group-data-[collapsible=icon]:bg-[#F57E3A]/90">
-            <Car className="size-4 text-white" aria-hidden />
-          </span>
-          <span className="flex min-w-0 flex-1 flex-col justify-center gap-0.5 py-2.5 pr-3 pl-2 group-data-[collapsible=icon]:hidden">
-            <span className="text-sm font-bold leading-tight text-[#F57E3A]">
-              Find a ride
-            </span>
-            <span className="text-[10px] font-medium text-white/65">
-              Open Uber or Lyft
-            </span>
-          </span>
-        </button>
-      </div>
-
       <Dialog open={duiOpen} onOpenChange={setDuiOpen}>
         <DialogContent className="z-[20001] border-white/10 bg-[#0a1628] sm:max-w-md">
           <DialogHeader>
@@ -166,6 +120,111 @@ export function SidebarHelpCtas() {
           </p>
         </DialogContent>
       </Dialog>
+    </>
+  );
+}
+
+export function SidebarHelpCtas() {
+  const [duiOpen, setDuiOpen] = useState(false);
+  const [rideOpen, setRideOpen] = useState(false);
+
+  return (
+    <>
+      <div className="flex flex-col gap-2 px-2 pb-2 group-data-[collapsible=icon]:items-center group-data-[collapsible=icon]:px-0">
+        <p className="font-montserrat px-2 text-[10px] font-semibold uppercase tracking-wider text-white/45 group-data-[collapsible=icon]:hidden">
+          Quick help
+        </p>
+        <button
+          type="button"
+          onClick={() => setDuiOpen(true)}
+          className={cn(
+            "font-montserrat flex w-full items-stretch gap-0 overflow-hidden rounded-lg text-left transition-all duration-200",
+            "border border-[#F57E3A]/40 bg-[#F57E3A] hover:brightness-105 active:scale-[0.99]",
+            "group-data-[collapsible=icon]:size-9 group-data-[collapsible=icon]:justify-center group-data-[collapsible=icon]:p-0",
+          )}
+          aria-label="Find a DUI — speak with a lawyer"
+        >
+          <span className="flex w-9 shrink-0 items-center justify-center bg-[#040F20]/25 group-data-[collapsible=icon]:w-full group-data-[collapsible=icon]:bg-transparent">
+            <Phone className="h-3.5 w-3.5 text-white" aria-hidden />
+          </span>
+          <span className="flex min-w-0 flex-1 flex-col justify-center gap-0 py-1.5 pr-2 pl-1.5 group-data-[collapsible=icon]:hidden">
+            <span className="text-[9px] font-medium leading-tight text-white/90">
+              Call us now to speak with a lawyer
+            </span>
+            <span className="text-xs font-bold leading-tight text-white">
+              Got a DUI?
+            </span>
+            <span className="text-[9px] font-medium leading-tight text-white/85">
+              Call us anytime 24/7
+            </span>
+          </span>
+        </button>
+
+        <button
+          type="button"
+          onClick={() => setRideOpen(true)}
+          className={cn(
+            "font-montserrat flex w-full items-stretch gap-0 overflow-hidden rounded-xl text-left transition-all duration-200",
+            "border border-white/15 bg-[#0a1628] hover:border-[#F57E3A]/35 hover:bg-[#0d1a30]",
+            "group-data-[collapsible=icon]:size-10 group-data-[collapsible=icon]:justify-center group-data-[collapsible=icon]:p-0",
+          )}
+          aria-label="Find a ride — Uber or Lyft"
+        >
+          <span className="flex w-11 shrink-0 items-center justify-center bg-[#F57E3A] group-data-[collapsible=icon]:w-full group-data-[collapsible=icon]:rounded-lg group-data-[collapsible=icon]:bg-[#F57E3A]/90">
+            <Car className="size-4 text-white" aria-hidden />
+          </span>
+          <span className="flex min-w-0 flex-1 flex-col justify-center gap-0.5 py-2.5 pr-3 pl-2 group-data-[collapsible=icon]:hidden">
+            <span className="text-sm font-bold leading-tight text-[#F57E3A]">
+              Find a ride
+            </span>
+            <span className="text-[10px] font-medium text-white/65">
+              Open Uber or Lyft
+            </span>
+          </span>
+        </button>
+      </div>
+      <HelpCtaDialogs
+        duiOpen={duiOpen}
+        rideOpen={rideOpen}
+        setDuiOpen={setDuiOpen}
+        setRideOpen={setRideOpen}
+      />
+    </>
+  );
+}
+
+export function HeaderHelpCtas() {
+  const [duiOpen, setDuiOpen] = useState(false);
+  const [rideOpen, setRideOpen] = useState(false);
+
+  return (
+    <>
+      <div className="flex items-center gap-2">
+        <button
+          type="button"
+          onClick={() => setDuiOpen(true)}
+          className="font-montserrat inline-flex h-9 items-center gap-2 rounded-lg border border-[#F57E3A]/45 bg-[#F57E3A] px-3 text-xs font-semibold text-white transition hover:brightness-105"
+          aria-label="Speak with a lawyer"
+        >
+          <Phone className="size-3.5" aria-hidden />
+          <span className="hidden sm:inline">Got a DUI?</span>
+        </button>
+        <button
+          type="button"
+          onClick={() => setRideOpen(true)}
+          className="font-montserrat inline-flex h-9 items-center gap-2 rounded-lg border border-white/15 bg-[#0a1628] px-3 text-xs font-semibold text-[#F57E3A] transition hover:border-[#F57E3A]/35 hover:bg-[#0d1a30]"
+          aria-label="Find a ride"
+        >
+          <Car className="size-3.5" aria-hidden />
+          <span className="hidden sm:inline">Find a ride</span>
+        </button>
+      </div>
+      <HelpCtaDialogs
+        duiOpen={duiOpen}
+        rideOpen={rideOpen}
+        setDuiOpen={setDuiOpen}
+        setRideOpen={setRideOpen}
+      />
     </>
   );
 }

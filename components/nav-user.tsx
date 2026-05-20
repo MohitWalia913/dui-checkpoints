@@ -46,20 +46,20 @@ export function NavUser({ user }: { user: DashboardUser }) {
           <DropdownMenuTrigger asChild>
             <SidebarMenuButton
               size="lg"
-              className="text-white/90 hover:bg-[#F57E3A]/15 hover:text-white data-[state=open]:bg-[#F57E3A]/20 data-[state=open]:text-white"
+              className="text-white/90 hover:bg-[#F57E3A]/15 hover:text-white data-[state=open]:bg-[#F57E3A]/20 data-[state=open]:text-white group-data-[collapsible=icon]:size-10 group-data-[collapsible=icon]:p-0 group-data-[collapsible=icon]:justify-center"
             >
-              <Avatar className="h-8 w-8 rounded-lg border border-white/10">
+              <Avatar className="h-8 w-8 rounded-lg border border-white/10 group-data-[collapsible=icon]:h-7 group-data-[collapsible=icon]:w-7">
                 <AvatarFallback className="rounded-lg bg-[#F57E3A] font-montserrat text-xs font-semibold text-white">
                   {getInitials(user.name)}
                 </AvatarFallback>
               </Avatar>
-              <div className="grid flex-1 text-left text-sm leading-tight">
+              <div className="grid flex-1 text-left text-sm leading-tight group-data-[collapsible=icon]:hidden">
                 <span className="truncate font-semibold">{user.name}</span>
                 <span className="truncate text-xs text-white/60">
                   {user.email}
                 </span>
               </div>
-              <ChevronsUpDown className="ml-auto size-4 text-white/50" />
+              <ChevronsUpDown className="ml-auto size-4 text-white/50 group-data-[collapsible=icon]:hidden" />
             </SidebarMenuButton>
           </DropdownMenuTrigger>
           <DropdownMenuContent

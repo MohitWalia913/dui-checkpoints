@@ -1,6 +1,7 @@
 "use client";
 
 import { AppSidebar } from "@/components/app-sidebar";
+import { HeaderHelpCtas } from "@/components/dashboard/sidebar-help-ctas";
 import { DashboardOnboarding } from "@/components/onboarding/dashboard-onboarding";
 import { Separator } from "@/components/ui/separator";
 import {
@@ -61,8 +62,8 @@ export function DashboardShell({
       >
         <AppSidebar user={user} />
         <SidebarInset className="min-w-0 flex-1 bg-[#040F20] font-inter text-white">
-          <header className="flex h-16 shrink-0 items-center gap-2 border-b border-white/10 bg-[#040F20] transition-[width,height] ease-linear group-has-data-[collapsible=icon]/sidebar-wrapper:h-12">
-            <div className="flex items-center gap-2 px-4">
+          <header className="flex h-16 shrink-0 items-center justify-between gap-2 border-b border-white/10 bg-[#040F20] px-4 transition-[width,height] ease-linear group-has-data-[collapsible=icon]/sidebar-wrapper:h-12">
+            <div className="flex items-center gap-2">
               <SidebarTrigger className="-ml-1 text-white hover:bg-[#F57E3A]/15 hover:text-[#F57E3A]" />
               <Separator
                 orientation="vertical"
@@ -72,6 +73,7 @@ export function DashboardShell({
                 DUI Checkpoints Locator
               </span>
             </div>
+            <HeaderHelpCtas />
           </header>
           <main className="relative flex flex-1 flex-col">{children}</main>
         </SidebarInset>
