@@ -104,19 +104,19 @@ function MarkerClusterLayer({
   checkpoints,
   selectedId,
   hoveredId,
-  onSelect,
+  onMarkerClick,
   onHover,
 }: {
   checkpoints: MapCheckpoint[];
   selectedId: number | null;
   hoveredId: number | null;
-  onSelect: (checkpoint: MapCheckpoint) => void;
+  onMarkerClick: (checkpoint: MapCheckpoint) => void;
   onHover: (id: number | null) => void;
 }) {
   const map = useMap();
   const groupRef = useRef<LayerGroup | null>(null);
-  const handlersRef = useRef({ onSelect, onHover });
-  handlersRef.current = { onSelect, onHover };
+  const handlersRef = useRef({ onMarkerClick, onHover });
+  handlersRef.current = { onMarkerClick, onHover };
   const [ready, setReady] = useState(false);
 
   useEffect(() => {
@@ -177,7 +177,7 @@ function MarkerClusterLayer({
           },
         );
 
-        marker.on("click", () => handlersRef.current.onSelect(checkpoint));
+        marker.on("click", () => handlersRef.current.onMarkerClick(checkpoint));
         marker.on("mouseover", () =>
           handlersRef.current.onHover(checkpoint.id),
         );
@@ -201,7 +201,7 @@ export function CheckpointsMapView({
   hoveredId,
   mapLayer,
   flyTarget,
-  onSelect,
+  onMarkerClick,
   onHover,
 }: {
   checkpoints: MapCheckpoint[];
@@ -209,7 +209,7 @@ export function CheckpointsMapView({
   hoveredId: number | null;
   mapLayer: MapLayerStyle;
   flyTarget: { center: LatLng; zoom: number } | null;
-  onSelect: (checkpoint: MapCheckpoint) => void;
+  onMarkerClick: (checkpoint: MapCheckpoint) => void;
   onHover: (id: number | null) => void;
 }) {
   const zonePositions = useMemo(() => {
@@ -232,7 +232,7 @@ export function CheckpointsMapView({
         checkpoints={checkpoints}
         selectedId={selectedCheckpoint?.id ?? null}
         hoveredId={hoveredId}
-        onSelect={onSelect}
+        onMarkerClick={onMarkerClick}
         onHover={onHover}
       />
       {zonePositions ? (

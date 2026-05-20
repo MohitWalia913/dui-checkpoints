@@ -69,7 +69,7 @@ export function CheckpointListPanel({
           </h1>
           <p className="font-inter mt-1 text-xs text-white/55">
             {checkpoints.length} location{checkpoints.length === 1 ? "" : "s"}{" "}
-            on map
+            on map · Select a row to focus the map; tap the marker for details.
           </p>
         </div>
 

@@ -25,7 +25,7 @@ import type { CheckpointListItem } from "@/lib/checkpoints/types";
 import type { Checkpoint } from "@/lib/checkpoints/types";
 import type { MapLayerStyle } from "@/lib/map/tile-layers";
 import { cn } from "@/lib/utils";
-import { useCallback, useMemo, useState } from "react";
+import { useCallback, useMemo, useRef, useState } from "react";
 
 async function fetchCheckpointDetail(id: number): Promise<{
   data: Checkpoint | null;
@@ -75,6 +75,7 @@ export function CheckpointsLocator({
     center: MapCheckpoint["coordinates"];
     zoom: number;
   } | null>(null);
+  const mapSectionRef = useRef<HTMLDivElement | null>(null);
 
   const counties = useMemo(() => {
     const set = new Set<string>();
@@ -125,7 +126,28 @@ export function CheckpointsLocator({
     setDetail(result.data);
   }, []);
 
-  const handleSelect = useCallback(
+  const handleListItemSelect = useCallback((checkpoint: MapCheckpoint) => {
+    setSelected(checkpoint);
+    setHoveredId(checkpoint.id);
+    setDialogOpen(false);
+    setDetail(null);
+    setDetailError(null);
+    setFlyTarget({
+      center: checkpoint.coordinates,
+      zoom: 15,
+    });
+    if (
+      typeof window !== "undefined" &&
+      window.matchMedia("(max-width: 1023px)").matches
+    ) {
+      mapSectionRef.current?.scrollIntoView({
+        behavior: "smooth",
+        block: "nearest",
+      });
+    }
+  }, []);
+
+  const handleMarkerClick = useCallback(
     (checkpoint: MapCheckpoint) => {
       setSelected(checkpoint);
       setHoveredId(checkpoint.id);
@@ -184,19 +206,22 @@ export function CheckpointsLocator({
             countyFilter={countyFilter}
             onCountyFilterChange={setCountyFilter}
             counties={counties}
-            onSelect={handleSelect}
+            onSelect={handleListItemSelect}
             onHover={setHoveredId}
           />
         </div>
 
-        <div className="relative min-h-[56vh] min-w-0 flex-1 lg:min-h-0">
+        <div
+          ref={mapSectionRef}
+          className="relative min-h-[56vh] min-w-0 flex-1 lg:min-h-0"
+        >
           <CheckpointsMapView
             checkpoints={filteredCheckpoints}
             selectedCheckpoint={selected}
             hoveredId={hoveredId}
             mapLayer={mapLayer}
             flyTarget={flyTarget}
-            onSelect={handleSelect}
+            onMarkerClick={handleMarkerClick}
             onHover={setHoveredId}
           />
 
