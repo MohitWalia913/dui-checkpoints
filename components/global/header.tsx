@@ -79,7 +79,7 @@ export function Header() {
           <div className="two-btn flex items-center gap-[15px]">
             <Link
               href="/auth/login"
-              className="same-btn "
+              className="same-btn"
             >
               Login
             </Link>
