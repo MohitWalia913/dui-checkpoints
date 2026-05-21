@@ -9,20 +9,20 @@ import type { LatLng } from "@/lib/checkpoints/coordinates";
 import type { Feature, FeatureCollection, Point, Polygon } from "geojson";
 import type {
   FilterSpecification,
+  GeoJSONSource,
   LngLatBoundsLike,
   MapLayerMouseEvent,
 } from "maplibre-gl";
 import type { CircleLayerSpecification } from "react-map-gl/maplibre";
 import { useCallback, useEffect, useMemo, useRef } from "react";
-import Map, { Layer, Popup, Source, type MapRef } from "react-map-gl/maplibre";
+import MapGL, { Layer, Popup, Source, type MapRef } from "react-map-gl/maplibre";
 
 import "maplibre-gl/dist/maplibre-gl.css";
 
 const CALIFORNIA_CENTER: [number, number] = [-119.4179, 36.7783];
-const DEFAULT_MAP_ZOOM = 5.6;
-const FOCUS_ZOOM = 15;
+const DEFAULT_MAP_ZOOM = 6;
+const FOCUS_ZOOM = 14;
 
-/** Stable style — basemap tiles are added as a Source child so filter/layer changes do not wipe markers. */
 const BASE_MAP_STYLE = {
   version: 8 as const,
   sources: {},
@@ -59,10 +59,33 @@ const CALIFORNIA_BOUNDARY: Feature<Polygon> = {
   },
 };
 
+const CLUSTER_LAYER: CircleLayerSpecification = {
+  id: "clusters",
+  type: "circle",
+  source: "checkpoints",
+  filter: ["has", "point_count"],
+  paint: {
+    "circle-color": "#F57E3A",
+    "circle-radius": [
+      "step",
+      ["get", "point_count"],
+      16,
+      10,
+      20,
+      50,
+      26,
+    ],
+    "circle-stroke-width": 2,
+    "circle-stroke-color": "#FFFFFF",
+    "circle-opacity": 0.92,
+  },
+};
+
 const UNCLUSTERED_LAYER: CircleLayerSpecification = {
   id: "unclustered-point",
   type: "circle",
   source: "checkpoints",
+  filter: ["!", ["has", "point_count"]],
   paint: {
     "circle-color": [
       "match",
@@ -70,18 +93,87 @@ const UNCLUSTERED_LAYER: CircleLayerSpecification = {
       "upcoming",
       "#10B981",
       "past",
-      "#CBD5E1",
+      "#64748B",
       "#F57E3A",
     ],
-    "circle-radius": 10,
-    "circle-stroke-width": 2.5,
+    "circle-radius": 11,
+    "circle-stroke-width": 3,
     "circle-stroke-color": "#FFFFFF",
     "circle-opacity": 1,
   },
 };
 
+const SELECTED_LAYER: CircleLayerSpecification = {
+  id: "selected-point",
+  type: "circle",
+  source: "checkpoints",
+  filter: [
+    "all",
+    ["!", ["has", "point_count"]],
+    ["==", ["get", "id"], -1],
+  ],
+  paint: {
+    "circle-color": "#F57E3A",
+    "circle-radius": 18,
+    "circle-stroke-width": 3,
+    "circle-stroke-color": "#FFFFFF",
+  },
+};
+
+const HOVERED_LAYER: CircleLayerSpecification = {
+  id: "hovered-point",
+  type: "circle",
+  source: "checkpoints",
+  filter: [
+    "all",
+    ["!", ["has", "point_count"]],
+    ["==", ["get", "id"], -1],
+  ],
+  paint: {
+    "circle-color": "#FDBA74",
+    "circle-radius": 14,
+    "circle-stroke-width": 2,
+    "circle-stroke-color": "#FFFFFF",
+  },
+};
+
 function isUndisclosedLocation(location: string): boolean {
   return /undisclosed|unknown|tbd/i.test(location);
+}
+
+/** Spread markers that share the same fallback coordinate so clusters remain visible. */
+function spreadMarkerCoordinates(
+  checkpoints: MapCheckpoint[],
+): Map<string, [number, number]> {
+  const groups = new Map<string, MapCheckpoint[]>();
+
+  for (const c of checkpoints) {
+    const key = `${c.coordinates.lat.toFixed(3)}|${c.coordinates.lng.toFixed(3)}`;
+    const list = groups.get(key) ?? [];
+    list.push(c);
+    groups.set(key, list);
+  }
+
+  const result = new Map<string, [number, number]>();
+
+  for (const [, group] of groups) {
+    if (group.length === 1) {
+      const c = group[0];
+      result.set(String(c.id), [c.coordinates.lng, c.coordinates.lat]);
+      continue;
+    }
+
+    group.forEach((c, index) => {
+      const angle = (index / group.length) * 2 * Math.PI;
+      const radius = 0.012 + index * 0.0015;
+      result.set(String(c.id), [
+        c.coordinates.lng + Math.cos(angle) * radius,
+        c.coordinates.lat + Math.sin(angle) * radius,
+      ]);
+    });
+  }
+
+  return result;
 }
 
 function createCirclePolygon(
@@ -104,36 +196,9 @@ function createCirclePolygon(
   return [ring];
 }
 
-const SELECTED_LAYER: CircleLayerSpecification = {
-  id: "selected-point",
-  type: "circle",
-  source: "checkpoints",
-  filter: ["==", ["get", "id"], -1],
-  paint: {
-    "circle-color": "#F57E3A",
-    "circle-radius": 16,
-    "circle-stroke-width": 3,
-    "circle-stroke-color": "#FFFFFF",
-    "circle-opacity": 1,
-  },
-};
-
-const HOVERED_LAYER: CircleLayerSpecification = {
-  id: "hovered-point",
-  type: "circle",
-  source: "checkpoints",
-  filter: ["==", ["get", "id"], -1],
-  paint: {
-    "circle-color": "#F57E3A",
-    "circle-radius": 12,
-    "circle-stroke-width": 2,
-    "circle-stroke-color": "#FFFFFF",
-    "circle-opacity": 0.95,
-  },
-};
-
 function boundsFromCheckpoints(
   checkpoints: MapCheckpoint[],
+  coordById: Map<string, [number, number]>,
 ): LngLatBoundsLike | null {
   if (checkpoints.length === 0) return null;
 
@@ -143,7 +208,11 @@ function boundsFromCheckpoints(
   let maxLat = -Infinity;
 
   for (const c of checkpoints) {
-    const { lat, lng } = c.coordinates;
+    const pair = coordById.get(String(c.id)) ?? [
+      c.coordinates.lng,
+      c.coordinates.lat,
+    ];
+    const [lng, lat] = pair;
     if (!Number.isFinite(lat) || !Number.isFinite(lng)) continue;
     minLng = Math.min(minLng, lng);
     minLat = Math.min(minLat, lat);
@@ -179,46 +248,62 @@ export function CheckpointsMapView({
   onMarkerClick: (checkpoint: MapCheckpoint) => void;
   onHover: (id: number | null) => void;
 }) {
+  const containerRef = useRef<HTMLDivElement | null>(null);
   const mapRef = useRef<MapRef | null>(null);
   const mapReadyRef = useRef(false);
   const lastFlownCoordsRef = useRef<string | null>(null);
 
   const tileConfig = MAP_TILE_LAYERS[mapLayer];
+  const markerCoordsById = useMemo(
+    () => spreadMarkerCoordinates(checkpoints),
+    [checkpoints],
+  );
 
-  const flyToCheckpoint = useCallback((coords: LatLng, zoom = FOCUS_ZOOM) => {
+  const snapToSharpTiles = useCallback(() => {
     const mapInstance = mapRef.current?.getMap();
-    if (!mapInstance || !mapReadyRef.current) return;
-
-    const lat = Number.parseFloat(String(coords.lat));
-    const lng = Number.parseFloat(String(coords.lng));
-    if (!Number.isFinite(lat) || !Number.isFinite(lng)) return;
-    if (Math.abs(lat) > 90 || Math.abs(lng) > 180 || lat === 0 || lng === 0) return;
-
-    const key = `${lat.toFixed(6)},${lng.toFixed(6)}@${zoom}`;
-    if (lastFlownCoordsRef.current === key) return;
-    lastFlownCoordsRef.current = key;
-
-    const center: [number, number] = [lng, lat];
-    mapInstance.stop();
+    if (!mapInstance) return;
+    const z = mapInstance.getZoom();
+    const rounded = Math.round(z * 10) / 10;
+    if (Math.abs(z - rounded) > 0.05) {
+      mapInstance.setZoom(rounded);
+    }
     mapInstance.resize();
-    mapInstance.flyTo({
-      center,
-      zoom,
-      duration: 1600,
-      essential: true,
-      curve: 1.42,
-    });
-    mapInstance.once("moveend", () => {
-      mapInstance.resize();
-    });
   }, []);
+
+  const flyToCheckpoint = useCallback(
+    (coords: LatLng, zoom = FOCUS_ZOOM) => {
+      const mapInstance = mapRef.current?.getMap();
+      if (!mapInstance || !mapReadyRef.current) return;
+
+      const lat = Number.parseFloat(String(coords.lat));
+      const lng = Number.parseFloat(String(coords.lng));
+      if (!Number.isFinite(lat) || !Number.isFinite(lng)) return;
+      if (Math.abs(lat) > 90 || Math.abs(lng) > 180 || lat === 0 || lng === 0)
+        return;
+
+      const key = `${lat.toFixed(6)},${lng.toFixed(6)}@${zoom}`;
+      if (lastFlownCoordsRef.current === key) return;
+      lastFlownCoordsRef.current = key;
+
+      mapInstance.stop();
+      mapInstance.resize();
+      mapInstance.easeTo({
+        center: [lng, lat],
+        zoom,
+        duration: 1200,
+        essential: true,
+      });
+      mapInstance.once("moveend", snapToSharpTiles);
+    },
+    [snapToSharpTiles],
+  );
 
   const fitCheckpointsInView = useCallback(
     (list: MapCheckpoint[], animate = true) => {
       const mapInstance = mapRef.current?.getMap();
       if (!mapInstance || !mapReadyRef.current) return;
 
-      const bounds = boundsFromCheckpoints(list);
+      const bounds = boundsFromCheckpoints(list, markerCoordsById);
       if (!bounds) {
         mapInstance.jumpTo({
           center: CALIFORNIA_CENTER,
@@ -230,33 +315,40 @@ export function CheckpointsMapView({
       lastFlownCoordsRef.current = null;
       mapInstance.resize();
       mapInstance.fitBounds(bounds, {
-        padding: { top: 48, bottom: 48, left: 48, right: 48 },
-        duration: animate ? 900 : 0,
-        maxZoom: 11,
+        padding: { top: 56, bottom: 56, left: 56, right: 56 },
+        duration: animate ? 700 : 0,
+        maxZoom: 10,
       });
+      mapInstance.once("moveend", snapToSharpTiles);
     },
-    [],
+    [markerCoordsById, snapToSharpTiles],
   );
 
   const checkpointsGeoJson = useMemo<FeatureCollection<Point>>(
     () => ({
       type: "FeatureCollection",
-      features: checkpoints.map((checkpoint) => ({
-        type: "Feature",
-        properties: {
-          id: checkpoint.id,
-          status: checkpoint.status,
-          location: checkpoint.Location,
-          city: checkpoint.City,
-          county: checkpoint.County,
-        },
-        geometry: {
-          type: "Point",
-          coordinates: [checkpoint.coordinates.lng, checkpoint.coordinates.lat],
-        },
-      })),
+      features: checkpoints.map((checkpoint) => {
+        const coordinates = markerCoordsById.get(String(checkpoint.id)) ?? [
+          checkpoint.coordinates.lng,
+          checkpoint.coordinates.lat,
+        ];
+        return {
+          type: "Feature",
+          properties: {
+            id: checkpoint.id,
+            status: checkpoint.status,
+            location: checkpoint.Location,
+            city: checkpoint.City,
+            county: checkpoint.County,
+          },
+          geometry: {
+            type: "Point",
+            coordinates,
+          },
+        };
+      }),
     }),
-    [checkpoints],
+    [checkpoints, markerCoordsById],
   );
 
   const undisclosedAreasGeoJson = useMemo<FeatureCollection<Polygon>>(
@@ -286,6 +378,30 @@ export function CheckpointsMapView({
   );
 
   useEffect(() => {
+    const el = containerRef.current;
+    if (!el) return;
+
+    const observer = new ResizeObserver(() => {
+      mapRef.current?.getMap()?.resize();
+    });
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, []);
+
+  useEffect(() => {
+    const mapInstance = mapRef.current?.getMap();
+    if (!mapInstance || !mapReadyRef.current) return;
+
+    const source = mapInstance.getSource("basemap") as
+      | { setTiles?: (tiles: string[]) => void }
+      | undefined;
+    if (source?.setTiles) {
+      source.setTiles([tileConfig.url]);
+      mapInstance.triggerRepaint();
+    }
+  }, [mapLayer, tileConfig.url]);
+
+  useEffect(() => {
     if (!flyTarget) return;
     lastFlownCoordsRef.current = null;
     flyToCheckpoint(flyTarget.center, flyTarget.zoom);
@@ -294,7 +410,13 @@ export function CheckpointsMapView({
   useEffect(() => {
     if (flyTarget || selectedCheckpoint) return;
     fitCheckpointsInView(checkpoints, true);
-  }, [checkpoints, resetViewToken, flyTarget, selectedCheckpoint, fitCheckpointsInView]);
+  }, [
+    checkpoints,
+    resetViewToken,
+    flyTarget,
+    selectedCheckpoint,
+    fitCheckpointsInView,
+  ]);
 
   const handleMapLoad = () => {
     mapReadyRef.current = true;
@@ -305,8 +427,29 @@ export function CheckpointsMapView({
   };
 
   const handleMapClick = (event: MapLayerMouseEvent) => {
+    const mapInstance = mapRef.current?.getMap();
+    if (!mapInstance) return;
+
     const feature = event.features?.[0];
-    if (!feature || feature.layer.id !== "unclustered-point") return;
+    if (!feature) return;
+
+    if (feature.layer.id === "clusters") {
+      const clusterId = feature.properties?.cluster_id;
+      if (clusterId == null) return;
+
+      const source = mapInstance.getSource("checkpoints") as GeoJSONSource;
+      void source.getClusterExpansionZoom(clusterId).then((zoom) => {
+        const [lng, lat] = (feature.geometry as Point).coordinates;
+        mapInstance.easeTo({
+          center: [lng, lat],
+          zoom: Math.min(zoom + 0.5, 14),
+          duration: 600,
+        });
+      });
+      return;
+    }
+
+    if (feature.layer.id !== "unclustered-point") return;
 
     const checkpointId = Number(feature.properties?.id);
     if (!Number.isFinite(checkpointId)) return;
@@ -316,8 +459,10 @@ export function CheckpointsMapView({
   };
 
   const handleMapMouseMove = (event: MapLayerMouseEvent) => {
-    const feature = event.features?.find((f) => f.layer.id === "unclustered-point");
-    if (!feature) {
+    const feature = event.features?.find(
+      (f) => f.layer.id === "unclustered-point" || f.layer.id === "clusters",
+    );
+    if (!feature || feature.layer.id === "clusters") {
       onHover(null);
       return;
     }
@@ -325,9 +470,19 @@ export function CheckpointsMapView({
     onHover(Number.isFinite(checkpointId) ? checkpointId : null);
   };
 
+  const selectedCoords = selectedCheckpoint
+    ? (markerCoordsById.get(String(selectedCheckpoint.id)) ?? [
+        selectedCheckpoint.coordinates.lng,
+        selectedCheckpoint.coordinates.lat,
+      ])
+    : null;
+
   return (
-    <div className="checkpoint-locator-map h-full min-h-[320px] w-full">
-      <Map
+    <div
+      ref={containerRef}
+      className="checkpoint-locator-map relative h-full min-h-[360px] w-full"
+    >
+      <MapGL
         ref={mapRef}
         mapStyle={BASE_MAP_STYLE}
         initialViewState={{
@@ -335,40 +490,52 @@ export function CheckpointsMapView({
           latitude: CALIFORNIA_CENTER[1],
           zoom: DEFAULT_MAP_ZOOM,
         }}
-        interactiveLayerIds={["unclustered-point"]}
+        interactiveLayerIds={["unclustered-point", "clusters"]}
         onLoad={handleMapLoad}
         onClick={handleMapClick}
         onMouseMove={handleMapMouseMove}
         onMouseLeave={() => onHover(null)}
         scrollZoom
         attributionControl={false}
+        pixelRatio={
+          typeof window !== "undefined"
+            ? Math.min(window.devicePixelRatio || 1, 2)
+            : 2
+        }
         style={{
           width: "100%",
           height: "100%",
-          minHeight: 320,
+          minHeight: 360,
           background: mapLayer === "dark" ? "#0a1628" : "#e2e8f0",
         }}
       >
         <Source
-          key={mapLayer}
           id="basemap"
           type="raster"
           tiles={[tileConfig.url]}
           tileSize={256}
           attribution={tileConfig.attribution}
           minzoom={0}
-          maxzoom={tileConfig.maxZoom ?? 20}
+          maxzoom={tileConfig.maxZoom ?? 19}
         >
           <Layer
             id="basemap-layer"
             type="raster"
             source="basemap"
             minzoom={0}
-            maxzoom={tileConfig.maxZoom ?? 20}
+            maxzoom={tileConfig.maxZoom ?? 19}
           />
         </Source>
 
-        <Source id="checkpoints" type="geojson" data={checkpointsGeoJson}>
+        <Source
+          id="checkpoints"
+          type="geojson"
+          data={checkpointsGeoJson}
+          cluster
+          clusterMaxZoom={13}
+          clusterRadius={48}
+        >
+          <Layer {...CLUSTER_LAYER} />
           <Layer {...UNCLUSTERED_LAYER} />
           <Layer {...HOVERED_LAYER} filter={hoveredFilter} />
           <Layer {...SELECTED_LAYER} filter={selectedFilter} />
@@ -395,24 +562,26 @@ export function CheckpointsMapView({
           />
         </Source>
 
-        {selectedCheckpoint ? (
+        {selectedCheckpoint && selectedCoords ? (
           <Popup
-            longitude={selectedCheckpoint.coordinates.lng}
-            latitude={selectedCheckpoint.coordinates.lat}
+            longitude={selectedCoords[0]}
+            latitude={selectedCoords[1]}
             closeButton={false}
             closeOnClick={false}
             anchor="top"
             offset={12}
           >
             <div className="font-sans text-sm">
-              <p className="font-semibold text-[#040F20]">{selectedCheckpoint.Location}</p>
+              <p className="font-semibold text-[#040F20]">
+                {selectedCheckpoint.Location}
+              </p>
               <p className="text-[#5C6573]">
                 {selectedCheckpoint.City}, {selectedCheckpoint.County}
               </p>
             </div>
           </Popup>
         ) : null}
-      </Map>
+      </MapGL>
     </div>
   );
 }

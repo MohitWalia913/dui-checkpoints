@@ -100,6 +100,9 @@ const CITY_FALLBACKS: Record<string, LatLng> = {
   "los angeles|los angeles": { lat: 34.0522, lng: -118.2437 },
   "san diego|san diego": { lat: 32.7157, lng: -117.1611 },
   "riverside|riverside": { lat: 33.9533, lng: -117.3962 },
+  "pleasanton|alameda": { lat: 37.6624, lng: -121.8747 },
+  "hayward|alameda": { lat: 37.6688, lng: -122.0808 },
+  "fremont|alameda": { lat: 37.5483, lng: -121.9886 },
 };
 
 function coordsNearlyEqual(a: LatLng, b: LatLng, epsilon = 0.02): boolean {

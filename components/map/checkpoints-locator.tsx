@@ -241,25 +241,34 @@ export function CheckpointsLocator({
     [coordOverrides],
   );
 
-  /** Resolve approximate Past/all pins in the background so markers match real locations. */
+  /** Resolve approximate pins in the background (parallel) so Past markers spread correctly. */
   useEffect(() => {
     let cancelled = false;
-    const pending = filteredCheckpoints
-      .filter((c) => needsGeocodeForMap(c, c.coordinates))
-      .slice(0, statusFilter === "past" ? 25 : 12);
+    const pending = filteredCheckpoints.filter((c) =>
+      needsGeocodeForMap(c, c.coordinates),
+    );
+    const limit = statusFilter === "past" ? 40 : 16;
+    const queue = pending.slice(0, limit);
+    const concurrency = 4;
 
     void (async () => {
-      for (const checkpoint of pending) {
-        if (cancelled) break;
-        await applyGeocodeIfNeeded(checkpoint);
-        await new Promise((resolve) => setTimeout(resolve, 300));
+      let index = 0;
+      async function worker() {
+        while (index < queue.length && !cancelled) {
+          const checkpoint = queue[index++];
+          await applyGeocodeIfNeeded(checkpoint);
+          await new Promise((resolve) => setTimeout(resolve, 220));
+        }
       }
+      await Promise.all(
+        Array.from({ length: Math.min(concurrency, queue.length) }, worker),
+      );
     })();
 
     return () => {
       cancelled = true;
     };
-  }, [filteredCheckpoints, applyGeocodeIfNeeded]);
+  }, [filteredCheckpoints, statusFilter, applyGeocodeIfNeeded]);
 
   const focusMapOnCheckpoint = useCallback((coords: LatLng) => {
     const normalized = normalizeLatLng(coords);
