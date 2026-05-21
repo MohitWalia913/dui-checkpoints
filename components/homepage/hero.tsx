@@ -82,19 +82,7 @@ export function Hero() {
           {/* Right — map bg + CA glow + mockups */}
           <div className="relative mx-auto h-[380px] w-full max-w-[600px] sm:h-[440px] lg:mx-0 lg:ml-auto lg:h-[520px] lg:max-w-[680px]">
             {/* Map texture behind mockups */}
-            <div className="absolute inset-0 overflow-hidden lg:inset-y-4 lg:left-8 lg:right-0">
-              <Image
-                src="/map.png"
-                alt=""
-                fill
-                className="object-cover object-center opacity-50"
-                sizes="(max-width: 1024px) 600px, 680px"
-              />
-              <div
-                className="absolute inset-0 bg-gradient-to-l from-[#040F20]/90 via-[#040F20]/40 to-transparent"
-                aria-hidden
-              />
-            </div>
+     
 
             <div
               className="pointer-events-none absolute left-1/2 top-1/2 z-[1] h-[300px] w-[300px] -translate-x-1/2 -translate-y-1/2 rounded-full bg-[#F57E3A]/25 blur-[70px] lg:h-[380px] lg:w-[380px]"
