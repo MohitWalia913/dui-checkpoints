@@ -60,7 +60,7 @@ export function AppShowcase() {
 
   return (
     <section className="w-full bg-[#F5F6F8] py-16 md:py-16 lg:py-20">
-      <div className="mx-auto max-w-[1440px] px-6 md:px-10 lg:px-14">
+      <div className="mx-auto max-w-[1338px] px-6 md:px-10 lg:px-14">
         <div className="flex items-center flex-col gap-9 md:flex-row lg:gap-10 xl:gap-16 justify-between">
           <div className="max-w-[100%] w-full md:max-w-[50%] lg:max-w-[415px]">
             <h3 className="max-w-[347px] w-full font-inter text-[28px] font-bold leading-[1.24] text-[#242E4E] md:text-[32px] lg:text-[36px] lg:leading-[44.8px]">
