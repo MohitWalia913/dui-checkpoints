@@ -40,14 +40,14 @@ export function Hero() {
         aria-hidden
       />
 
-      <div className="relative z-10 mx-auto max-w-[1440px] !pt-[46px] !pb-[46px] px-6 py-12 md:px-10 md:py-16 lg:px-14 lg:py-20">
-        <div className="banner-row grid grid-cols-1 items-center gap-8 md:grid-cols-2 lg:grid-cols-2 lg:gap-8 xl:gap-12">
-          <div className="max-w-xl lg:py-4">
+      <div className="relative z-10 mx-auto max-w-[1338px] !pt-[46px] !pb-[46px] px-6 py-12 md:px-10 md:py-16 lg:px-14 lg:py-20">
+        <div className="banner-row flex flex-col md:flex-row grid-cols-1 md:items-center gap-6 md:grid-cols-2 lg:grid-cols-2 lg:gap-8 xl:gap-12">
+          <div className="max-w-fullmd:max-w-xl lg:py-4">
             <p className="font-inter text-[16px] font-normal uppercase leading-6 text-[#F57E3A]">
               DUI checkpoint data updated every 24 hours
             </p>
 
-            <h1 className="font-inter mt-4 w-full max-w-[482px] text-[24px] font-semibold leading-[1.2] text-white sm:text-[32px] md:text-[36px] lg:text-[40px] xl:text-[48px]">
+            <h1 className="font-inter mt-4 w-full max-w-[482px] text-[24px] font-semibold leading-[1.2] text-white sm:text-[28px] md:text-[32px] lg:text-[40px] xl:text-[48px]">
               <span className="text-white">California DUI</span>
               <span className="text-[#F57E3A]">Checkpoints Locator Map</span>
               <span className="text-white">&amp; Real-Time Database</span>
@@ -76,22 +76,22 @@ export function Hero() {
           </div>
 
           {/* Right — CA glow + mockups with gap, full phones visible */}
-          <div className="image-box-banner relative mx-auto w-full max-w-[640px] py-0 sm:py-0 lg:mx-0 lg:ml-auto lg:max-w-[700px] lg:py-0">
+          <div className="image-box-banner relative mx-auto w-full max-w-full py-0 sm:py-0 lg:mx-0 lg:ml-auto lg:max-w-[650px] lg:py-0">
             <div
-              className="pointer-events-none absolute left-1/2 top-1/2 z-[1] h-[min(85%,420px)] w-[min(85%,420px)] -translate-x-1/2 -translate-y-1/2 rounded-full bg-[#F57E3A]/25 blur-[70px] lg:h-[440px] lg:w-[440px]"
+              className="pointer-events-none hidden absolute left-1/2 top-1/2 z-[1] h-[min(85%,420px)] w-[min(85%,420px)] -translate-x-1/2 -translate-y-1/2 rounded-full bg-[#F57E3A]/25 blur-[70px] lg:h-[440px] lg:w-[440px]"
               aria-hidden
             />
             <CaliforniaGlow />
 
-            <div className="relative z-10 flex min-h-[290px] items-center justify-start sm:min-h-[440px] lg:min-h-[500px] lg:justify-end">
-              <div className="flex items-end justify-center gap-5 sm:gap-7 lg:gap-9">
+            <div className="relative z-10 flex min-h-[290px] items-center justify-start sm:min-h-[440px] lg:min-h-[500px] md:justify-end">
+              <div className="flex items-end justify-center gap-5 sm:gap-5 lg:gap-9">
                 <Image
                   src="/bgphone.png"
                   alt="DUI Checkpoints Locator map app on mobile"
                   width={355}
                   height={710}
                   priority
-                  className="relative z-20 h-auto w-[min(42vw,220px)] max-w-[300px] shrink-0 drop-shadow-[0_28px_56px_rgba(0,0,0,0.5)] sm:w-[260px] lg:w-[320px] lg:max-w-[340px]"
+                  className="relative z-20 h-auto w-[min(42vw,220px)] max-w-[300px] shrink-0 drop-shadow-[0_28px_56px_rgba(0,0,0,0.5)] sm:w-[240px] lg:w-[300px] lg:max-w-[300px]"
                 />
                 <Image
                   src="/bglegal.png"
@@ -99,7 +99,7 @@ export function Hero() {
                   width={232}
                   height={384}
                   priority
-                  className="relative z-10 !mb-0 h-auto w-[min(34vw,168px)] max-w-[220px] shrink-0 drop-shadow-[0_24px_48px_rgba(0,0,0,0.45)] sm:mb-4 sm:w-[200px] lg:mb-6 lg:w-[228px]"
+                  className="relative z-10 !mb-0 h-auto w-[min(34vw,168px)] max-w-[200px] shrink-0 drop-shadow-[0_24px_48px_rgba(0,0,0,0.45)] sm:mb-4 sm:w-[180px] lg:mb-6 lg:w-[200px]"
                 />
               </div>
             </div>

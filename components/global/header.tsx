@@ -48,7 +48,7 @@ export function Header() {
 
   return (
     <header className="relative z-50 w-full bg-[#040F20]">
-      <div className="main-header-inner-row mx-auto flex h-[72px] max-w-[1440px] items-center justify-between px-6 md:px-10 lg:h-[80px] lg:px-14">
+      <div className="main-header-inner-row mx-auto flex h-[72px] max-w-[1338px] items-center justify-between px-6 md:px-10 lg:h-[80px] lg:px-14">
         <Link href="/" className="logo-img-box relative shrink-0" onClick={() => setMenuOpen(false)}>
           <Image
             src={logo}

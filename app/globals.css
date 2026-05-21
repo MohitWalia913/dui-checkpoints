@@ -88,7 +88,9 @@
 .two-btn .same-btn.same-ext-btn:hover { background:transparent; color:#F57E3A;}
 .banner-main { position: relative; z-index: 1;}
 .hover-window:hover {background:#f57e3a; transition:all 0.3s;}
-
+.four-logo { justify-content: space-between;}
+.four-logo .four-logo-inner-box:first-child{padding-left:0px;}
+.four-logo .four-logo-inner-box:last-child {padding-right:0px;}
 
 /***********Responsive-start-here***********/
  @media (max-width: 1440px) { .grid-left-inner { padding-left: 56px;}
@@ -111,11 +113,16 @@ div#mobile-menu a {  font-size: 16px !important;}
 .calfornia-left-cil-inner-box {
     max-width: 100%;
 }
+section#about-us {
+    background-image: none !important;
+    background-color: #040F20;
+}
 }
 
  @media (max-width: 767px) {
 .trusted-block .trusted-right-box-slider .bordeer-box-trust-slide { width: 86.9565% !important;}
 .grid-left-inner { padding-left: 0px;}
+.four-logo { padding: 0px;}
  }
 
  @media (max-width: 640px) {
@@ -127,10 +134,6 @@ div#mobile-menu a {  font-size: 16px !important;}
 .protect-right-inner {flex-direction: column; row-gap: 20px; align-items: flex-start;}
 .protect-right-inner .protect-right-inner-text { width:100%; max-width:100%;}
 .report-right-image-box { width: 100%;}
-.height-app img {
-    height: 350px !important;
-    min-height: 350px !important;
-    object-fit: contain !important;
-}
- 
+.height-app img {  height: 350px !important;  min-height: 350px !important; object-fit: contain !important;}
+.four-logo { gap: 20px;}
  }
