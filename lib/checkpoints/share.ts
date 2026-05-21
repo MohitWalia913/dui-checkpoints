@@ -12,22 +12,29 @@ export function buildCheckpointShareContent(
   >,
   pageUrl: string,
 ) {
-  const text = [
+  const summary = [
     `DUI Checkpoint: ${checkpoint.Location}`,
     `${checkpoint.City}, ${checkpoint.County} County, ${checkpoint.State}`,
     `${formatCheckpointDate(checkpoint.Date)} · ${checkpoint.Time || "—"}`,
-    pageUrl,
   ].join("\n");
+
+  const text = `${summary}\n\n${pageUrl}`;
 
   return {
     title: `DUI Checkpoint — ${checkpoint.Location}`,
+    summary,
     text,
     url: pageUrl,
   };
 }
 
+/** Opens WhatsApp app or web with message + link (works on mobile & desktop). */
 export function whatsAppShareUrl(text: string): string {
-  return `https://wa.me/?text=${encodeURIComponent(text)}`;
+  return `https://api.whatsapp.com/send?text=${encodeURIComponent(text)}`;
+}
+
+export function teamsShareUrl(url: string, message: string): string {
+  return `https://teams.microsoft.com/share?href=${encodeURIComponent(url)}&msgText=${encodeURIComponent(message)}`;
 }
 
 export function facebookShareUrl(url: string): string {
