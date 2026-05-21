@@ -14,7 +14,7 @@ import type {
   SymbolLayerSpecification,
 } from "maplibre-gl";
 import type { CircleLayerSpecification } from "react-map-gl/maplibre";
-import { useEffect, useMemo, useRef } from "react";
+import { useCallback, useEffect, useMemo, useRef } from "react";
 import Map, { Layer, Popup, Source, type MapRef } from "react-map-gl/maplibre";
 
 import "maplibre-gl/dist/maplibre-gl.css";
@@ -57,12 +57,13 @@ const UNCLUSTERED_LAYER: CircleLayerSpecification = {
       "upcoming",
       "#10B981",
       "past",
-      "#64748B",
+      "#94A3B8",
       "#F57E3A",
     ],
-    "circle-radius": 8,
-    "circle-stroke-width": 2,
+    "circle-radius": 9,
+    "circle-stroke-width": 2.5,
     "circle-stroke-color": "#FFFFFF",
+    "circle-opacity": 0.95,
   },
 };
 
@@ -97,9 +98,10 @@ const SELECTED_LAYER: CircleLayerSpecification = {
   filter: ["==", ["get", "id"], -1],
   paint: {
     "circle-color": "#F57E3A",
-    "circle-radius": 12,
+    "circle-radius": 14,
     "circle-stroke-width": 3,
     "circle-stroke-color": "#FFFFFF",
+    "circle-opacity": 1,
   },
 };
 
@@ -140,6 +142,31 @@ export function CheckpointsMapView({
 }) {
   const mapRef = useRef<MapRef | null>(null);
   const hasFittedRef = useRef(false);
+  const lastFlownCoordsRef = useRef<string | null>(null);
+
+  const flyToCheckpoint = useCallback((coords: LatLng, zoom = 16) => {
+    const map = mapRef.current;
+    if (!map) return;
+    const lat = Number.parseFloat(String(coords.lat));
+    const lng = Number.parseFloat(String(coords.lng));
+    if (!Number.isFinite(lat) || !Number.isFinite(lng)) return;
+    if (Math.abs(lat) > 90 || Math.abs(lng) > 180 || lat === 0 || lng === 0) return;
+
+    const key = `${lat.toFixed(6)},${lng.toFixed(6)}`;
+    if (lastFlownCoordsRef.current === key) return;
+    lastFlownCoordsRef.current = key;
+
+    map.flyTo({
+      center: [lng, lat],
+      zoom,
+      duration: 1500,
+      essential: true,
+    });
+
+    window.setTimeout(() => {
+      map.getMap().resize();
+    }, 350);
+  }, []);
 
   const checkpointsGeoJson = useMemo<FeatureCollection<Point>>(
     () => ({
@@ -205,24 +232,23 @@ export function CheckpointsMapView({
   }, [mapLayer]);
 
   useEffect(() => {
-    if (!flyTarget || !mapRef.current) return;
-    mapRef.current.flyTo({
-      center: [flyTarget.center.lng, flyTarget.center.lat],
-      zoom: flyTarget.zoom,
-      duration: 1150,
-      essential: true,
-    });
-  }, [flyTarget]);
+    if (!flyTarget) return;
+    lastFlownCoordsRef.current = null;
+    flyToCheckpoint(flyTarget.center, flyTarget.zoom);
+  }, [flyTarget, flyToCheckpoint]);
 
   useEffect(() => {
-    if (!selectedCheckpoint || !mapRef.current) return;
-    mapRef.current.flyTo({
-      center: [selectedCheckpoint.coordinates.lng, selectedCheckpoint.coordinates.lat],
-      zoom: 16,
-      duration: 1500,
-      essential: true,
-    });
-  }, [selectedCheckpoint, focusToken]);
+    if (!selectedCheckpoint) {
+      lastFlownCoordsRef.current = null;
+      return;
+    }
+    lastFlownCoordsRef.current = null;
+    flyToCheckpoint(selectedCheckpoint.coordinates, 16);
+  }, [
+    selectedCheckpoint,
+    focusToken,
+    flyToCheckpoint,
+  ]);
 
   useEffect(() => {
     if (!mapRef.current) return;
@@ -296,7 +322,7 @@ export function CheckpointsMapView({
         onClick={handleMapClick}
         onMouseMove={handleMapMouseMove}
         onMouseLeave={() => onHover(null)}
-        scrollZoom={false}
+        scrollZoom
         style={{ width: "100%", height: "100%", background: "#e2e8f0" }}
       >
         <Source id="checkpoints" type="geojson" data={checkpointsGeoJson}>

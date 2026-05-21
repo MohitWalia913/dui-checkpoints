@@ -84,6 +84,11 @@ export function buildGeocodeQuery(checkpoint: {
     .join(", ");
 }
 
+export const CALIFORNIA_CENTER_FALLBACK: LatLng = {
+  lat: 36.7783,
+  lng: -119.4179,
+};
+
 const CITY_FALLBACKS: Record<string, LatLng> = {
   "el centro|imperial": { lat: 32.792, lng: -115.563 },
   "glendora|los angeles": { lat: 34.1361, lng: -117.8653 },
@@ -91,6 +96,27 @@ const CITY_FALLBACKS: Record<string, LatLng> = {
   "san diego|san diego": { lat: 32.7157, lng: -117.1611 },
   "riverside|riverside": { lat: 33.9533, lng: -117.3962 },
 };
+
+function coordsNearlyEqual(a: LatLng, b: LatLng, epsilon = 0.02): boolean {
+  return Math.abs(a.lat - b.lat) < epsilon && Math.abs(a.lng - b.lng) < epsilon;
+}
+
+/** True when coordinates are a city/state fallback, not a precise pin. */
+export function isApproximateCoordinates(coords: LatLng): boolean {
+  if (coordsNearlyEqual(coords, CALIFORNIA_CENTER_FALLBACK)) return true;
+  return Object.values(CITY_FALLBACKS).some((fallback) =>
+    coordsNearlyEqual(coords, fallback),
+  );
+}
+
+/** Whether card/marker selection should geocode for a better pin. */
+export function needsGeocodeForMap(
+  checkpoint: Pick<Checkpoint, "mapurl" | "City" | "County" | "State">,
+  coords: LatLng,
+): boolean {
+  if (!hasPreciseMapCoordinates(checkpoint.mapurl)) return true;
+  return isApproximateCoordinates(coords);
+}
 
 function cityFallback(city: string, county: string): LatLng | null {
   const key = `${city}|${county}`.toLowerCase();
@@ -106,6 +132,5 @@ export function resolveCheckpointCoordinates(
   const fromCity = cityFallback(checkpoint.City, checkpoint.County);
   if (fromCity) return fromCity;
 
-  // California center — last resort
-  return { lat: 36.7783, lng: -119.4179 };
+  return CALIFORNIA_CENTER_FALLBACK;
 }
