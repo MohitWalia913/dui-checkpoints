@@ -41,19 +41,19 @@ export function Hero() {
       />
 
       <div className="relative z-10 mx-auto max-w-[1440px] !pt-[46px] !pb-[46px] px-6 py-12 md:px-10 md:py-16 lg:px-14 lg:py-20">
-        <div className="banner-row grid grid-cols-1 items-center gap-12 md:grid-cols-2 lg:grid-cols-2 lg:gap-8 xl:gap-12">
+        <div className="banner-row grid grid-cols-1 items-center gap-8 md:grid-cols-2 lg:grid-cols-2 lg:gap-8 xl:gap-12">
           <div className="max-w-xl lg:py-4">
             <p className="font-inter text-[16px] font-normal uppercase leading-6 text-[#F57E3A]">
               DUI checkpoint data updated every 24 hours
             </p>
 
-            <h1 className="font-inter mt-4 w-full max-w-[482px] text-[32px] font-semibold leading-[1.2] text-white sm:text-[36px] lg:text-[40px] lg:text-[48px]">
+            <h1 className="font-inter mt-4 w-full max-w-[482px] text-[24px] font-semibold leading-[1.2] text-white sm:text-[32px] md:text-[36px] lg:text-[40px] xl:text-[48px]">
               <span className="text-white">California DUI</span>
               <span className="text-[#F57E3A]">Checkpoints Locator Map</span>
               <span className="text-white">&amp; Real-Time Database</span>
             </h1>
 
-            <p className="font-inter mt-6 max-w-lg text-[18px] font-normal leading-[1.6] text-white">
+            <p className="font-inter mt-6 max-w-lg text-[16px] md:text-[18px] font-normal leading-[1.6] text-white">
               Stay informed with real-time DUI checkpoints and incident mapping
               across California.
             </p>
@@ -67,8 +67,8 @@ export function Hero() {
                 aria-hidden
               />
               <span className="flex flex-col text-left leading-tight">
-                <span className="text-[16px] font-normal leading-5">Use On</span>
-                <span className="mt-[8px] text-[18px] font-semibold leading-6 md:text-[25px]">
+                <span className="text-[14px] md:text-[16px] font-normal leading-5">Use On</span>
+                <span className="mt-[8px] text-[16px] md:text-[18px] font-semibold leading-6 md:text-[25px]">
                   Web Browser
                 </span>
               </span>
@@ -83,7 +83,7 @@ export function Hero() {
             />
             <CaliforniaGlow />
 
-            <div className="relative z-10 flex min-h-[380px] items-center justify-center sm:min-h-[440px] lg:min-h-[500px] lg:justify-end">
+            <div className="relative z-10 flex min-h-[290px] items-center justify-start sm:min-h-[440px] lg:min-h-[500px] lg:justify-end">
               <div className="flex items-end justify-center gap-5 sm:gap-7 lg:gap-9">
                 <Image
                   src="/bgphone.png"
@@ -99,7 +99,7 @@ export function Hero() {
                   width={232}
                   height={384}
                   priority
-                  className="relative z-10 mb-2 h-auto w-[min(34vw,168px)] max-w-[220px] shrink-0 drop-shadow-[0_24px_48px_rgba(0,0,0,0.45)] sm:mb-4 sm:w-[200px] lg:mb-6 lg:w-[228px]"
+                  className="relative z-10 !mb-0 h-auto w-[min(34vw,168px)] max-w-[220px] shrink-0 drop-shadow-[0_24px_48px_rgba(0,0,0,0.45)] sm:mb-4 sm:w-[200px] lg:mb-6 lg:w-[228px]"
                 />
               </div>
             </div>
