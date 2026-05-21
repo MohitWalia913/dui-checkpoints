@@ -127,5 +127,10 @@ div#mobile-menu a {  font-size: 16px !important;}
 .protect-right-inner {flex-direction: column; row-gap: 20px; align-items: flex-start;}
 .protect-right-inner .protect-right-inner-text { width:100%; max-width:100%;}
 .report-right-image-box { width: 100%;}
+.height-app img {
+    height: 350px !important;
+    min-height: 350px !important;
+    object-fit: contain !important;
+}
  
  }
