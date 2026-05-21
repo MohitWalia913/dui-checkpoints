@@ -10,10 +10,14 @@ import {
 import {
   buildCheckpointShareContent,
   emailShareUrl,
+  facebookAppShareUrl,
   facebookShareUrl,
   getCheckpointSharePath,
-  teamsShareUrl,
+  isMobileShareDevice,
+  openAppOrWebShare,
+  teamsComposeUrl,
   twitterShareUrl,
+  whatsAppAppShareUrl,
   whatsAppShareUrl,
 } from "@/lib/checkpoints/share";
 import type { Checkpoint } from "@/lib/checkpoints/types";
@@ -95,12 +99,17 @@ export function CheckpointShareButton({
 }) {
   const [pageUrl, setPageUrl] = useState("");
   const [copied, setCopied] = useState(false);
+  const [teamsReady, setTeamsReady] = useState(false);
   const [canNativeShare, setCanNativeShare] = useState(false);
 
   useEffect(() => {
     const origin = window.location.origin;
     setPageUrl(`${origin}${getCheckpointSharePath(checkpoint.id)}`);
-    setCanNativeShare(typeof navigator !== "undefined" && !!navigator.share);
+    setCanNativeShare(
+      typeof navigator !== "undefined" &&
+        !!navigator.share &&
+        isMobileShareDevice(),
+    );
   }, [checkpoint.id]);
 
   const share = useMemo(
@@ -136,6 +145,34 @@ export function CheckpointShareButton({
         window.open(whatsAppShareUrl(share.text), "_blank", "noopener,noreferrer");
       }
     }
+  }, [share]);
+
+  const handleWhatsAppShare = useCallback(() => {
+    if (!share) return;
+    openAppOrWebShare({
+      appUrl: whatsAppAppShareUrl(share.text),
+      webUrl: whatsAppShareUrl(share.text),
+    });
+  }, [share]);
+
+  const handleFacebookShare = useCallback(() => {
+    if (!share) return;
+    openAppOrWebShare({
+      appUrl: facebookAppShareUrl(share.url),
+      webUrl: facebookShareUrl(share.url),
+    });
+  }, [share]);
+
+  const handleTeamsShare = useCallback(async () => {
+    if (!share) return;
+    try {
+      await navigator.clipboard.writeText(share.text);
+      setTeamsReady(true);
+      window.setTimeout(() => setTeamsReady(false), 3000);
+    } catch {
+      // continue — Teams may still open with message in URL
+    }
+    window.open(teamsComposeUrl(share.text), "_blank", "noopener,noreferrer");
   }, [share]);
 
   const handleCopyLink = useCallback(async () => {
@@ -192,26 +229,45 @@ export function CheckpointShareButton({
           </>
         ) : null}
 
-        <ShareMenuLink
-          href={whatsAppShareUrl(share.text)}
-          icon={<MessageCircle className="size-4 text-[#25D366]" aria-hidden />}
+        <DropdownMenuItem
+          className="cursor-pointer gap-2 focus:bg-[#F57E3A]/15 focus:text-white"
+          onSelect={(e) => {
+            e.preventDefault();
+            handleWhatsAppShare();
+          }}
         >
+          <MessageCircle className="size-4 text-[#25D366]" aria-hidden />
           WhatsApp
-        </ShareMenuLink>
+        </DropdownMenuItem>
 
-        <ShareMenuLink
-          href={teamsShareUrl(share.url, share.text)}
-          icon={<TeamsIcon className="size-4 text-[#5B5FC7]" />}
+        <DropdownMenuItem
+          className="cursor-pointer gap-2 focus:bg-[#F57E3A]/15 focus:text-white"
+          onSelect={(e) => {
+            e.preventDefault();
+            void handleTeamsShare();
+          }}
         >
-          Microsoft Teams
-        </ShareMenuLink>
+          <TeamsIcon className="size-4 text-[#5B5FC7]" />
+          <span className="flex flex-col">
+            <span>Microsoft Teams</span>
+            {teamsReady ? (
+              <span className="text-[10px] font-normal text-emerald-400">
+                Message copied — paste if needed (Ctrl+V)
+              </span>
+            ) : null}
+          </span>
+        </DropdownMenuItem>
 
-        <ShareMenuLink
-          href={facebookShareUrl(share.url)}
-          icon={<FacebookIcon className="size-4 text-[#1877F2]" />}
+        <DropdownMenuItem
+          className="cursor-pointer gap-2 focus:bg-[#F57E3A]/15 focus:text-white"
+          onSelect={(e) => {
+            e.preventDefault();
+            handleFacebookShare();
+          }}
         >
+          <FacebookIcon className="size-4 text-[#1877F2]" />
           Facebook
-        </ShareMenuLink>
+        </DropdownMenuItem>
 
         <ShareMenuLink
           href={twitterShareUrl(share.summary, share.url)}
