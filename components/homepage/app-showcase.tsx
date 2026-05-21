@@ -2,7 +2,7 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import { ChevronLeft, ChevronRight, Monitor } from "lucide-react";
+import { ChevronLeft, ChevronRight } from "lucide-react";
 import { useCallback, useEffect, useState } from "react";
 
 const PHONE_SLIDES = [
@@ -73,8 +73,12 @@ export function AppShowcase() {
               href="/map"
               className="hover-window font-inter mt-8 inline-flex items-center gap-4 rounded-[10px] border border-white/10 bg-black px-6 py-3.5 text-white transition-opacity hover:opacity-90"
             >
-              <Monitor
-                className="h-8 w-8 shrink-0 stroke-[1.5]"
+              <Image
+                src="/browser.png"
+                alt=""
+                width={32}
+                height={32}
+                className="h-8 w-8 shrink-0 object-contain"
                 aria-hidden
               />
               <span className="flex flex-col text-left leading-tight">
