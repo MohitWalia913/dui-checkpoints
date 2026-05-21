@@ -10,7 +10,10 @@ const BULLETS = [
 
 export function Coverage() {
   return (
-    <section className="relative w-full overflow-hidden pl-[24px] bg-[#040F20] md:pl-[40px] lg:pl-[56px]">
+    <section
+      id="about-us"
+      className="relative w-full scroll-mt-[80px] overflow-hidden bg-[#040F20] pl-[24px] md:pl-[40px] lg:pl-[56px]"
+    >
       <div className="grid lg:grid-cols-2">
         {/* Left — copy & CTAs */}
         <div className="relative z-10 flex flex-col justify-center !pl-[0px] px-6 py-16 md:px-10 md:py-20 lg:px-14 lg:py-24">

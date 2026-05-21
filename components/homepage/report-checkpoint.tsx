@@ -10,7 +10,10 @@ const APP_FEATURES = [
 
 export function ReportCheckpoint() {
   return (
-    <section className="report-block w-full bg-[#F5F6F8] py-16 md:py-16 lg:py-20">
+    <section
+      id="report-checkpoint"
+      className="report-block scroll-mt-[80px] w-full bg-[#F5F6F8] py-16 md:py-16 lg:py-20"
+    >
       <div className="mx-auto max-w-[1324px] px-6 md:px-10 lg:px-14">
         <div className="flex flex-col items-start gap-12 w-full lg:flex-row lg:grid-cols-2 lg:gap-10 xl:gap-14">
           {/* Left — report form */}

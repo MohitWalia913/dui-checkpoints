@@ -2,17 +2,35 @@
 
 import Image from "next/image";
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
 import logo from "@/app/logo.png";
 
 const NAV_LINKS = [
-  { href: "/report", label: "Report Checkpoint" },
-  { href: "/about", label: "About Us" },
-  { href: "/resources", label: "Resources" },
+  { href: "/#report-checkpoint", sectionId: "report-checkpoint", label: "Report Checkpoint" },
+  { href: "/#about-us", sectionId: "about-us", label: "About Us" },
+  { href: "/#resources", sectionId: "resources", label: "Resources" },
 ] as const;
 
+function scrollToSection(sectionId: string) {
+  const target = document.getElementById(sectionId);
+  if (!target) return;
+  target.scrollIntoView({ behavior: "smooth", block: "start" });
+}
+
 export function Header() {
+  const pathname = usePathname();
   const [menuOpen, setMenuOpen] = useState(false);
+
+  const handleSectionNav = (
+    event: React.MouseEvent<HTMLAnchorElement>,
+    sectionId: string,
+  ) => {
+    if (pathname !== "/") return;
+    event.preventDefault();
+    scrollToSection(sectionId);
+    setMenuOpen(false);
+  };
 
   useEffect(() => {
     document.body.style.overflow = menuOpen ? "hidden" : "";
@@ -20,6 +38,13 @@ export function Header() {
       document.body.style.overflow = "";
     };
   }, [menuOpen]);
+
+  useEffect(() => {
+    if (pathname !== "/") return;
+    const hash = window.location.hash.replace("#", "");
+    if (!hash) return;
+    requestAnimationFrame(() => scrollToSection(hash));
+  }, [pathname]);
 
   return (
     <header className="relative z-50 w-full bg-[#040F20]">
@@ -39,10 +64,11 @@ export function Header() {
             className="flex items-center gap-[20px] xl:gap-[40px]"
             aria-label="Main navigation"
           >
-            {NAV_LINKS.map(({ href, label }) => (
+            {NAV_LINKS.map(({ href, sectionId, label }) => (
               <Link
                 key={href}
                 href={href}
+                onClick={(event) => handleSectionNav(event, sectionId)}
                 className="font-montserrat text-[14px] font-medium leading-[22px] text-white transition-opacity hover:opacity-80"
               >
                 {label}
@@ -117,12 +143,15 @@ export function Header() {
           className="flex flex-col gap-1 px-6 pt-6 md:px-10"
           aria-label="Mobile navigation"
         >
-          {NAV_LINKS.map(({ href, label }) => (
+          {NAV_LINKS.map(({ href, sectionId, label }) => (
             <Link
               key={href}
               href={href}
               className="font-montserrat border-b border-white/10 py-4 text-sm font-medium leading-[22px] text-white"
-              onClick={() => setMenuOpen(false)}
+              onClick={(event) => {
+                handleSectionNav(event, sectionId);
+                setMenuOpen(false);
+              }}
             >
               {label}
             </Link>

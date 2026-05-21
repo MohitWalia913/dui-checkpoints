@@ -38,7 +38,10 @@ const FEATURES = [
 
 export function Features() {
   return (
-    <section className="w-full bg-[#F5F6F8] py-16 md:py-16 lg:py-20">
+    <section
+      id="resources"
+      className="scroll-mt-[80px] w-full bg-[#F5F6F8] py-16 md:py-16 lg:py-20"
+    >
       <div className="mx-auto max-w-[1200px] px-6 md:px-10 lg:px-14">
         <header className="mx-auto max-w-3xl text-center">
           <h2 className=" w-full max-w-[636px] mx-auto font-inter text-[28px] font-semibold leading-tight text-[#040F20] sm:text-[32px] lg:text-[36px]">
