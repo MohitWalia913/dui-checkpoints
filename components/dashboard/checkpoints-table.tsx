@@ -2,6 +2,7 @@ import {
   formatCheckpointDate,
   isCheckpointUpcoming,
 } from "@/lib/checkpoints/date";
+import { CheckpointShareButton } from "@/components/dashboard/checkpoint-share-button";
 import type { CheckpointListItem } from "@/lib/checkpoints/types";
 import { ExternalLink } from "lucide-react";
 import Link from "next/link";
@@ -101,7 +102,11 @@ export function CheckpointsTable({
                   {checkpoint.Time}
                 </td>
                 <td className="px-4 py-4 text-right md:px-6">
-                  <div className="flex flex-wrap justify-end gap-2">
+                  <div className="flex flex-wrap items-center justify-end gap-2">
+                    <CheckpointShareButton
+                      checkpoint={checkpoint}
+                      variant="compact"
+                    />
                     <Link
                       href={`/dashboard/checkpoints/${checkpoint.id}`}
                       className="font-montserrat text-xs font-semibold text-[#F57E3A] hover:underline"

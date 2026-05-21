@@ -1,4 +1,5 @@
 import { CheckpointMapPanel } from "@/components/dashboard/checkpoint-map-panel";
+import { CheckpointShareButton } from "@/components/dashboard/checkpoint-share-button";
 import {
   formatCheckpointDate,
   isCheckpointUpcoming,
@@ -70,6 +71,7 @@ export function CheckpointDetailView({
         </div>
 
         <div className="flex flex-wrap gap-2">
+          <CheckpointShareButton checkpoint={checkpoint} />
           {checkpoint.mapurl ? (
             <a
               href={checkpoint.mapurl}
