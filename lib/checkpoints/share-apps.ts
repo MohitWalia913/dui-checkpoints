@@ -68,9 +68,24 @@ export type OpenAppWithFallbackOptions = {
   installUrl?: string;
 };
 
+/** Open URL in a new browser tab (keeps dashboard tab unchanged). */
+export function openInNewTab(url: string): void {
+  const tab = window.open(url, "_blank", "noopener,noreferrer");
+  if (!tab) {
+    const anchor = document.createElement("a");
+    anchor.href = url;
+    anchor.target = "_blank";
+    anchor.rel = "noopener noreferrer";
+    anchor.style.display = "none";
+    document.body.appendChild(anchor);
+    anchor.click();
+    anchor.remove();
+  }
+}
+
 /**
  * 1. Attempt to open the installed app via deep link.
- * 2. If the page stays focused (app not opened), open web / install fallback.
+ * 2. If the page stays focused (app not opened), open web / install fallback in a new tab.
  */
 export function openAppWithFallback(
   appUrl: string,
@@ -117,16 +132,7 @@ export function openAppWithFallback(
         ? options.installUrl
         : webUrl;
 
-    try {
-      if (isMobileShareDevice()) {
-        window.location.assign(fallback);
-      } else {
-        const tab = window.open(fallback, "_blank", "noopener,noreferrer");
-        if (!tab) window.location.assign(fallback);
-      }
-    } catch {
-      window.location.assign(fallback);
-    }
+    openInNewTab(fallback);
   }, delayMs);
 }
 
@@ -151,12 +157,13 @@ function telegramWebUrl(url: string, text: string): string {
   return `https://t.me/share/url?${params.toString()}`;
 }
 
-function facebookAppUrl(url: string): string {
-  return `fb://facewebmodal/f?href=${encodeURIComponent(url)}`;
+/** Share checkpoint link on www.facebook.com (official sharer). */
+function facebookWebUrl(checkpointUrl: string): string {
+  return `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(checkpointUrl)}`;
 }
 
-function facebookWebUrl(url: string): string {
-  return `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(url)}`;
+function facebookAppUrl(checkpointUrl: string): string {
+  return `fb://facewebmodal/f?href=${encodeURIComponent(facebookWebUrl(checkpointUrl))}`;
 }
 
 function gmailAppUrl(title: string, body: string): string {
@@ -243,7 +250,7 @@ export function buildShareAppTargets(
       label: "Facebook",
       appUrl: facebookAppUrl(url),
       webUrl: facebookWebUrl(url),
-      installUrl: "https://www.facebook.com/mobile",
+      installUrl: "https://www.facebook.com/",
     },
     {
       id: "gmail",
@@ -302,19 +309,7 @@ export function getOrderedShareAppTargets(
 
 export function openShareApp(
   target: ShareAppTarget,
-  options?: OpenAppWithFallbackOptions,
+  _options?: OpenAppWithFallbackOptions,
 ): void {
-  if (target.id === "email") {
-    try {
-      launchProtocolUrl(target.appUrl);
-    } catch {
-      window.location.assign(target.webUrl);
-    }
-    return;
-  }
-
-  openAppWithFallback(target.appUrl, target.webUrl, {
-    installUrl: target.installUrl,
-    ...options,
-  });
+  openInNewTab(target.webUrl);
 }
