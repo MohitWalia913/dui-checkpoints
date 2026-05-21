@@ -13,8 +13,11 @@ import {
   facebookAppShareUrl,
   facebookShareUrl,
   getCheckpointSharePath,
-  isMobileShareDevice,
+  isSystemShareAvailable,
+  launchProtocolUrl,
   openAppOrWebShare,
+  shareViaSystemSheet,
+  teamsAppShareUrl,
   teamsComposeUrl,
   twitterShareUrl,
   whatsAppAppShareUrl,
@@ -28,7 +31,7 @@ import {
   Mail,
   MessageCircle,
   Share2,
-  Smartphone,
+  LayoutGrid,
 } from "lucide-react";
 import { useCallback, useEffect, useMemo, useState } from "react";
 
@@ -105,11 +108,7 @@ export function CheckpointShareButton({
   useEffect(() => {
     const origin = window.location.origin;
     setPageUrl(`${origin}${getCheckpointSharePath(checkpoint.id)}`);
-    setCanNativeShare(
-      typeof navigator !== "undefined" &&
-        !!navigator.share &&
-        isMobileShareDevice(),
-    );
+    setCanNativeShare(isSystemShareAvailable());
   }, [checkpoint.id]);
 
   const share = useMemo(
@@ -118,33 +117,14 @@ export function CheckpointShareButton({
     [checkpoint, pageUrl],
   );
 
-  const handleNativeShare = useCallback(async () => {
-    if (!share || !navigator.share) return;
-
-    const withUrl: ShareData = {
+  const handleNativeShare = useCallback(() => {
+    if (!share) return;
+    void shareViaSystemSheet({
       title: share.title,
-      text: share.summary,
-      url: share.url,
-    };
-    const textOnly: ShareData = {
-      title: share.title,
+      summary: share.summary,
       text: share.text,
-    };
-
-    try {
-      if (navigator.canShare?.(withUrl)) {
-        await navigator.share(withUrl);
-      } else if (navigator.canShare?.(textOnly)) {
-        await navigator.share(textOnly);
-      } else {
-        await navigator.share({ title: share.title, text: share.text });
-      }
-    } catch (err) {
-      if ((err as Error).name !== "AbortError") {
-        await navigator.clipboard.writeText(share.text).catch(() => undefined);
-        window.open(whatsAppShareUrl(share.text), "_blank", "noopener,noreferrer");
-      }
-    }
+      url: share.url,
+    });
   }, [share]);
 
   const handleWhatsAppShare = useCallback(() => {
@@ -172,7 +152,10 @@ export function CheckpointShareButton({
     } catch {
       // continue — Teams may still open with message in URL
     }
-    window.open(teamsComposeUrl(share.text), "_blank", "noopener,noreferrer");
+    openAppOrWebShare({
+      appUrl: teamsAppShareUrl(share.text),
+      webUrl: teamsComposeUrl(share.text),
+    });
   }, [share]);
 
   const handleCopyLink = useCallback(async () => {
@@ -222,7 +205,7 @@ export function CheckpointShareButton({
                 void handleNativeShare();
               }}
             >
-              <Smartphone className="size-4 text-[#F57E3A]" aria-hidden />
+              <LayoutGrid className="size-4 text-[#F57E3A]" aria-hidden />
               Share to apps…
             </DropdownMenuItem>
             <DropdownMenuSeparator className="bg-white/10" />
@@ -276,12 +259,16 @@ export function CheckpointShareButton({
           X (Twitter)
         </ShareMenuLink>
 
-        <ShareMenuLink
-          href={emailShareUrl(share.title, share.text)}
-          icon={<Mail className="size-4 text-[#F57E3A]" aria-hidden />}
+        <DropdownMenuItem
+          className="cursor-pointer gap-2 focus:bg-[#F57E3A]/15 focus:text-white"
+          onSelect={(e) => {
+            e.preventDefault();
+            launchProtocolUrl(emailShareUrl(share.title, share.text));
+          }}
         >
+          <Mail className="size-4 text-[#F57E3A]" aria-hidden />
           Email
-        </ShareMenuLink>
+        </DropdownMenuItem>
 
         <DropdownMenuSeparator className="bg-white/10" />
 
