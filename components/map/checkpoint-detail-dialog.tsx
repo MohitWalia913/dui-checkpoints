@@ -56,8 +56,8 @@ export function CheckpointDetailDialog({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="z-[20001] max-h-[min(90vh,640px)] overflow-y-auto sm:max-w-xl">
-        <DialogHeader>
+      <DialogContent className="z-[20001] flex max-h-[min(90vh,720px)] flex-col gap-0 overflow-hidden p-0 sm:max-w-xl">
+        <DialogHeader className="shrink-0 gap-3 border-b border-white/10 px-6 pb-4 pt-6">
           <div className="flex flex-wrap items-center gap-2">
             <StatusBadge date={checkpoint.Date} />
             <span className="font-montserrat rounded-full bg-[#F57E3A]/15 px-2.5 py-0.5 text-xs font-semibold text-[#F57E3A]">
@@ -75,7 +75,7 @@ export function CheckpointDetailDialog({
           </DialogDescription>
         </DialogHeader>
 
-        <div className="font-inter space-y-4 text-sm text-white/80">
+        <div className="checkpoint-dialog-body font-inter min-h-0 flex-1 space-y-4 overflow-y-auto overscroll-contain px-6 py-4 text-sm text-white/80">
           <div className="flex flex-wrap gap-4">
             <span className="inline-flex items-center gap-1.5">
               <Calendar className="size-4 text-[#F57E3A]" aria-hidden />
@@ -102,26 +102,26 @@ export function CheckpointDetailDialog({
               <p className="leading-relaxed">{description}</p>
             )}
           </div>
+        </div>
 
-          <div className="flex flex-wrap gap-3 pt-1">
-            {checkpoint.Source ? (
-              <a
-                href={checkpoint.Source}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="font-montserrat inline-flex items-center gap-2 rounded-xl bg-[#F57E3A] px-4 py-2.5 text-sm font-semibold text-white transition-opacity hover:opacity-90"
-              >
-                View Source
-                <ExternalLink className="size-4" aria-hidden />
-              </a>
-            ) : null}
-            <Link
-              href={`/dashboard/checkpoints/${checkpoint.id}`}
-              className="font-montserrat inline-flex items-center rounded-xl border border-white/15 bg-white/5 px-4 py-2.5 text-sm font-semibold text-white transition-colors hover:border-[#F57E3A]/40 hover:text-[#F57E3A]"
+        <div className="flex shrink-0 flex-wrap gap-3 border-t border-white/10 px-6 py-4">
+          {checkpoint.Source ? (
+            <a
+              href={checkpoint.Source}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="font-montserrat inline-flex items-center gap-2 rounded-xl bg-[#F57E3A] px-4 py-2.5 text-sm font-semibold text-white transition-opacity hover:opacity-90"
             >
-              Full page view
-            </Link>
-          </div>
+              View Source
+              <ExternalLink className="size-4" aria-hidden />
+            </a>
+          ) : null}
+          <Link
+            href={`/dashboard/checkpoints/${checkpoint.id}`}
+            className="font-montserrat inline-flex items-center rounded-xl border border-white/15 bg-white/5 px-4 py-2.5 text-sm font-semibold text-white transition-colors hover:border-[#F57E3A]/40 hover:text-[#F57E3A]"
+          >
+            Full page view
+          </Link>
         </div>
       </DialogContent>
     </Dialog>

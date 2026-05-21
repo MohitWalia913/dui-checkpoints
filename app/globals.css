@@ -23,6 +23,15 @@
   width: 100% !important;
   height: 100% !important;
 }
+
+/* Checkpoint detail dialog: scroll without visible scrollbar */
+.checkpoint-dialog-body {
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+.checkpoint-dialog-body::-webkit-scrollbar {
+  display: none;
+}
 @layer base {
   html {
     scroll-behavior: smooth;
