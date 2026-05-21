@@ -1,5 +1,12 @@
 "use client";
 
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import { buildCheckpointShareContent, getCheckpointSharePath } from "@/lib/checkpoints/share";
 import {
   buildShareAppTargets,
@@ -8,25 +15,13 @@ import {
 } from "@/lib/checkpoints/share-apps";
 import type { Checkpoint } from "@/lib/checkpoints/types";
 import { cn } from "@/lib/utils";
-import { Check, Copy, Mail, MessageCircle } from "lucide-react";
+import { Check, Copy, Mail, MessageCircle, Share2 } from "lucide-react";
 import { useCallback, useEffect, useMemo, useState } from "react";
 
 type ShareCheckpoint = Pick<
   Checkpoint,
   "id" | "Location" | "City" | "County" | "State" | "Date" | "Time"
 >;
-
-const DEFAULT_APPS: ShareAppId[] = [
-  "whatsapp",
-  "telegram",
-  "facebook",
-  "gmail",
-  "email",
-  "teams",
-  "twitter",
-];
-
-const COMPACT_APPS: ShareAppId[] = ["whatsapp", "telegram", "facebook"];
 
 function FacebookIcon({ className }: { className?: string }) {
   return (
@@ -98,9 +93,6 @@ const APP_ICONS: Record<
   twitter: ({ className }) => <XIcon className={className} />,
 };
 
-const iconBtnClass =
-  "inline-flex items-center justify-center rounded-lg border border-white/15 bg-white/5 text-white transition-colors hover:border-[#F57E3A]/40 hover:text-[#F57E3A]";
-
 export function CheckpointShareButton({
   checkpoint,
   className,
@@ -124,19 +116,14 @@ export function CheckpointShareButton({
     [checkpoint, pageUrl],
   );
 
-  const visibleApps = useMemo(() => {
-    if (!share) return [];
-    const ids = variant === "compact" ? COMPACT_APPS : DEFAULT_APPS;
-    const targets = buildShareAppTargets(share);
-    return ids
-      .map((id) => targets.find((t) => t.id === id))
-      .filter((t): t is NonNullable<typeof t> => !!t);
-  }, [share, variant]);
+  const appTargets = useMemo(
+    () => (share ? buildShareAppTargets(share) : []),
+    [share],
+  );
 
   const handleAppShare = useCallback(
     (appId: ShareAppId) => {
-      if (!share) return;
-      const target = buildShareAppTargets(share).find((t) => t.id === appId);
+      const target = appTargets.find((t) => t.id === appId);
       if (!target) return;
       try {
         openShareApp(target);
@@ -144,7 +131,7 @@ export function CheckpointShareButton({
         window.open(target.webUrl, "_blank", "noopener,noreferrer");
       }
     },
-    [share],
+    [appTargets],
   );
 
   const handleCopyLink = useCallback(async () => {
@@ -158,51 +145,69 @@ export function CheckpointShareButton({
     }
   }, [share]);
 
+  const triggerClass =
+    variant === "compact"
+      ? "font-montserrat inline-flex items-center gap-1 rounded-lg border border-white/15 bg-white/5 px-3 py-1.5 text-xs font-semibold text-white hover:border-[#F57E3A]/40 hover:text-[#F57E3A]"
+      : "font-montserrat inline-flex items-center gap-2 rounded-lg border border-white/15 bg-white/5 px-4 py-2.5 text-sm font-semibold text-white transition-colors hover:border-[#F57E3A]/40 hover:bg-white/[0.08]";
+
   const iconSize = variant === "compact" ? "size-3.5" : "size-4";
-  const btnPad = variant === "compact" ? "p-1.5" : "p-2.5";
 
   if (!share) {
     return (
-      <span
-        className={cn("inline-flex items-center gap-1 opacity-50", className)}
-        aria-hidden
-      >
-        …
-      </span>
+      <button type="button" disabled className={cn(triggerClass, className)}>
+        <Share2 className={iconSize} aria-hidden />
+        Share
+      </button>
     );
   }
 
   return (
-    <div className={cn("inline-flex flex-wrap items-center gap-1.5", className)}>
-      {visibleApps.map((target) => {
-        const Icon = APP_ICONS[target.id];
-        return (
-          <button
-            key={target.id}
-            type="button"
-            className={cn(iconBtnClass, btnPad)}
-            title={target.label}
-            aria-label={`Share on ${target.label}`}
-            onClick={() => handleAppShare(target.id)}
-          >
-            <Icon className={iconSize} />
-          </button>
-        );
-      })}
-
-      <button
-        type="button"
-        className={cn(iconBtnClass, btnPad)}
-        title={copied ? "Link copied" : "Copy link"}
-        aria-label="Copy checkpoint link"
-        onClick={() => void handleCopyLink()}
+    <DropdownMenu>
+      <DropdownMenuTrigger
+        className={cn(triggerClass, className)}
+        aria-label="Share checkpoint"
       >
-        {copied ? (
-          <Check className={cn(iconSize, "text-emerald-400")} aria-hidden />
-        ) : (
-          <Copy className={cn(iconSize, "text-white/70")} aria-hidden />
-        )}
-      </button>
-    </div>
+        <Share2 className={iconSize} aria-hidden />
+        Share
+      </DropdownMenuTrigger>
+      <DropdownMenuContent
+        align="end"
+        className="z-[100] min-w-[220px] border-white/10 bg-[#0a1628] text-white"
+      >
+        {appTargets.map((target) => {
+          const Icon = APP_ICONS[target.id];
+          return (
+            <DropdownMenuItem
+              key={target.id}
+              className="cursor-pointer gap-2 focus:bg-[#F57E3A]/15 focus:text-white"
+              onSelect={(e) => {
+                e.preventDefault();
+                handleAppShare(target.id);
+              }}
+            >
+              <Icon className="size-4" />
+              {target.label}
+            </DropdownMenuItem>
+          );
+        })}
+
+        <DropdownMenuSeparator className="bg-white/10" />
+
+        <DropdownMenuItem
+          className="cursor-pointer gap-2 focus:bg-[#F57E3A]/15 focus:text-white"
+          onSelect={(e) => {
+            e.preventDefault();
+            void handleCopyLink();
+          }}
+        >
+          {copied ? (
+            <Check className="size-4 text-emerald-400" aria-hidden />
+          ) : (
+            <Copy className="size-4 text-white/70" aria-hidden />
+          )}
+          {copied ? "Link copied!" : "Copy link"}
+        </DropdownMenuItem>
+      </DropdownMenuContent>
+    </DropdownMenu>
   );
 }
