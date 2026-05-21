@@ -198,11 +198,11 @@ export function Testimonials() {
         </div>
 
         <div className="mt-8 border-t border-white/10 pt-10 md:mt-10">
-          <div className="four-logo flex flex-wrap items-center gap-6 md:gap-0 md:divide-x md:divide-white/15 mx-auto max-w-[1440px] px-6 md:px-10 lg:px-14">
+          <div className="four-logo flex flex-wrap items-center gap-6 md:gap-0 md:divide-x md:divide-white/15 mx-auto max-w-[1338px] px-6 md:px-10 lg:px-14">
             {PARTNER_LOGOS.map(({ src, alt }) => (
               <div
                 key={src}
-                className=" four-logo-inner-box flex items-center justify-center px-4 md:px-8 lg:px-12"
+                className=" four-logo-inner-box flex items-center justify-center px-4 md:px-8 lg:px-[35px]"
               >
                 <Image
                   src={src}

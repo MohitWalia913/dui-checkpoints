@@ -216,7 +216,7 @@ export function ReportCheckpointForm() {
         <textarea
           id="description"
           name="Description"
-          rows={3}
+          rows={1}
           placeholder="Description (details about the checkpoint)"
           className={`${inputClassName} resize-y`}
           value={form.Description}
