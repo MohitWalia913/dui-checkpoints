@@ -1,5 +1,5 @@
 import Image from "next/image";
-import { ArrowRight } from "lucide-react";
+import { ReportCheckpointForm } from "@/components/homepage/report-checkpoint-form";
 
 const APP_FEATURES = [
   "Real-time alerts",
@@ -7,9 +7,6 @@ const APP_FEATURES = [
   "Plan Your Route",
   "Stay informed",
 ] as const;
-
-const inputClassName =
-  "py-[11px] px-[10px] bg-white border border-[#97979D] font-open-sans font-normal text-[14px] leading-[19px] text-[#97979D] w-full rounded-[0px] placeholder:text-[#97979D] focus:border-[#F57E3A] focus:outline-none focus:ring-1 focus:ring-[#F57E3A]";
 
 export function ReportCheckpoint() {
   return (
@@ -27,90 +24,7 @@ export function ReportCheckpoint() {
               information below, and we&apos;ll add it to the live map.
             </p>
 
-            <form className="mt-[20px] md:mt-[30px] space-y-4" action="#" method="post">
-
-              <div className="form-flex flex justify-between gap-5 mb-[20px]"> 
-              <div className="w-full">
-                <label htmlFor="full-name" className="sr-only">
-                  Full Name
-                </label>
-                <input
-                  id="full-name" 
-                  name="fullName"
-                  type="text"
-                  placeholder="Full Name" 
-                  className={inputClassName } 
-                  required
-                />
-              </div>
-              <div className="w-full">
-                <label htmlFor="email" className="sr-only">
-                  Email Address
-                </label>
-                <input
-                  id="email"
-                  name="email"
-                  type="email"
-                  placeholder="Email Address"
-                  className={inputClassName}
-                  required
-                />
-              </div>
- </div>
-          <div className="form-flex flex justify-between gap-5 mb-[20px]"> 
-              <div className="w-full">
-                <label htmlFor="phone" className="sr-only">
-                  Phone Number
-                </label>
-                <input
-                  id="phone"
-                  name="phone"
-                  type="tel"
-                  placeholder="Phone Number"
-                  className={inputClassName}
-                />
-              </div>
-              <div className="w-full">
-                <label htmlFor="inquiry-type" className="sr-only">
-                  Type of Inquiry
-                </label>
-                <select
-                  id="inquiry-type"
-                  name="inquiryType"
-                  className={`${inputClassName} appearance-none bg-[url('data:image/svg+xml;charset=utf-8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%2216%22%20height%3D%2216%22%20fill%3D%22none%22%20stroke%3D%22%236B7280%22%20stroke-width%3D%222%22%3E%3Cpath%20d%3D%22m4%206%206%206%206-6%22%2F%3E%3C%2Fsvg%3E')] bg-[length:16px] bg-[right_1rem_center] bg-no-repeat pr-10 text-[#242E4E]`}
-                  defaultValue=""
-                  required
-                >
-                  <option value="" disabled>
-                    Type of Inquiry
-                  </option>
-                  <option value="checkpoint">Report a checkpoint</option>
-                  <option value="general">General inquiry</option>
-                  <option value="legal">Legal help</option>
-                </select>
-              </div>
-
-            </div>
-              <div className="w-full mt-[0px] mb-[20px]">
-                <label htmlFor="message" className="sr-only ">
-                  How can we help you?
-                </label>
-                <textarea
-                  id="message"
-                  name="message"
-                  rows={1}
-                  placeholder="How can we help you?"
-                  className={`${inputClassName} resize-none`}
-                />
-              </div>
-              <button
-                type="submit"
-                className="font-inter !mt-[20px] flex w-full items-center justify-center gap-2 rounded-[0px] bg-[#F57E3A] p-[16px]  md:p-[21px] text-lg font-medium text-white transition-opacity hover:opacity-90 hover:bg-[#000] focus:outline-none"
-              >
-                Send Message
-                <ArrowRight className="h-5 w-5" aria-hidden />
-              </button>
-            </form>
+            <ReportCheckpointForm />
           </div>
 
           {/* Right — app promo card */}

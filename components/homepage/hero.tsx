@@ -5,7 +5,7 @@ import { Monitor } from "lucide-react";
 function CaliforniaGlow() {
   return (
     <svg
-      className="pointer-events-none absolute left-1/2 top-[46%] z-[1] h-[min(88%,520px)] w-auto max-h-[520px] -translate-x-1/2 -translate-y-1/2 text-[#F57E3A] opacity-90"
+      className="pointer-events-none absolute left-1/2 top-1/2 z-[1] h-[min(90%,500px)] w-auto max-h-[500px] -translate-x-1/2 -translate-y-1/2 text-[#F57E3A] opacity-90"
       viewBox="0 0 100 160"
       fill="none"
       preserveAspectRatio="xMidYMid meet"
@@ -26,7 +26,7 @@ function CaliforniaGlow() {
 
 export function Hero() {
   return (
-    <section className="banner-main relative w-full overflow-hidden bg-[#040F20]">
+    <section className="banner-main relative w-full overflow-x-hidden bg-[#040F20]">
       <Image
         src="/herobg.png"
         alt=""
@@ -75,34 +75,31 @@ export function Hero() {
             </Link>
           </div>
 
-          {/* Right — CA glow + overlapping mockups (Figma proportions) */}
-          <div className="image-box-banner relative mx-auto h-[400px] w-full max-w-[560px] sm:h-[460px] lg:mx-0 lg:ml-auto lg:h-[540px] lg:max-w-[620px]">
+          {/* Right — CA glow + mockups with gap, full phones visible */}
+          <div className="image-box-banner relative mx-auto w-full max-w-[640px] py-6 sm:py-8 lg:mx-0 lg:ml-auto lg:max-w-[700px] lg:py-10">
             <div
-              className="pointer-events-none absolute left-1/2 top-[46%] z-[1] h-[min(72%,380px)] w-[min(72%,380px)] -translate-x-1/2 -translate-y-1/2 rounded-full bg-[#F57E3A]/25 blur-[70px] lg:h-[400px] lg:w-[400px]"
+              className="pointer-events-none absolute left-1/2 top-1/2 z-[1] h-[min(85%,420px)] w-[min(85%,420px)] -translate-x-1/2 -translate-y-1/2 rounded-full bg-[#F57E3A]/25 blur-[70px] lg:h-[440px] lg:w-[440px]"
               aria-hidden
             />
             <CaliforniaGlow />
 
-            <div className="absolute inset-0 z-10 flex items-center justify-center lg:justify-end">
-              <div className="relative h-[360px] w-[min(100%,500px)] sm:h-[400px] sm:w-[520px] lg:h-[480px] lg:w-[560px]">
-                {/* Legal card — smaller, behind, bottom-right overlap */}
-                <Image
-                  src="/bglegal.png"
-                  alt="Legal information and DUI help resources"
-                  width={232}
-                  height={384}
-                  priority
-                  className="absolute bottom-4 right-0 z-10 h-auto w-[46%] min-w-[168px] max-w-[232px] drop-shadow-[0_24px_48px_rgba(0,0,0,0.45)] sm:bottom-6 sm:w-[44%] lg:bottom-8 lg:max-w-[238px]"
-                />
-
-                {/* Phone — primary, larger, front-left */}
+            <div className="relative z-10 flex min-h-[380px] items-center justify-center sm:min-h-[440px] lg:min-h-[500px] lg:justify-end">
+              <div className="flex items-end justify-center gap-5 sm:gap-7 lg:gap-9">
                 <Image
                   src="/bgphone.png"
                   alt="DUI Checkpoints Locator map app on mobile"
                   width={355}
                   height={710}
                   priority
-                  className="absolute bottom-0 left-0 z-20 h-auto w-[68%] min-w-[220px] max-w-[355px] drop-shadow-[0_28px_56px_rgba(0,0,0,0.5)] sm:w-[66%] lg:max-w-[360px]"
+                  className="relative z-20 h-auto w-[min(42vw,220px)] max-w-[300px] shrink-0 drop-shadow-[0_28px_56px_rgba(0,0,0,0.5)] sm:w-[260px] lg:w-[320px] lg:max-w-[340px]"
+                />
+                <Image
+                  src="/bglegal.png"
+                  alt="Legal information and DUI help resources"
+                  width={232}
+                  height={384}
+                  priority
+                  className="relative z-10 mb-2 h-auto w-[min(34vw,168px)] max-w-[220px] shrink-0 drop-shadow-[0_24px_48px_rgba(0,0,0,0.45)] sm:mb-4 sm:w-[200px] lg:mb-6 lg:w-[228px]"
                 />
               </div>
             </div>
