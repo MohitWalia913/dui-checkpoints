@@ -5,16 +5,12 @@ import {
   type MapLayerStyle,
 } from "@/lib/map/tile-layers";
 import type { MapCheckpoint } from "@/lib/checkpoints/map-checkpoint";
-import {
-  isApproximateCoordinates,
-  type LatLng,
-} from "@/lib/checkpoints/coordinates";
+import type { LatLng } from "@/lib/checkpoints/coordinates";
 import type { Feature, FeatureCollection, Point, Polygon } from "geojson";
 import type {
   FilterSpecification,
+  LngLatBoundsLike,
   MapLayerMouseEvent,
-  StyleSpecification,
-  SymbolLayerSpecification,
 } from "maplibre-gl";
 import type { CircleLayerSpecification } from "react-map-gl/maplibre";
 import { useCallback, useEffect, useMemo, useRef } from "react";
@@ -25,6 +21,19 @@ import "maplibre-gl/dist/maplibre-gl.css";
 const CALIFORNIA_CENTER: [number, number] = [-119.4179, 36.7783];
 const DEFAULT_MAP_ZOOM = 5.6;
 const FOCUS_ZOOM = 15;
+
+/** Stable style — basemap tiles are added as a Source child so filter/layer changes do not wipe markers. */
+const BASE_MAP_STYLE = {
+  version: 8 as const,
+  sources: {},
+  layers: [
+    {
+      id: "background",
+      type: "background" as const,
+      paint: { "background-color": "#e2e8f0" },
+    },
+  ],
+};
 
 const CALIFORNIA_BOUNDARY: Feature<Polygon> = {
   type: "Feature",
@@ -61,13 +70,13 @@ const UNCLUSTERED_LAYER: CircleLayerSpecification = {
       "upcoming",
       "#10B981",
       "past",
-      "#94A3B8",
+      "#CBD5E1",
       "#F57E3A",
     ],
-    "circle-radius": 9,
+    "circle-radius": 10,
     "circle-stroke-width": 2.5,
     "circle-stroke-color": "#FFFFFF",
-    "circle-opacity": 0.95,
+    "circle-opacity": 1,
   },
 };
 
@@ -102,7 +111,7 @@ const SELECTED_LAYER: CircleLayerSpecification = {
   filter: ["==", ["get", "id"], -1],
   paint: {
     "circle-color": "#F57E3A",
-    "circle-radius": 14,
+    "circle-radius": 16,
     "circle-stroke-width": 3,
     "circle-stroke-color": "#FFFFFF",
     "circle-opacity": 1,
@@ -116,12 +125,38 @@ const HOVERED_LAYER: CircleLayerSpecification = {
   filter: ["==", ["get", "id"], -1],
   paint: {
     "circle-color": "#F57E3A",
-    "circle-radius": 10,
+    "circle-radius": 12,
     "circle-stroke-width": 2,
     "circle-stroke-color": "#FFFFFF",
-    "circle-opacity": 0.9,
+    "circle-opacity": 0.95,
   },
 };
+
+function boundsFromCheckpoints(
+  checkpoints: MapCheckpoint[],
+): LngLatBoundsLike | null {
+  if (checkpoints.length === 0) return null;
+
+  let minLng = Infinity;
+  let minLat = Infinity;
+  let maxLng = -Infinity;
+  let maxLat = -Infinity;
+
+  for (const c of checkpoints) {
+    const { lat, lng } = c.coordinates;
+    if (!Number.isFinite(lat) || !Number.isFinite(lng)) continue;
+    minLng = Math.min(minLng, lng);
+    minLat = Math.min(minLat, lat);
+    maxLng = Math.max(maxLng, lng);
+    maxLat = Math.max(maxLat, lat);
+  }
+
+  if (!Number.isFinite(minLng)) return null;
+  return [
+    [minLng, minLat],
+    [maxLng, maxLat],
+  ];
+}
 
 export function CheckpointsMapView({
   checkpoints,
@@ -145,58 +180,63 @@ export function CheckpointsMapView({
   onHover: (id: number | null) => void;
 }) {
   const mapRef = useRef<MapRef | null>(null);
-  const hasFittedRef = useRef(false);
+  const mapReadyRef = useRef(false);
   const lastFlownCoordsRef = useRef<string | null>(null);
+
+  const tileConfig = MAP_TILE_LAYERS[mapLayer];
 
   const flyToCheckpoint = useCallback((coords: LatLng, zoom = FOCUS_ZOOM) => {
     const mapInstance = mapRef.current?.getMap();
-    if (!mapInstance) return;
+    if (!mapInstance || !mapReadyRef.current) return;
 
     const lat = Number.parseFloat(String(coords.lat));
     const lng = Number.parseFloat(String(coords.lng));
     if (!Number.isFinite(lat) || !Number.isFinite(lng)) return;
     if (Math.abs(lat) > 90 || Math.abs(lng) > 180 || lat === 0 || lng === 0) return;
-    if (isApproximateCoordinates({ lat, lng })) return;
 
     const key = `${lat.toFixed(6)},${lng.toFixed(6)}@${zoom}`;
     if (lastFlownCoordsRef.current === key) return;
     lastFlownCoordsRef.current = key;
 
     const center: [number, number] = [lng, lat];
-
-    const runFocusAnimation = () => {
+    mapInstance.stop();
+    mapInstance.resize();
+    mapInstance.flyTo({
+      center,
+      zoom,
+      duration: 1600,
+      essential: true,
+      curve: 1.42,
+    });
+    mapInstance.once("moveend", () => {
       mapInstance.resize();
-      mapInstance.stop();
-
-      mapInstance.flyTo({
-        center,
-        zoom: Math.max(zoom - 2, 8),
-        duration: 900,
-        essential: true,
-        curve: 1.35,
-      });
-
-      mapInstance.once("moveend", () => {
-        mapInstance.easeTo({
-          center,
-          zoom,
-          duration: 1100,
-          essential: true,
-        });
-        mapInstance.once("idle", () => {
-          mapInstance.resize();
-          mapInstance.triggerRepaint();
-        });
-      });
-    };
-
-    if (mapInstance.isStyleLoaded()) {
-      runFocusAnimation();
-      return;
-    }
-
-    mapInstance.once("load", runFocusAnimation);
+    });
   }, []);
+
+  const fitCheckpointsInView = useCallback(
+    (list: MapCheckpoint[], animate = true) => {
+      const mapInstance = mapRef.current?.getMap();
+      if (!mapInstance || !mapReadyRef.current) return;
+
+      const bounds = boundsFromCheckpoints(list);
+      if (!bounds) {
+        mapInstance.jumpTo({
+          center: CALIFORNIA_CENTER,
+          zoom: DEFAULT_MAP_ZOOM,
+        });
+        return;
+      }
+
+      lastFlownCoordsRef.current = null;
+      mapInstance.resize();
+      mapInstance.fitBounds(bounds, {
+        padding: { top: 48, bottom: 48, left: 48, right: 48 },
+        duration: animate ? 900 : 0,
+        maxZoom: 11,
+      });
+    },
+    [],
+  );
 
   const checkpointsGeoJson = useMemo<FeatureCollection<Point>>(
     () => ({
@@ -218,6 +258,7 @@ export function CheckpointsMapView({
     }),
     [checkpoints],
   );
+
   const undisclosedAreasGeoJson = useMemo<FeatureCollection<Polygon>>(
     () => ({
       type: "FeatureCollection",
@@ -244,32 +285,6 @@ export function CheckpointsMapView({
     [hoveredId],
   );
 
-  const mapStyle = useMemo<StyleSpecification>(() => {
-    const tile = MAP_TILE_LAYERS[mapLayer];
-    return {
-      version: 8,
-      sources: {
-        basemap: {
-          type: "raster",
-          tiles: [tile.url],
-          tileSize: 256,
-          attribution: tile.attribution,
-          minzoom: 0,
-          maxzoom: tile.maxZoom ?? 20,
-        },
-      },
-      layers: [
-        {
-          id: "basemap",
-          type: "raster",
-          source: "basemap",
-          minzoom: 0,
-          maxzoom: tile.maxZoom ?? 20,
-        },
-      ],
-    };
-  }, [mapLayer]);
-
   useEffect(() => {
     if (!flyTarget) return;
     lastFlownCoordsRef.current = null;
@@ -277,58 +292,27 @@ export function CheckpointsMapView({
   }, [flyTarget, focusToken, flyToCheckpoint]);
 
   useEffect(() => {
-    if (!flyTarget) return;
-    lastFlownCoordsRef.current = null;
-    const mapInstance = mapRef.current?.getMap();
-    if (!mapInstance) return;
-
-    const refly = () => flyToCheckpoint(flyTarget.center, flyTarget.zoom);
-    if (mapInstance.isStyleLoaded()) {
-      refly();
-      return;
-    }
-    mapInstance.once("styledata", refly);
-  }, [mapLayer, flyTarget, flyToCheckpoint]);
-
-  useEffect(() => {
-    if (!mapRef.current) return;
-    mapRef.current.easeTo({
-      center: CALIFORNIA_CENTER,
-      zoom: DEFAULT_MAP_ZOOM,
-      pitch: 0,
-      bearing: 0,
-      duration: 350,
-      essential: true,
-    });
-  }, [resetViewToken]);
+    if (flyTarget || selectedCheckpoint) return;
+    fitCheckpointsInView(checkpoints, true);
+  }, [checkpoints, resetViewToken, flyTarget, selectedCheckpoint, fitCheckpointsInView]);
 
   const handleMapLoad = () => {
-    if (hasFittedRef.current || !mapRef.current) return;
-    mapRef.current.jumpTo({
-      center: CALIFORNIA_CENTER,
-      zoom: DEFAULT_MAP_ZOOM,
-      pitch: 0,
-      bearing: 0,
-    });
-    hasFittedRef.current = true;
+    mapReadyRef.current = true;
+    const mapInstance = mapRef.current?.getMap();
+    if (!mapInstance) return;
+    mapInstance.resize();
+    fitCheckpointsInView(checkpoints, false);
   };
 
   const handleMapClick = (event: MapLayerMouseEvent) => {
-    const map = mapRef.current?.getMap();
-    if (!map) return;
-
     const feature = event.features?.[0];
-    if (!feature) return;
-
-    if (feature.layer.id !== "unclustered-point") return;
+    if (!feature || feature.layer.id !== "unclustered-point") return;
 
     const checkpointId = Number(feature.properties?.id);
     if (!Number.isFinite(checkpointId)) return;
 
     const match = checkpoints.find((c) => c.id === checkpointId);
-    if (match) {
-      onMarkerClick(match);
-    }
+    if (match) onMarkerClick(match);
   };
 
   const handleMapMouseMove = (event: MapLayerMouseEvent) => {
@@ -337,21 +321,15 @@ export function CheckpointsMapView({
       onHover(null);
       return;
     }
-
     const checkpointId = Number(feature.properties?.id);
-    if (!Number.isFinite(checkpointId)) {
-      onHover(null);
-      return;
-    }
-
-    onHover(checkpointId);
+    onHover(Number.isFinite(checkpointId) ? checkpointId : null);
   };
 
   return (
-    <div className="checkpoint-locator-map h-full w-full">
+    <div className="checkpoint-locator-map h-full min-h-[320px] w-full">
       <Map
         ref={mapRef}
-        mapStyle={mapStyle}
+        mapStyle={BASE_MAP_STYLE}
         initialViewState={{
           longitude: CALIFORNIA_CENTER[0],
           latitude: CALIFORNIA_CENTER[1],
@@ -363,6 +341,7 @@ export function CheckpointsMapView({
         onMouseMove={handleMapMouseMove}
         onMouseLeave={() => onHover(null)}
         scrollZoom
+        attributionControl={false}
         style={{
           width: "100%",
           height: "100%",
@@ -370,6 +349,25 @@ export function CheckpointsMapView({
           background: mapLayer === "dark" ? "#0a1628" : "#e2e8f0",
         }}
       >
+        <Source
+          key={mapLayer}
+          id="basemap"
+          type="raster"
+          tiles={[tileConfig.url]}
+          tileSize={256}
+          attribution={tileConfig.attribution}
+          minzoom={0}
+          maxzoom={tileConfig.maxZoom ?? 20}
+        >
+          <Layer
+            id="basemap-layer"
+            type="raster"
+            source="basemap"
+            minzoom={0}
+            maxzoom={tileConfig.maxZoom ?? 20}
+          />
+        </Source>
+
         <Source id="checkpoints" type="geojson" data={checkpointsGeoJson}>
           <Layer {...UNCLUSTERED_LAYER} />
           <Layer {...HOVERED_LAYER} filter={hoveredFilter} />
@@ -397,8 +395,7 @@ export function CheckpointsMapView({
           />
         </Source>
 
-        {selectedCheckpoint &&
-        !isApproximateCoordinates(selectedCheckpoint.coordinates) ? (
+        {selectedCheckpoint ? (
           <Popup
             longitude={selectedCheckpoint.coordinates.lng}
             latitude={selectedCheckpoint.coordinates.lat}

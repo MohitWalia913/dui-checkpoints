@@ -134,6 +134,7 @@ export function CheckpointsLocator({
     setSelected(null);
     setHoveredId(null);
     setFlyTarget(null);
+    setMapFocusing(false);
     setResetViewToken((prev) => prev + 1);
   }, [statusFilter, countyFilter, searchQuery]);
 
@@ -245,7 +246,7 @@ export function CheckpointsLocator({
     let cancelled = false;
     const pending = filteredCheckpoints
       .filter((c) => needsGeocodeForMap(c, c.coordinates))
-      .slice(0, 12);
+      .slice(0, statusFilter === "past" ? 25 : 12);
 
     void (async () => {
       for (const checkpoint of pending) {
@@ -285,20 +286,21 @@ export function CheckpointsLocator({
         mapCheckpoint.coordinates,
       );
 
-      if (!mustGeocode) {
-        focusMapOnCheckpoint(mapCheckpoint.coordinates);
-      } else {
+      const flyNow = normalizeLatLng(mapCheckpoint.coordinates);
+      if (flyNow) {
+        focusMapOnCheckpoint(flyNow);
+      }
+
+      if (mustGeocode) {
         setMapFocusing(true);
         void (async () => {
           const resolved = await applyGeocodeIfNeeded(mapCheckpoint);
           if (selectionRequestRef.current !== requestId) return;
           const safeResolved = resolved
             ? normalizeLatLng(resolved)
-            : normalizeLatLng(mapCheckpoint.coordinates);
-          if (!safeResolved) {
-            setMapFocusing(false);
-            return;
-          }
+            : flyNow;
+          setMapFocusing(false);
+          if (!safeResolved) return;
 
           setSelected((prev) =>
             prev?.id === mapCheckpoint.id
@@ -337,20 +339,21 @@ export function CheckpointsLocator({
         mapCheckpoint.coordinates,
       );
 
-      if (!mustGeocode) {
-        focusMapOnCheckpoint(mapCheckpoint.coordinates);
-      } else {
+      const flyNow = normalizeLatLng(mapCheckpoint.coordinates);
+      if (flyNow) {
+        focusMapOnCheckpoint(flyNow);
+      }
+
+      if (mustGeocode) {
         setMapFocusing(true);
         void (async () => {
           const resolved = await applyGeocodeIfNeeded(mapCheckpoint);
           if (selectionRequestRef.current !== requestId) return;
           const safeResolved = resolved
             ? normalizeLatLng(resolved)
-            : normalizeLatLng(mapCheckpoint.coordinates);
-          if (!safeResolved) {
-            setMapFocusing(false);
-            return;
-          }
+            : flyNow;
+          setMapFocusing(false);
+          if (!safeResolved) return;
 
           setSelected((prev) =>
             prev?.id === mapCheckpoint.id
