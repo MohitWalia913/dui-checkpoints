@@ -1,7 +1,9 @@
 "use client";
 
 import {
+  MAP_STYLE_URLS,
   MAP_TILE_LAYERS,
+  usesVectorMapStyle,
   type MapLayerStyle,
 } from "@/lib/map/tile-layers";
 import type { MapCheckpoint } from "@/lib/checkpoints/map-checkpoint";
@@ -253,22 +255,15 @@ export function CheckpointsMapView({
   const mapReadyRef = useRef(false);
   const lastFlownCoordsRef = useRef<string | null>(null);
 
+  const vectorStyleUrl = MAP_STYLE_URLS[mapLayer];
+  const useVectorBasemap = usesVectorMapStyle(mapLayer);
   const tileConfig = MAP_TILE_LAYERS[mapLayer];
+  const mapStyle = vectorStyleUrl ?? BASE_MAP_STYLE;
+
   const markerCoordsById = useMemo(
     () => spreadMarkerCoordinates(checkpoints),
     [checkpoints],
   );
-
-  const snapToSharpTiles = useCallback(() => {
-    const mapInstance = mapRef.current?.getMap();
-    if (!mapInstance) return;
-    const z = mapInstance.getZoom();
-    const rounded = Math.round(z * 10) / 10;
-    if (Math.abs(z - rounded) > 0.05) {
-      mapInstance.setZoom(rounded);
-    }
-    mapInstance.resize();
-  }, []);
 
   const flyToCheckpoint = useCallback(
     (coords: LatLng, zoom = FOCUS_ZOOM) => {
@@ -281,21 +276,21 @@ export function CheckpointsMapView({
       if (Math.abs(lat) > 90 || Math.abs(lng) > 180 || lat === 0 || lng === 0)
         return;
 
-      const key = `${lat.toFixed(6)},${lng.toFixed(6)}@${zoom}`;
+      const z = Math.round(zoom);
+      const key = `${lat.toFixed(6)},${lng.toFixed(6)}@${z}`;
       if (lastFlownCoordsRef.current === key) return;
       lastFlownCoordsRef.current = key;
 
       mapInstance.stop();
       mapInstance.resize();
-      mapInstance.easeTo({
+      mapInstance.flyTo({
         center: [lng, lat],
-        zoom,
-        duration: 1200,
+        zoom: z,
+        duration: 1400,
         essential: true,
       });
-      mapInstance.once("moveend", snapToSharpTiles);
     },
-    [snapToSharpTiles],
+    [],
   );
 
   const fitCheckpointsInView = useCallback(
@@ -316,12 +311,11 @@ export function CheckpointsMapView({
       mapInstance.resize();
       mapInstance.fitBounds(bounds, {
         padding: { top: 56, bottom: 56, left: 56, right: 56 },
-        duration: animate ? 700 : 0,
+        duration: animate ? 600 : 0,
         maxZoom: 10,
       });
-      mapInstance.once("moveend", snapToSharpTiles);
     },
-    [markerCoordsById, snapToSharpTiles],
+    [markerCoordsById],
   );
 
   const checkpointsGeoJson = useMemo<FeatureCollection<Point>>(
@@ -381,25 +375,23 @@ export function CheckpointsMapView({
     const el = containerRef.current;
     if (!el) return;
 
+    let timeoutId: ReturnType<typeof setTimeout> | undefined;
     const observer = new ResizeObserver(() => {
-      mapRef.current?.getMap()?.resize();
+      if (timeoutId) clearTimeout(timeoutId);
+      timeoutId = setTimeout(() => {
+        mapRef.current?.getMap()?.resize();
+      }, 150);
     });
     observer.observe(el);
-    return () => observer.disconnect();
+    return () => {
+      if (timeoutId) clearTimeout(timeoutId);
+      observer.disconnect();
+    };
   }, []);
 
   useEffect(() => {
-    const mapInstance = mapRef.current?.getMap();
-    if (!mapInstance || !mapReadyRef.current) return;
-
-    const source = mapInstance.getSource("basemap") as
-      | { setTiles?: (tiles: string[]) => void }
-      | undefined;
-    if (source?.setTiles) {
-      source.setTiles([tileConfig.url]);
-      mapInstance.triggerRepaint();
-    }
-  }, [mapLayer, tileConfig.url]);
+    mapReadyRef.current = false;
+  }, [mapLayer]);
 
   useEffect(() => {
     if (!flyTarget) return;
@@ -442,8 +434,8 @@ export function CheckpointsMapView({
         const [lng, lat] = (feature.geometry as Point).coordinates;
         mapInstance.easeTo({
           center: [lng, lat],
-          zoom: Math.min(zoom + 0.5, 14),
-          duration: 600,
+          zoom: Math.round(Math.min(zoom + 0.5, 14)),
+          duration: 500,
         });
       });
       return;
@@ -483,8 +475,9 @@ export function CheckpointsMapView({
       className="checkpoint-locator-map relative h-full min-h-[360px] w-full"
     >
       <MapGL
+        key={mapLayer}
         ref={mapRef}
-        mapStyle={BASE_MAP_STYLE}
+        mapStyle={mapStyle}
         initialViewState={{
           longitude: CALIFORNIA_CENTER[0],
           latitude: CALIFORNIA_CENTER[1],
@@ -492,16 +485,12 @@ export function CheckpointsMapView({
         }}
         interactiveLayerIds={["unclustered-point", "clusters"]}
         onLoad={handleMapLoad}
+        onIdle={() => mapRef.current?.getMap()?.resize()}
         onClick={handleMapClick}
         onMouseMove={handleMapMouseMove}
         onMouseLeave={() => onHover(null)}
         scrollZoom
         attributionControl={false}
-        pixelRatio={
-          typeof window !== "undefined"
-            ? Math.min(window.devicePixelRatio || 1, 2)
-            : 2
-        }
         style={{
           width: "100%",
           height: "100%",
@@ -509,23 +498,29 @@ export function CheckpointsMapView({
           background: mapLayer === "dark" ? "#0a1628" : "#e2e8f0",
         }}
       >
-        <Source
-          id="basemap"
-          type="raster"
-          tiles={[tileConfig.url]}
-          tileSize={256}
-          attribution={tileConfig.attribution}
-          minzoom={0}
-          maxzoom={tileConfig.maxZoom ?? 19}
-        >
-          <Layer
-            id="basemap-layer"
+        {!useVectorBasemap ? (
+          <Source
+            id="basemap"
             type="raster"
-            source="basemap"
+            tiles={[tileConfig.url]}
+            tileSize={256}
+            attribution={tileConfig.attribution}
             minzoom={0}
-            maxzoom={tileConfig.maxZoom ?? 19}
-          />
-        </Source>
+            maxzoom={tileConfig.maxNativeZoom ?? tileConfig.maxZoom ?? 19}
+          >
+            <Layer
+              id="basemap-layer"
+              type="raster"
+              source="basemap"
+              minzoom={0}
+              maxzoom={tileConfig.maxNativeZoom ?? tileConfig.maxZoom ?? 19}
+              paint={{
+                "raster-fade-duration": 0,
+                "raster-resampling": "linear",
+              }}
+            />
+          </Source>
+        ) : null}
 
         <Source
           id="checkpoints"
