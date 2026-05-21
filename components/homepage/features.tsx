@@ -38,10 +38,10 @@ const FEATURES = [
 
 export function Features() {
   return (
-    <section className="w-full bg-[#F5F6F8] py-16 md:py-20 lg:py-24">
+    <section className="w-full bg-[#F5F6F8] py-16 md:py-16 lg:py-20">
       <div className="mx-auto max-w-[1200px] px-6 md:px-10 lg:px-14">
         <header className="mx-auto max-w-3xl text-center">
-          <h2 className="font-inter text-[32px] font-semibold leading-tight text-[#040F20] sm:text-[36px] lg:text-[40px]">
+          <h2 className=" w-full max-w-[636px] mx-auto font-inter text-[28px] font-semibold leading-tight text-[#040F20] sm:text-[32px] lg:text-[36px]">
             Powerful Features Built for Your{" "}
             <span className="text-[#F57E3A]">Protection</span>
           </h2>
@@ -51,7 +51,7 @@ export function Features() {
           />
         </header>
 
-        <div className="mt-12 grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3 lg:gap-8">
+        <div className="mt-8 grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3 lg:gap-8">
           {FEATURES.map(({ icon, title, description }) => (
             <article
               key={title}
@@ -66,7 +66,7 @@ export function Features() {
                   className="h-16 w-16 object-contain sm:h-20 sm:w-20"
                 />
               </div>
-              <h3 className="font-inter text-lg font-semibold text-[#040F20] sm:text-xl">
+              <h3 className="font-inter text-[20px] text-lg font-semibold text-[#040F20] md:text-[22px] lg:text-[24px]">
                 {title}
               </h3>
               <p className="font-inter mt-3 text-sm font-normal leading-relaxed text-[#5C6573] sm:text-base">

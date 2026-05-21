@@ -26,7 +26,7 @@ function CaliforniaGlow() {
 
 export function Hero() {
   return (
-    <section className="relative w-full overflow-hidden bg-[#040F20]">
+    <section className="banner-main relative w-full overflow-hidden bg-[#040F20]">
       {/* Full-width city background */}
       <Image
         src="/herobg.png"
@@ -37,24 +37,24 @@ export function Hero() {
         sizes="100vw"
       />
       <div
-        className="absolute inset-0 bg-gradient-to-r from-[#040F20] from-0% via-[#040F20]/92 via-42% to-[#040F20]/20 to-100%"
+        className="text-box absolute inset-0 bg-gradient-to-r from-[#040F20] from-0% via-[#040F20]/92 via-42% to-[#040F20]/20 to-100%"
         aria-hidden
       />
 
       <div className="relative z-10 mx-auto max-w-[1440px] px-6 py-12 md:px-10 md:py-16 lg:px-14 lg:py-20">
-        <div className="grid items-center gap-12 lg:grid-cols-2 lg:gap-8 xl:gap-12">
+        <div className="banner-row grid items-center grid-cols-1 gap-12 md:grid-cols-2 lg:grid-cols-2 lg:gap-8 xl:gap-12">
           {/* Left — copy & CTA */}
           <div className="max-w-xl lg:py-4">
             <p className="font-inter text-[16px] font-normal uppercase leading-6 text-[#F57E3A]">
               DUI checkpoint data updated every 24 hours
             </p>
 
-            <h1 className="font-inter mt-4 text-[32px] font-semibold leading-[1.2] text-white sm:text-[40px] lg:text-[48px]">
-              <span className="block text-white">California DUI</span>
-              <span className="block text-[#F57E3A]">
+            <h1 className="font-inter w-full max-w-[482px] mt-4 text-[32px] font-semibold leading-[1.2] text-white  sm:text-[36px]  lg:text-[40px] lg:text-[48px]">
+              <span className=" text-white">California DUI</span>
+              <span className="text-[#F57E3A]">
                 Checkpoints Locator Map
               </span>
-              <span className="block text-white">&amp; Real-Time Database</span>
+              <span className="text-white">&amp; Real-Time Database</span>
             </h1>
 
             <p className="font-inter mt-6 max-w-lg text-[18px] font-normal leading-[1.6] text-white">
@@ -64,15 +64,15 @@ export function Hero() {
 
             <Link
               href="/map"
-              className="font-inter mt-8 inline-flex items-center gap-4 rounded-full border border-white/25 bg-black px-6 py-3.5 text-white transition-opacity hover:opacity-90 lg:mt-10"
+              className="hover-window font-inter mt-8 inline-flex items-center gap-4 rounded-[10px] border border-white/10 bg-black px-6 py-3.5 text-white transition-opacity hover:opacity-90"
             >
               <Monitor
                 className="h-8 w-8 shrink-0 stroke-[1.5]"
                 aria-hidden
               />
               <span className="flex flex-col text-left leading-tight">
-                <span className="text-sm font-normal leading-5">Use On</span>
-                <span className="text-lg font-semibold leading-6">
+                <span className="text-[16px] font-normal leading-5">Use On</span>
+                <span className="text-[18px] mt-[8px] font-semibold leading-6 md:text-[25px]">
                   Web Browser
                 </span>
               </span>
@@ -80,7 +80,7 @@ export function Hero() {
           </div>
 
           {/* Right — map bg + CA glow + mockups */}
-          <div className="relative mx-auto h-[380px] w-full max-w-[600px] sm:h-[440px] lg:mx-0 lg:ml-auto lg:h-[520px] lg:max-w-[680px]">
+          <div className="image-box-banner relative mx-auto h-[380px] w-full max-w-[600px] sm:h-[440px] lg:mx-0 lg:ml-auto lg:h-[520px] lg:max-w-[680px]">
             {/* Map texture behind mockups */}
      
 
@@ -91,9 +91,9 @@ export function Hero() {
             <CaliforniaGlow />
 
             {/* Device mockups — phone left & up, legal right & down */}
-            <div className="absolute inset-0 z-10 flex items-end justify-center pb-2 lg:justify-end lg:pb-0">
-              <div className="relative flex w-full max-w-[560px] items-end justify-center lg:justify-end">
-                <div className="relative z-20 w-[54%] max-w-[300px] shrink-0 translate-y-0 sm:max-w-[320px] lg:max-w-[340px]">
+            <div className="md:absolute inset-0 z-10 flex items-end justify-center pb-2 lg:justify-end lg:pb-0">
+              <div className="relative flex gap-[33px] w-full max-w-[668px] items-end justify-center lg:justify-end">
+                <div className="relative">
                   <Image
                     src="/bgphone.png"
                     alt="DUI Checkpoints Locator map app on mobile"
@@ -104,7 +104,7 @@ export function Hero() {
                   />
                 </div>
 
-                <div className="relative z-10 -ml-10 mb-6 w-[50%] max-w-[270px] shrink-0 sm:-ml-14 sm:mb-8 lg:-ml-16 lg:mb-10 lg:max-w-[290px]">
+                <div className="relative">
                   <Image
                     src="/bglegal.png"
                     alt="Legal information and DUI help resources"

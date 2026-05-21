@@ -1,9 +1,7 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&family=Montserrat:ital,wght@0,100..900;1,100..900&family=Open+Sans:ital,wght@0,300..800;1,300..800&display=swap');
 @tailwind base;
-
-@custom-variant dark (&:is(.dark *));
 @tailwind components;
 @tailwind utilities;
-
 @layer base {
   :root {
     --background: 0 0% 100%;
@@ -60,93 +58,70 @@
   }
 }
 
+
 @layer base {
   * {
     @apply border-border;
   }
+  
   body {
     @apply bg-background text-foreground;
+    font-family: 'Inter', 'Open Sans', 'Montserrat', sans-serif;
   }
 }
 
-:root {
-  --sidebar: hsl(0 0% 98%);
-  --sidebar-foreground: hsl(240 5.3% 26.1%);
-  --sidebar-primary: hsl(240 5.9% 10%);
-  --sidebar-primary-foreground: hsl(0 0% 98%);
-  --sidebar-accent: hsl(240 4.8% 95.9%);
-  --sidebar-accent-foreground: hsl(240 5.9% 10%);
-  --sidebar-border: hsl(220 13% 91%);
-  --sidebar-ring: hsl(217.2 91.2% 59.8%);
+
+/********style**************/
+.main-header-inner-row { padding-top: 20px;  padding-bottom: 20px;}
+.main-header-inner-row .logo-img-box {   width: 200px; max-width: 100%;}
+.main-header-inner-row .logo-img-box img { width: 100%; max-width: 100%; object-fit: cover;}
+.main-header-inner-row  nav { margin-right: 115px;}
+.main-header-inner-row  nav  ul li a  { font-family: 'Montserrat' !important; font-style: normal;font-weight: 500 !important;font-size: 14px !important;line-height: 22px;color: #FFFFFF !important;}
+.two-btn { gap: 20px;}
+.two-btn .same-btn {  border: 1px solid #fff;  padding: 12.5px 26px;  font-family: 'Inter';  font-style: normal;  font-weight: 500 !important;  font-size: 20.8px;  line-height: 16px;  text-align: center;  color: #FFFFFF; text-transform:capitalize; box-shadow: none;}
+.two-btn .same-btn:hover {  border-color:#F57E3A; background:#F57E3A; transition: all 0.3s ease;}
+.two-btn .same-btn.same-ext-btn {  background: #F57E3A; border-color: #F57E3A;}
+.two-btn .same-btn.same-ext-btn:hover { background:transparent; color:#F57E3A;}
+.banner-main { position: relative; z-index: 1;  padding-top: 120px;}
+.hover-window:hover {background:#f57e3a; transition:all 0.3s;}
+
+
+/***********Responsive-start-here***********/
+ @media (max-width: 1440px) { .grid-left-inner { padding-left: 56px;}
+ .banner-main { padding-top: 0px;}
+  }
+ 
+ @media (max-width: 1366px) {
+  .trusted-block .trusted-right-box-slider .bordeer-box-trust-slide { width: 50% !important;}
+  }
+
+ @media (max-width: 1199px) {.main-header-inner-row nav { margin-right: 50px;}
+  }
+
+ @media (max-width: 1024px) {
+.four-logo { display:grid; grid-template-columns:1fr 1fr 1fr 1fr;}
+.four-logo-inner-box {  padding: 0px 20px;}
+.trusted-block .trusted-right-box-slider .bordeer-box-trust-slide {  width: 66.6667% !important;}
+.grid-left-inner { padding-left: 40px;}
+div#mobile-menu a {  font-size: 16px !important;}
+.calfornia-left-cil-inner-box {
+    max-width: 100%;
+}
 }
 
-.dark {
-  --sidebar: hsl(240 5.9% 10%);
-  --sidebar-foreground: hsl(240 4.8% 95.9%);
-  --sidebar-primary: hsl(224.3 76.3% 48%);
-  --sidebar-primary-foreground: hsl(0 0% 100%);
-  --sidebar-accent: hsl(240 3.7% 15.9%);
-  --sidebar-accent-foreground: hsl(240 4.8% 95.9%);
-  --sidebar-border: hsl(240 3.7% 15.9%);
-  --sidebar-ring: hsl(217.2 91.2% 59.8%);
-}
+ @media (max-width: 767px) {
+.trusted-block .trusted-right-box-slider .bordeer-box-trust-slide { width: 86.9565% !important;}
+.grid-left-inner { padding-left: 0px;}
+ }
 
-/* Leaflet map (dashboard checkpoint detail) */
-.leaflet-container {
-  font-family: var(--font-inter), sans-serif;
-  z-index: 0;
-}
-
-.leaflet-popup-content-wrapper {
-  border-radius: 0.5rem;
-}
-
-/* Checkpoint locator map — keep Leaflet panes below modals/dialogs */
-.checkpoint-locator-map.leaflet-container {
-  font-family: var(--font-inter), sans-serif;
-  z-index: 0;
-}
-
-.checkpoint-locator-map .leaflet-pane,
-.checkpoint-locator-map .leaflet-top,
-.checkpoint-locator-map .leaflet-bottom,
-.checkpoint-locator-map .leaflet-control-container {
-  z-index: 1 !important;
-}
-
-.checkpoint-locator-map .leaflet-marker-pane {
-  z-index: 2 !important;
-}
-
-.checkpoint-locator-map .leaflet-popup-pane {
-  z-index: 3 !important;
-}
-
-.checkpoint-map-marker,
-.checkpoint-cluster-marker {
-  background: transparent !important;
-  border: none !important;
-}
-
-.marker-cluster-small,
-.marker-cluster-medium,
-.marker-cluster-large {
-  background: transparent !important;
-}
-
-.marker-cluster-small div,
-.marker-cluster-medium div,
-.marker-cluster-large div {
-  background: transparent !important;
-}
-
-@theme inline {
-  --color-sidebar: var(--sidebar);
-  --color-sidebar-foreground: var(--sidebar-foreground);
-  --color-sidebar-primary: var(--sidebar-primary);
-  --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
-  --color-sidebar-accent: var(--sidebar-accent);
-  --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
-  --color-sidebar-border: var(--sidebar-border);
-  --color-sidebar-ring: var(--sidebar-ring);
-}
+ @media (max-width: 640px) {
+.four-logo { grid-template-columns: 1fr 1fr;  display: grid; gap: 30px; padding:0px !important}
+.four-logo-inner-box { padding: 0px !important; width: 100% !important; max-width: 100% !important; min-width: 100% !important;}
+.four-logo-inner-box img { width: 100% !important; max-width: 70%; }
+ }
+ @media (max-width: 480px) {
+.protect-right-inner {flex-direction: column; row-gap: 20px; align-items: flex-start;}
+.protect-right-inner .protect-right-inner-text { width:100%; max-width:100%;}
+.report-right-image-box { width: 100%;}
+ 
+ }
