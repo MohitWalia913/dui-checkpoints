@@ -82,7 +82,7 @@
 .two-btn .same-btn:hover {  border-color:#F57E3A; background:#F57E3A; transition: all 0.3s ease;}
 .two-btn .same-btn.same-ext-btn {  background: #F57E3A; border-color: #F57E3A;}
 .two-btn .same-btn.same-ext-btn:hover { background:transparent; color:#F57E3A;}
-.banner-main { position: relative; z-index: 1;  padding-top: 120px;}
+.banner-main { position: relative; z-index: 1;}
 .hover-window:hover {background:#f57e3a; transition:all 0.3s;}
 
 
