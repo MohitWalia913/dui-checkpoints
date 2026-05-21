@@ -53,7 +53,7 @@ export function Hero() {
               <span className="text-white">&amp; Real-Time Database</span>
             </h1>
 
-            <p className="font-inter mt-6 max-w-lg text-[18px] font-normal leading-[1.6] text-white">
+            <p className="font-inter mt-6 max-w-lg text-[16px] md:text-[18px] font-normal leading-[1.6] text-white">
               Stay informed with real-time DUI checkpoints and incident mapping
               across California.
             </p>
@@ -67,8 +67,8 @@ export function Hero() {
                 aria-hidden
               />
               <span className="flex flex-col text-left leading-tight">
-                <span className="text-[16px] font-normal leading-5">Use On</span>
-                <span className="mt-[8px] text-[18px] font-semibold leading-6 md:text-[25px]">
+                <span className="text-[14px] md:text-[16px] font-normal leading-5">Use On</span>
+                <span className="mt-[8px] text-[16px] md:text-[18px] font-semibold leading-6 md:text-[25px]">
                   Web Browser
                 </span>
               </span>
@@ -83,7 +83,7 @@ export function Hero() {
             />
             <CaliforniaGlow />
 
-            <div className="relative z-10 flex min-h-[380px] items-center justify-start sm:min-h-[440px] lg:min-h-[500px] lg:justify-end">
+            <div className="relative z-10 flex min-h-[290px] items-center justify-start sm:min-h-[440px] lg:min-h-[500px] lg:justify-end">
               <div className="flex items-end justify-center gap-5 sm:gap-7 lg:gap-9">
                 <Image
                   src="/bgphone.png"
@@ -99,7 +99,7 @@ export function Hero() {
                   width={232}
                   height={384}
                   priority
-                  className="relative z-10 mb-2 h-auto w-[min(34vw,168px)] max-w-[220px] shrink-0 drop-shadow-[0_24px_48px_rgba(0,0,0,0.45)] sm:mb-4 sm:w-[200px] lg:mb-6 lg:w-[228px]"
+                  className="relative z-10 !mb-0 h-auto w-[min(34vw,168px)] max-w-[220px] shrink-0 drop-shadow-[0_24px_48px_rgba(0,0,0,0.45)] sm:mb-4 sm:w-[200px] lg:mb-6 lg:w-[228px]"
                 />
               </div>
             </div>
