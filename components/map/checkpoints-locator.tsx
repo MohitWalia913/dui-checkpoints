@@ -411,7 +411,7 @@ export function CheckpointsLocator({
   return (
     <>
       <div className="flex h-full min-h-0 flex-1 flex-col overflow-hidden lg:flex-row">
-        <div className="h-[44vh] min-h-0 shrink-0 overflow-hidden lg:h-full lg:max-h-none lg:min-h-0 lg:flex-none">
+        <div className="flex max-h-[42%] min-h-0 shrink-0 flex-col overflow-hidden lg:h-full lg:max-h-none lg:w-[min(100%,400px)] lg:max-w-[400px] lg:min-w-[300px]">
           <CheckpointListPanel
             checkpoints={filteredCheckpoints}
             selectedId={selected?.id ?? null}
@@ -430,8 +430,9 @@ export function CheckpointsLocator({
 
         <div
           ref={mapSectionRef}
-          className="relative min-h-[56vh] min-w-0 flex-1 overflow-hidden lg:h-full lg:min-h-0"
+          className="relative min-h-0 min-w-0 flex-1 overflow-hidden lg:h-full"
         >
+          <div className="absolute inset-0 min-h-0 overflow-hidden">
           <CheckpointsMapView
             checkpoints={checkpointsForMap}
             selectedCheckpoint={selectedForMap}
@@ -443,6 +444,7 @@ export function CheckpointsLocator({
             onMarkerClick={handleMarkerClick}
             onHover={setHoveredId}
           />
+          </div>
 
           {mapFocusing ? (
             <div className="pointer-events-none absolute inset-x-0 top-3 z-[600] flex justify-center px-3">

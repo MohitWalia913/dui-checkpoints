@@ -57,11 +57,11 @@ export function DashboardShell({
       <SidebarProvider
         open={sidebarOpen}
         onOpenChange={setSidebarOpen}
-        className="dark flex min-h-svh w-full bg-[#040F20] text-white"
+        className="dark flex h-svh max-h-svh w-full overflow-hidden bg-[#040F20] text-white"
         style={sidebarTheme}
       >
         <AppSidebar user={user} />
-        <SidebarInset className="min-h-0 min-w-0 flex-1 overflow-hidden bg-[#040F20] font-inter text-white">
+        <SidebarInset className="flex h-full min-h-0 min-w-0 flex-1 flex-col overflow-hidden bg-[#040F20] font-inter text-white">
           <header className="flex h-16 shrink-0 items-center justify-between gap-2 border-b border-white/10 bg-[#040F20] px-4 transition-[width,height] ease-linear group-has-data-[collapsible=icon]/sidebar-wrapper:h-12">
             <div className="flex items-center gap-2">
               <SidebarTrigger className="-ml-1 text-white hover:bg-[#F57E3A]/15 hover:text-[#F57E3A]" />

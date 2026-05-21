@@ -472,7 +472,7 @@ export function CheckpointsMapView({
   return (
     <div
       ref={containerRef}
-      className="checkpoint-locator-map relative h-full min-h-[360px] w-full"
+      className="checkpoint-locator-map relative h-full min-h-0 w-full overflow-hidden"
     >
       <MapGL
         key={mapLayer}
@@ -494,7 +494,6 @@ export function CheckpointsMapView({
         style={{
           width: "100%",
           height: "100%",
-          minHeight: 360,
           background: mapLayer === "dark" ? "#0a1628" : "#e2e8f0",
         }}
       >
