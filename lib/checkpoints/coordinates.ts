@@ -73,11 +73,16 @@ export function buildGeocodeQuery(checkpoint: {
   const location = checkpoint.Location?.trim() ?? "";
   const isUndisclosedLocation = /undisclosed|unknown|tbd/i.test(location);
 
+  const county = checkpoint.County?.trim() ?? "";
+  const countyLabel =
+    county && !/county/i.test(county) ? `${county} County` : county;
+
   return [
     isUndisclosedLocation ? "" : location,
     checkpoint.City,
-    checkpoint.County,
-    checkpoint.State || "USA",
+    countyLabel,
+    checkpoint.State || "California",
+    "USA",
   ]
     .map((s) => s?.trim())
     .filter(Boolean)

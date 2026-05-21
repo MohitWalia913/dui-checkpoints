@@ -81,6 +81,7 @@ export function CheckpointsLocator({
   );
   const [countyFilter, setCountyFilter] = useState("");
   const [mapLayer, setMapLayer] = useState<MapLayerStyle>("standard");
+  const [mapFocusing, setMapFocusing] = useState(false);
   const [selected, setSelected] = useState<MapCheckpoint | null>(null);
   const [hoveredId, setHoveredId] = useState<number | null>(null);
   const [dialogOpen, setDialogOpen] = useState(false);
@@ -259,15 +260,13 @@ export function CheckpointsLocator({
     };
   }, [filteredCheckpoints, applyGeocodeIfNeeded]);
 
-  const focusMapOnCheckpoint = useCallback(
-    (checkpoint: MapCheckpoint, coords: LatLng) => {
-      const normalized = normalizeLatLng(coords);
-      if (!normalized) return;
-      setFlyTarget({ center: normalized, zoom: 16 });
-      setFocusToken((prev) => prev + 1);
-    },
-    [],
-  );
+  const focusMapOnCheckpoint = useCallback((coords: LatLng) => {
+    const normalized = normalizeLatLng(coords);
+    if (!normalized) return;
+    setMapFocusing(false);
+    setFlyTarget({ center: normalized, zoom: 15 });
+    setFocusToken((prev) => prev + 1);
+  }, []);
 
   const handleListItemSelect = useCallback(
     (checkpoint: MapCheckpoint) => {
@@ -287,22 +286,26 @@ export function CheckpointsLocator({
       );
 
       if (!mustGeocode) {
-        focusMapOnCheckpoint(mapCheckpoint, mapCheckpoint.coordinates);
+        focusMapOnCheckpoint(mapCheckpoint.coordinates);
       } else {
+        setMapFocusing(true);
         void (async () => {
           const resolved = await applyGeocodeIfNeeded(mapCheckpoint);
           if (selectionRequestRef.current !== requestId) return;
           const safeResolved = resolved
             ? normalizeLatLng(resolved)
             : normalizeLatLng(mapCheckpoint.coordinates);
-          if (!safeResolved) return;
+          if (!safeResolved) {
+            setMapFocusing(false);
+            return;
+          }
 
           setSelected((prev) =>
             prev?.id === mapCheckpoint.id
               ? { ...mapCheckpoint, coordinates: safeResolved }
               : prev,
           );
-          focusMapOnCheckpoint(mapCheckpoint, safeResolved);
+          focusMapOnCheckpoint(safeResolved);
         })();
       }
 
@@ -335,22 +338,26 @@ export function CheckpointsLocator({
       );
 
       if (!mustGeocode) {
-        focusMapOnCheckpoint(mapCheckpoint, mapCheckpoint.coordinates);
+        focusMapOnCheckpoint(mapCheckpoint.coordinates);
       } else {
+        setMapFocusing(true);
         void (async () => {
           const resolved = await applyGeocodeIfNeeded(mapCheckpoint);
           if (selectionRequestRef.current !== requestId) return;
           const safeResolved = resolved
             ? normalizeLatLng(resolved)
             : normalizeLatLng(mapCheckpoint.coordinates);
-          if (!safeResolved) return;
+          if (!safeResolved) {
+            setMapFocusing(false);
+            return;
+          }
 
           setSelected((prev) =>
             prev?.id === mapCheckpoint.id
               ? { ...mapCheckpoint, coordinates: safeResolved }
               : prev,
           );
-          focusMapOnCheckpoint(mapCheckpoint, safeResolved);
+          focusMapOnCheckpoint(safeResolved);
         })();
       }
 
@@ -424,6 +431,14 @@ export function CheckpointsLocator({
             onMarkerClick={handleMarkerClick}
             onHover={setHoveredId}
           />
+
+          {mapFocusing ? (
+            <div className="pointer-events-none absolute inset-x-0 top-3 z-[600] flex justify-center px-3">
+              <p className="font-montserrat rounded-full border border-white/15 bg-[#040F20]/85 px-4 py-2 text-xs font-semibold text-white/90 backdrop-blur-md">
+                Finding exact location…
+              </p>
+            </div>
+          ) : null}
 
           <div className="pointer-events-none absolute inset-0 z-[500] flex flex-col justify-between p-3 sm:p-4">
             <div className="pointer-events-auto ml-auto max-w-[160px]">
