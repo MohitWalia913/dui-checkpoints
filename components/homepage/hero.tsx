@@ -41,13 +41,13 @@ export function Hero() {
       />
 
       <div className="relative z-10 mx-auto max-w-[1440px] !pt-[46px] !pb-[46px] px-6 py-12 md:px-10 md:py-16 lg:px-14 lg:py-20">
-        <div className="banner-row grid grid-cols-1 items-center gap-12 md:grid-cols-2 lg:grid-cols-2 lg:gap-8 xl:gap-12">
+        <div className="banner-row grid grid-cols-1 items-center gap-8 md:grid-cols-2 lg:grid-cols-2 lg:gap-8 xl:gap-12">
           <div className="max-w-xl lg:py-4">
             <p className="font-inter text-[16px] font-normal uppercase leading-6 text-[#F57E3A]">
               DUI checkpoint data updated every 24 hours
             </p>
 
-            <h1 className="font-inter mt-4 w-full max-w-[482px] text-[32px] font-semibold leading-[1.2] text-white sm:text-[36px] lg:text-[40px] lg:text-[48px]">
+            <h1 className="font-inter mt-4 w-full max-w-[482px] text-[24px] font-semibold leading-[1.2] text-white sm:text-[32px] md:text-[36px] lg:text-[40px] xl:text-[48px]">
               <span className="text-white">California DUI</span>
               <span className="text-[#F57E3A]">Checkpoints Locator Map</span>
               <span className="text-white">&amp; Real-Time Database</span>
@@ -83,7 +83,7 @@ export function Hero() {
             />
             <CaliforniaGlow />
 
-            <div className="relative z-10 flex min-h-[380px] items-center justify-center sm:min-h-[440px] lg:min-h-[500px] lg:justify-end">
+            <div className="relative z-10 flex min-h-[380px] items-center justify-start sm:min-h-[440px] lg:min-h-[500px] lg:justify-end">
               <div className="flex items-end justify-center gap-5 sm:gap-7 lg:gap-9">
                 <Image
                   src="/bgphone.png"
