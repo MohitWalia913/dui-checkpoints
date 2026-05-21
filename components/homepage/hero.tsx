@@ -40,7 +40,7 @@ export function Hero() {
         aria-hidden
       />
 
-      <div className="relative z-10 mx-auto max-w-[1440px] px-6 py-12 md:px-10 md:py-16 lg:px-14 lg:py-20">
+      <div className="relative z-10 mx-auto max-w-[1440px] !pt-[46px] !pb-[46px] px-6 py-12 md:px-10 md:py-16 lg:px-14 lg:py-20">
         <div className="banner-row grid grid-cols-1 items-center gap-12 md:grid-cols-2 lg:grid-cols-2 lg:gap-8 xl:gap-12">
           <div className="max-w-xl lg:py-4">
             <p className="font-inter text-[16px] font-normal uppercase leading-6 text-[#F57E3A]">
@@ -76,7 +76,7 @@ export function Hero() {
           </div>
 
           {/* Right — CA glow + mockups with gap, full phones visible */}
-          <div className="image-box-banner relative mx-auto w-full max-w-[640px] py-6 sm:py-8 lg:mx-0 lg:ml-auto lg:max-w-[700px] lg:py-10">
+          <div className="image-box-banner relative mx-auto w-full max-w-[640px] py-0 sm:py-0 lg:mx-0 lg:ml-auto lg:max-w-[700px] lg:py-0">
             <div
               className="pointer-events-none absolute left-1/2 top-1/2 z-[1] h-[min(85%,420px)] w-[min(85%,420px)] -translate-x-1/2 -translate-y-1/2 rounded-full bg-[#F57E3A]/25 blur-[70px] lg:h-[440px] lg:w-[440px]"
               aria-hidden
