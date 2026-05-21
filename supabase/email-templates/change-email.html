@@ -1,0 +1,292 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <title>Confirm email change — DUI Checkpoints Locator</title>
+  </head>
+  <body
+    style="
+      margin: 0;
+      padding: 0;
+      background-color: #f5f6f8;
+      font-family: Inter, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto,
+        Helvetica, Arial, sans-serif;
+      -webkit-font-smoothing: antialiased;
+    "
+  >
+    <table
+      role="presentation"
+      cellpadding="0"
+      cellspacing="0"
+      border="0"
+      width="100%"
+      style="background-color: #f5f6f8"
+    >
+      <tr>
+        <td align="center" style="padding: 32px 16px">
+          <table
+            role="presentation"
+            cellpadding="0"
+            cellspacing="0"
+            border="0"
+            width="100%"
+            style="max-width: 600px"
+          >
+            <!-- Header -->
+            <tr>
+              <td
+                align="center"
+                style="
+                  background-color: #040f20;
+                  border-radius: 12px 12px 0 0;
+                  padding: 28px 32px 24px;
+                "
+              >
+                <a
+                  href="https://dui-checkpoints.vercel.app"
+                  style="text-decoration: none"
+                >
+                  <img
+                    src="https://dui-checkpoints.vercel.app/footerlogo.png"
+                    alt="DUI Checkpoints Locator — Statewide, Real-time Alerts"
+                    width="280"
+                    style="
+                      display: block;
+                      max-width: 280px;
+                      width: 100%;
+                      height: auto;
+                      border: 0;
+                    "
+                  />
+                </a>
+              </td>
+            </tr>
+
+            <!-- Body -->
+            <tr>
+              <td
+                style="
+                  background-color: #ffffff;
+                  padding: 36px 32px 32px;
+                  border-left: 1px solid #e8eaed;
+                  border-right: 1px solid #e8eaed;
+                "
+              >
+                <p
+                  style="
+                    margin: 0 0 8px;
+                    font-size: 13px;
+                    font-weight: 600;
+                    letter-spacing: 0.04em;
+                    text-transform: uppercase;
+                    color: #f57e3a;
+                    line-height: 1.5;
+                  "
+                >
+                  Account security
+                </p>
+
+                <h1
+                  style="
+                    margin: 0 0 16px;
+                    font-size: 26px;
+                    font-weight: 600;
+                    line-height: 1.3;
+                    color: #040f20;
+                  "
+                >
+                  Confirm your new email address
+                </h1>
+
+                <p
+                  style="
+                    margin: 0 0 24px;
+                    font-size: 16px;
+                    line-height: 1.6;
+                    color: #3d4f63;
+                  "
+                >
+                  We received a request to update the email on your
+                  <strong style="color: #040f20">DUI Checkpoints Locator</strong>
+                  account. Confirm the change below to keep receiving real-time
+                  DUI checkpoint alerts and account notifications.
+                </p>
+
+                <table
+                  role="presentation"
+                  cellpadding="0"
+                  cellspacing="0"
+                  border="0"
+                  width="100%"
+                  style="
+                    margin: 0 0 24px;
+                    background-color: #f5f6f8;
+                    border-radius: 10px;
+                    border: 1px solid #e8eaed;
+                  "
+                >
+                  <tr>
+                    <td style="padding: 20px 24px">
+                      <p
+                        style="
+                          margin: 0 0 12px;
+                          font-size: 13px;
+                          font-weight: 600;
+                          text-transform: uppercase;
+                          letter-spacing: 0.04em;
+                          color: #6b7c8f;
+                          line-height: 1.5;
+                        "
+                      >
+                        Email change summary
+                      </p>
+                      <p
+                        style="
+                          margin: 0 0 8px;
+                          font-size: 15px;
+                          line-height: 1.6;
+                          color: #3d4f63;
+                        "
+                      >
+                        <span style="color: #6b7c8f">Current:</span>
+                        <strong style="color: #040f20">{{ .Email }}</strong>
+                      </p>
+                      <p
+                        style="
+                          margin: 0;
+                          font-size: 15px;
+                          line-height: 1.6;
+                          color: #3d4f63;
+                        "
+                      >
+                        <span style="color: #6b7c8f">New:</span>
+                        <strong style="color: #f57e3a">{{ .NewEmail }}</strong>
+                      </p>
+                    </td>
+                  </tr>
+                </table>
+
+                <p
+                  style="
+                    margin: 0 0 28px;
+                    font-size: 16px;
+                    line-height: 1.6;
+                    color: #3d4f63;
+                  "
+                >
+                  Tap the button below to confirm this update. Until you do,
+                  your account will continue using your current email address.
+                </p>
+
+                <table
+                  role="presentation"
+                  cellpadding="0"
+                  cellspacing="0"
+                  border="0"
+                  width="100%"
+                >
+                  <tr>
+                    <td align="center" style="padding-bottom: 28px">
+                      <a
+                        href="{{ .ConfirmationURL }}"
+                        style="
+                          display: inline-block;
+                          background-color: #f57e3a;
+                          color: #ffffff;
+                          font-size: 16px;
+                          font-weight: 600;
+                          text-decoration: none;
+                          padding: 14px 32px;
+                          border-radius: 10px;
+                          line-height: 1.25;
+                        "
+                      >
+                        Confirm email change
+                      </a>
+                    </td>
+                  </tr>
+                </table>
+
+                <p
+                  style="
+                    margin: 0 0 8px;
+                    font-size: 14px;
+                    line-height: 1.6;
+                    color: #6b7c8f;
+                  "
+                >
+                  If the button doesn&apos;t work, copy and paste this link into
+                  your browser:
+                </p>
+                <p style="margin: 0; word-break: break-all">
+                  <a
+                    href="{{ .ConfirmationURL }}"
+                    style="font-size: 14px; line-height: 1.6; color: #f57e3a"
+                    >{{ .ConfirmationURL }}</a
+                  >
+                </p>
+              </td>
+            </tr>
+
+            <!-- Footer -->
+            <tr>
+              <td
+                style="
+                  background-color: #040f20;
+                  border-radius: 0 0 12px 12px;
+                  padding: 28px 32px;
+                  text-align: center;
+                "
+              >
+                <p
+                  style="
+                    margin: 0 0 8px;
+                    font-size: 15px;
+                    line-height: 1.5;
+                    color: #ffffff;
+                  "
+                >
+                  Real-Time DUI Checkpoints Locator Across California.
+                </p>
+                <p style="margin: 0 0 16px">
+                  <a
+                    href="mailto:hello@californiaduicheckpoints.com"
+                    style="
+                      font-size: 14px;
+                      color: #f57e3a;
+                      text-decoration: underline;
+                    "
+                    >hello@californiaduicheckpoints.com</a
+                  >
+                </p>
+                <p
+                  style="
+                    margin: 0;
+                    font-size: 12px;
+                    line-height: 1.5;
+                    color: rgba(255, 255, 255, 0.65);
+                  "
+                >
+                  Didn&apos;t request this change? Ignore this email — your
+                  email address will stay the same.
+                </p>
+                <p
+                  style="
+                    margin: 16px 0 0;
+                    font-size: 12px;
+                    line-height: 1.5;
+                    color: rgba(255, 255, 255, 0.5);
+                  "
+                >
+                  © 2026 Meehan Law Firm. All rights reserved.
+                </p>
+              </td>
+            </tr>
+          </table>
+        </td>
+      </tr>
+    </table>
+  </body>
+</html>
