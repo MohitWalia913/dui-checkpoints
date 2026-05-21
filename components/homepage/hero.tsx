@@ -68,7 +68,7 @@ export function Hero() {
               />
               <span className="flex flex-col text-left leading-tight">
                 <span className="text-[14px] md:text-[16px] font-normal leading-5">Use On</span>
-                <span className="mt-[8px] text-[16px] md:text-[18px] font-semibold leading-6 md:text-[25px]">
+                <span className="mt-[4px] text-[16px] md:mt-[8px] md:text-[18px] font-semibold leading-6 md:text-[20px] lg:text-[25px]">
                   Web Browser
                 </span>
               </span>
