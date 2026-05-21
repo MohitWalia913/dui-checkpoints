@@ -78,13 +78,13 @@ export function Header() {
 
           <div className="two-btn flex items-center gap-[15px]">
             <Link
-              href="/login"
+              href="/auth/login"
               className="same-btn "
             >
               Login
             </Link>
             <Link
-              href="/sign-up"
+              href="/auth/sign-up"
               className="same-btn same-ext-btn"
             >
               Get Started
@@ -159,14 +159,14 @@ export function Header() {
 
           <div className="two-btn mt-8 flex flex-col gap-4">
             <Link
-              href="/login"
+              href="/auth/login"
               className="same-btn  font-inter inline-flex w-full items-center justify-center border border-white px-[25px] py-[10px] text-[20.8px] font-medium leading-4 text-white"
               onClick={() => setMenuOpen(false)}
             >
               Login
             </Link>
             <Link
-              href="/sign-up"
+              href="/auth/sign-up"
               className="same-btn  same-ext-btn font-inter inline-flex w-full items-center justify-center bg-[#F57E3A] px-[25px] py-[10px] text-[20.8px] font-medium leading-4 text-white"
               onClick={() => setMenuOpen(false)}
             >
