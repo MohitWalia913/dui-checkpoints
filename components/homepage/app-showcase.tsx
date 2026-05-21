@@ -69,7 +69,7 @@ export function AppShowcase() {
             <p className="font-inter mt-4 text-[16px] md:text-[18px] font-normal leading-[1.6] text-[#242E4E]">
               Real-time information. Legal protection. Total peace of mind.
             </p>
-            <Link
+           <Link
               href="/map"
               className="hover-window font-inter mt-8 inline-flex items-center gap-4 rounded-[10px] border border-white/10 bg-black px-6 py-3.5 text-white transition-opacity hover:opacity-90"
             >
@@ -82,8 +82,8 @@ export function AppShowcase() {
                 aria-hidden
               />
               <span className="flex flex-col text-left leading-tight">
-                <span className="text-[16px] font-normal leading-5">Use On</span>
-                <span className="text-[18px] mt-[8px] font-semibold leading-6 md:text-[25px]">
+                <span className="text-[14px] md:text-[16px] font-normal leading-5">Use On</span>
+                <span className="mt-[4px] text-[16px] md:mt-[8px] md:text-[18px] font-semibold leading-6 md:text-[20px] lg:text-[25px]">
                   Web Browser
                 </span>
               </span>
