@@ -5,9 +5,24 @@ export type ShareAppId =
   | "telegram"
   | "facebook"
   | "gmail"
+  | "outlook"
   | "email"
   | "teams"
+  | "linkedin"
   | "twitter";
+
+/** Windows-style “Share using” grid order */
+export const SHARE_APP_DISPLAY_ORDER: ShareAppId[] = [
+  "facebook",
+  "teams",
+  "whatsapp",
+  "telegram",
+  "gmail",
+  "outlook",
+  "email",
+  "linkedin",
+  "twitter",
+];
 
 export type ShareAppTarget = {
   id: ShareAppId;
@@ -186,6 +201,23 @@ function twitterWebUrl(summary: string, url: string): string {
   return `https://twitter.com/intent/tweet?${params.toString()}`;
 }
 
+function outlookAppUrl(title: string, body: string): string {
+  return `ms-outlook://compose?subject=${encodeURIComponent(title)}&body=${encodeURIComponent(body)}`;
+}
+
+function outlookWebUrl(title: string, body: string): string {
+  const params = new URLSearchParams({ subject: title, body });
+  return `https://outlook.live.com/mail/0/deeplink/compose?${params.toString()}`;
+}
+
+function linkedInAppUrl(url: string): string {
+  return `linkedin://shareArticle?mini=true&url=${encodeURIComponent(url)}`;
+}
+
+function linkedInWebUrl(url: string): string {
+  return `https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(url)}`;
+}
+
 export function buildShareAppTargets(
   payload: CheckpointSharePayload,
 ): ShareAppTarget[] {
@@ -221,8 +253,15 @@ export function buildShareAppTargets(
       installUrl: "https://mail.google.com/mail/",
     },
     {
+      id: "outlook",
+      label: "Outlook",
+      appUrl: outlookAppUrl(title, text),
+      webUrl: outlookWebUrl(title, text),
+      installUrl: "https://www.microsoft.com/microsoft-365/outlook/email-and-calendar-software-microsoft-outlook",
+    },
+    {
       id: "email",
-      label: "Email",
+      label: "Mail",
       appUrl: emailAppUrl(title, text),
       webUrl: emailAppUrl(title, text),
     },
@@ -234,6 +273,13 @@ export function buildShareAppTargets(
       installUrl: "https://www.microsoft.com/microsoft-teams/download-app",
     },
     {
+      id: "linkedin",
+      label: "LinkedIn",
+      appUrl: linkedInAppUrl(url),
+      webUrl: linkedInWebUrl(url),
+      installUrl: "https://www.linkedin.com/apps",
+    },
+    {
       id: "twitter",
       label: "X (Twitter)",
       appUrl: twitterAppUrl(summary, url),
@@ -241,6 +287,17 @@ export function buildShareAppTargets(
       installUrl: "https://twitter.com/download",
     },
   ];
+}
+
+export function getOrderedShareAppTargets(
+  payload: CheckpointSharePayload,
+): ShareAppTarget[] {
+  const map = new Map(
+    buildShareAppTargets(payload).map((t) => [t.id, t] as const),
+  );
+  return SHARE_APP_DISPLAY_ORDER.map((id) => map.get(id)).filter(
+    (t): t is ShareAppTarget => !!t,
+  );
 }
 
 export function openShareApp(
