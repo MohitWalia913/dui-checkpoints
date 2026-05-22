@@ -54,23 +54,30 @@ export async function loadAllCheckpointListItems(): Promise<{
 
 export async function listCheckpoints(params: CheckpointsListParams = {}) {
   if (usesInMemoryDateFiltering(params)) {
-    const loaded = await loadAllCheckpointListItems();
-    if (loaded.error) {
-      return { data: [], count: 0, error: loaded.error };
+    try {
+      const loaded = await loadAllCheckpointListItems();
+      if (loaded.error) {
+        return { data: [], count: 0, error: loaded.error };
+      }
+
+      const full = filterCheckpointList(loaded.data, {
+        ...params,
+        limit: loaded.data.length,
+        offset: 0,
+      });
+      const data = filterCheckpointList(loaded.data, params);
+
+      return {
+        data,
+        count: full.length,
+        error: null,
+      };
+    } catch (err) {
+      const message =
+        err instanceof Error ? err.message : "Failed to filter checkpoints";
+      console.error("[listCheckpoints]", err);
+      return { data: [], count: 0, error: message };
     }
-
-    const full = filterCheckpointList(loaded.data, {
-      ...params,
-      limit: loaded.data.length,
-      offset: 0,
-    });
-    const data = filterCheckpointList(loaded.data, params);
-
-    return {
-      data,
-      count: full.length,
-      error: null,
-    };
   }
 
   const supabase = await createClient();
@@ -179,40 +186,47 @@ export async function getCheckpointStats(): Promise<{
   data: CheckpointStats | null;
   error: string | null;
 }> {
-  const loaded = await loadAllCheckpointListItems();
-  if (loaded.error) {
-    return { data: null, error: loaded.error };
-  }
+  try {
+    const loaded = await loadAllCheckpointListItems();
+    if (loaded.error) {
+      return { data: null, error: loaded.error };
+    }
 
-  const today = getTodayDateString();
-  const week = getWeekDateRange();
-  const tabCounts = getCheckpointTabCountsFromItems(loaded.data);
+    const today = getTodayDateString();
+    const week = getWeekDateRange();
+    const tabCounts = getCheckpointTabCountsFromItems(loaded.data);
 
-  const upcoming = loaded.data.filter((row) => {
-    const eventDate = getCheckpointEventDate(row);
-    return eventDate != null && eventDate >= today;
-  }).length;
+    const upcoming = loaded.data.filter((row) => {
+      const eventDate = getCheckpointEventDate(row);
+      return eventDate != null && eventDate >= today;
+    }).length;
 
-  const thisWeek = loaded.data.filter((row) => {
-    const eventDate = getCheckpointEventDate(row);
-    return (
-      eventDate != null && eventDate >= week.start && eventDate <= week.end
+    const thisWeek = loaded.data.filter((row) => {
+      const eventDate = getCheckpointEventDate(row);
+      return (
+        eventDate != null && eventDate >= week.start && eventDate <= week.end
+      );
+    }).length;
+
+    const uniqueCounties = new Set(
+      loaded.data.map((row) => row.County).filter(Boolean),
     );
-  }).length;
 
-  const uniqueCounties = new Set(
-    loaded.data.map((row) => row.County).filter(Boolean),
-  );
-
-  return {
-    data: {
-      total: tabCounts.totalInWindow,
-      upcoming,
-      thisWeek,
-      counties: uniqueCounties.size,
-    },
-    error: null,
-  };
+    return {
+      data: {
+        total: tabCounts.totalInWindow,
+        upcoming,
+        thisWeek,
+        counties: uniqueCounties.size,
+      },
+      error: null,
+    };
+  } catch (err) {
+    const message =
+      err instanceof Error ? err.message : "Failed to compute checkpoint stats";
+    console.error("[getCheckpointStats]", err);
+    return { data: null, error: message };
+  }
 }
 
 export async function createCheckpoint(payload: CheckpointInsert) {

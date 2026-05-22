@@ -108,9 +108,9 @@ export function filterCheckpointList<T extends CheckpointListItem>(
         getCheckpointEventDate(b) ?? "",
       );
       if (dateCmp !== 0) return dateCmp;
-      const countyCmp = a.County.localeCompare(b.County);
+      const countyCmp = (a.County ?? "").localeCompare(b.County ?? "");
       if (countyCmp !== 0) return countyCmp;
-      return a.City.localeCompare(b.City);
+      return (a.City ?? "").localeCompare(b.City ?? "");
     });
   }
 
