@@ -73,16 +73,67 @@ export async function fetchDashboardCheckpointsFromApiServer(limit = 12) {
   };
 }
 
-export async function fetchUpcomingCheckpointsFromApiServer(limit = 50) {
-  const result = await fetchFromAppApi<{ data: CheckpointListItem[] }>(
-    `/api/checkpoints?upcoming=true&limit=${limit}`,
-  );
+export type CheckpointsApiListResult = {
+  data: CheckpointListItem[];
+  count: number;
+  error: string | null;
+  status: number;
+};
+
+function buildCheckpointsQuery(params: {
+  upcoming?: boolean;
+  past?: boolean;
+  latest?: boolean;
+  fromDate?: string;
+  toDate?: string;
+  limit?: number;
+  offset?: number;
+}): string {
+  const search = new URLSearchParams();
+  if (params.upcoming) search.set("upcoming", "true");
+  if (params.past) search.set("past", "true");
+  if (params.latest) search.set("latest", "true");
+  if (params.fromDate) search.set("fromDate", params.fromDate);
+  if (params.toDate) search.set("toDate", params.toDate);
+  search.set("limit", String(params.limit ?? 50));
+  if (params.offset) search.set("offset", String(params.offset));
+  return `/api/checkpoints?${search.toString()}`;
+}
+
+export async function fetchCheckpointsListFromApiServer(params: {
+  upcoming?: boolean;
+  past?: boolean;
+  latest?: boolean;
+  fromDate?: string;
+  toDate?: string;
+  limit?: number;
+  offset?: number;
+}): Promise<CheckpointsApiListResult> {
+  const result = await fetchFromAppApi<{
+    data: CheckpointListItem[];
+    meta?: { count?: number; limit?: number; offset?: number };
+  }>(buildCheckpointsQuery(params));
+
+  const data = result.data?.data ?? [];
+  const count = result.data?.meta?.count ?? data.length;
 
   return {
-    data: result.data?.data ?? [],
+    data,
+    count,
     error: result.error,
     status: result.status,
   };
+}
+
+export async function fetchUpcomingCheckpointsFromApiServer(
+  limit = 50,
+  dateRange?: { fromDate?: string; toDate?: string },
+) {
+  return fetchCheckpointsListFromApiServer({
+    upcoming: true,
+    limit,
+    ...dateRange,
+  });
 }
 
 export async function fetchMapCheckpointsFromApiServer(limit = 250) {
@@ -97,14 +148,14 @@ export async function fetchMapCheckpointsFromApiServer(limit = 250) {
   };
 }
 
-export async function fetchPastCheckpointsFromApiServer(limit = 50) {
-  const result = await fetchFromAppApi<{ data: CheckpointListItem[] }>(
-    `/api/checkpoints?past=true&latest=true&limit=${limit}`,
-  );
-
-  return {
-    data: result.data?.data ?? [],
-    error: result.error,
-    status: result.status,
-  };
+export async function fetchPastCheckpointsFromApiServer(
+  limit = 50,
+  dateRange?: { fromDate?: string; toDate?: string },
+) {
+  return fetchCheckpointsListFromApiServer({
+    past: true,
+    latest: true,
+    limit,
+    ...dateRange,
+  });
 }
