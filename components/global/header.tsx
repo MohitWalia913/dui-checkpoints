@@ -6,11 +6,33 @@ import { usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
 import logo from "@/app/logo.png";
 
-const NAV_LINKS = [
-  { href: "/#report-checkpoint", sectionId: "report-checkpoint", label: "Report Checkpoint" },
-  { href: "/#about-us", sectionId: "about-us", label: "About Us" },
-  { href: "/#resources", sectionId: "resources", label: "Resources" },
-] as const;
+type NavLink =
+  | {
+      kind: "page";
+      href: string;
+      label: string;
+    }
+  | {
+      kind: "section";
+      href: string;
+      sectionId: string;
+      label: string;
+    };
+
+const NAV_LINKS: NavLink[] = [
+  {
+    kind: "section",
+    href: "/#view-map",
+    sectionId: "view-map",
+    label: "View Checkpoints",
+  },
+  {
+    kind: "section",
+    href: "/#report-checkpoint",
+    sectionId: "report-checkpoint",
+    label: "Report Checkpoints",
+  },
+];
 
 function scrollToSection(sectionId: string) {
   const target = document.getElementById(sectionId);
@@ -64,14 +86,18 @@ export function Header() {
             className="flex items-center gap-[20px] xl:gap-[40px]"
             aria-label="Main navigation"
           >
-            {NAV_LINKS.map(({ href, sectionId, label }) => (
+            {NAV_LINKS.map((item) => (
               <Link
-                key={href}
-                href={href}
-                onClick={(event) => handleSectionNav(event, sectionId)}
+                key={item.href}
+                href={item.href}
+                onClick={(event) =>
+                  item.kind === "section"
+                    ? handleSectionNav(event, item.sectionId)
+                    : setMenuOpen(false)
+                }
                 className="font-montserrat text-[14px] font-medium leading-[22px] text-white transition-opacity hover:opacity-80"
               >
-                {label}
+                {item.label}
               </Link>
             ))}
           </nav>
@@ -143,17 +169,19 @@ export function Header() {
           className="flex flex-col gap-1 px-6 pt-6 md:px-10"
           aria-label="Mobile navigation"
         >
-          {NAV_LINKS.map(({ href, sectionId, label }) => (
+          {NAV_LINKS.map((item) => (
             <Link
-              key={href}
-              href={href}
+              key={item.href}
+              href={item.href}
               className="font-montserrat border-b border-white/10 py-4 text-sm font-medium leading-[22px] text-white"
               onClick={(event) => {
-                handleSectionNav(event, sectionId);
+                if (item.kind === "section") {
+                  handleSectionNav(event, item.sectionId);
+                }
                 setMenuOpen(false);
               }}
             >
-              {label}
+              {item.label}
             </Link>
           ))}
 

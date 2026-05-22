@@ -10,9 +10,6 @@ import { NextRequest, NextResponse } from "next/server";
 type RouteContext = { params: Promise<{ id: string }> };
 
 export async function GET(_request: NextRequest, context: RouteContext) {
-  const auth = await requireApiUser();
-  if (auth.response) return auth.response;
-
   const { id: idParam } = await context.params;
   const id = Number(idParam);
 

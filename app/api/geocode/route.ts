@@ -1,12 +1,8 @@
-import { requireApiUser } from "@/lib/api/auth";
 import { NextRequest, NextResponse } from "next/server";
 
 const NOMINATIM = "https://nominatim.openstreetmap.org/search";
 
 export async function GET(request: NextRequest) {
-  const auth = await requireApiUser();
-  if (auth.response) return auth.response;
-
   const q = request.nextUrl.searchParams.get("q")?.trim();
   if (!q || q.length > 280) {
     return NextResponse.json({ error: "Invalid query" }, { status: 400 });

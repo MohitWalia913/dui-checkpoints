@@ -1,7 +1,7 @@
 "use client";
 
 import Image from "next/image";
-import Link from "next/link";
+import { WebBrowserCta } from "@/components/homepage/web-browser-cta";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import { useCallback, useEffect, useState } from "react";
 
@@ -69,25 +69,7 @@ export function AppShowcase() {
             <p className="font-inter mt-4 text-[16px] md:text-[18px] font-normal leading-[1.6] text-[#242E4E]">
               Real-time information. Legal protection. Total peace of mind.
             </p>
-           <Link
-              href="/map"
-              className="hover-window font-inter mt-8 inline-flex items-center gap-4 rounded-[10px] border border-white/10 bg-black px-6 py-3.5 text-white transition-opacity hover:opacity-90"
-            >
-              <Image
-                src="/browser.png"
-                alt=""
-                width={32}
-                height={32}
-                className="h-8 w-8 shrink-0 object-contain"
-                aria-hidden
-              />
-              <span className="flex flex-col text-left leading-tight">
-                <span className="text-[14px] md:text-[16px] font-normal leading-5">Use On</span>
-                <span className="mt-[4px] text-[16px] md:mt-[8px] md:text-[18px] font-semibold leading-6 md:text-[20px] lg:text-[25px]">
-                  Web Browser
-                </span>
-              </span>
-            </Link>
+            <WebBrowserCta />
           </div>
 
           <div className="relative  lg:max-w-[100%] w-full  md:max-w-[50%] lg:max-w-[785px]">

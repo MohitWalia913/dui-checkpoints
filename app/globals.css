@@ -117,7 +117,12 @@
 .two-btn .same-btn.same-ext-btn {  background: #F57E3A; border-color: #F57E3A;}
 .two-btn .same-btn.same-ext-btn:hover { background:transparent; color:#F57E3A;}
 .banner-main { position: relative; z-index: 1;}
-.hover-window:hover {background:#f57e3a; transition:all 0.3s;}
+.hover-window:hover {
+  background: #f57e3a;
+  border-color: #f57e3a;
+  color: #fff;
+  transition: all 0.3s;
+}
 .four-logo { justify-content: space-between;}
 .four-logo .four-logo-inner-box:first-child{padding-left:0px;}
 .four-logo .four-logo-inner-box:last-child {padding-right:0px;}
@@ -143,8 +148,7 @@ div#mobile-menu a {  font-size: 16px !important;}
 .calfornia-left-cil-inner-box {
     max-width: 100%;
 }
-section#about-us {
-    background-image: none !important;
+section#view-map {
     background-color: #040F20;
 }
 }

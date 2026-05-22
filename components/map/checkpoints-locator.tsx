@@ -66,9 +66,12 @@ async function fetchCheckpointDetail(id: number): Promise<{
 export function CheckpointsLocator({
   initialCheckpoints,
   loadError,
+  mapOnly = false,
 }: {
   initialCheckpoints: CheckpointListItem[];
   loadError: string | null;
+  /** Homepage: map + map controls only; list/filters stay on dashboard. */
+  mapOnly?: boolean;
 }) {
   const allCheckpoints = useMemo(
     () => toMapCheckpoints(initialCheckpoints),
@@ -77,7 +80,7 @@ export function CheckpointsLocator({
 
   const [searchQuery, setSearchQuery] = useState("");
   const [statusFilter, setStatusFilter] = useState<"all" | "upcoming" | "past">(
-    "upcoming",
+    mapOnly ? "all" : "upcoming",
   );
   const [countyFilter, setCountyFilter] = useState("");
   const [mapLayer, setMapLayer] = useState<MapLayerStyle>("standard");
@@ -410,27 +413,37 @@ export function CheckpointsLocator({
 
   return (
     <>
-      <div className="flex h-full min-h-0 flex-1 flex-col overflow-hidden lg:flex-row">
-        <div className="flex max-h-[42%] min-h-0 shrink-0 flex-col overflow-hidden lg:h-full lg:max-h-none lg:w-[min(100%,400px)] lg:max-w-[400px] lg:min-w-[300px]">
-          <CheckpointListPanel
-            checkpoints={filteredCheckpoints}
-            selectedId={selected?.id ?? null}
-            hoveredId={hoveredId}
-            searchQuery={searchQuery}
-            onSearchChange={setSearchQuery}
-            statusFilter={statusFilter}
-            onStatusFilterChange={setStatusFilter}
-            countyFilter={countyFilter}
-            onCountyFilterChange={setCountyFilter}
-            counties={counties}
-            onSelect={handleListItemSelect}
-            onHover={setHoveredId}
-          />
-        </div>
+      <div
+        className={cn(
+          "flex h-full min-h-0 flex-1 overflow-hidden",
+          !mapOnly && "flex-col lg:flex-row",
+        )}
+      >
+        {!mapOnly ? (
+          <div className="flex max-h-[42%] min-h-0 shrink-0 flex-col overflow-hidden lg:h-full lg:max-h-none lg:w-[min(100%,400px)] lg:max-w-[400px] lg:min-w-[300px]">
+            <CheckpointListPanel
+              checkpoints={filteredCheckpoints}
+              selectedId={selected?.id ?? null}
+              hoveredId={hoveredId}
+              searchQuery={searchQuery}
+              onSearchChange={setSearchQuery}
+              statusFilter={statusFilter}
+              onStatusFilterChange={setStatusFilter}
+              countyFilter={countyFilter}
+              onCountyFilterChange={setCountyFilter}
+              counties={counties}
+              onSelect={handleListItemSelect}
+              onHover={setHoveredId}
+            />
+          </div>
+        ) : null}
 
         <div
           ref={mapSectionRef}
-          className="relative min-h-0 min-w-0 flex-1 overflow-hidden lg:h-full"
+          className={cn(
+            "relative min-h-0 min-w-0 flex-1 overflow-hidden",
+            !mapOnly && "lg:h-full",
+          )}
         >
           <div className="absolute inset-0 min-h-0 overflow-hidden">
           <CheckpointsMapView

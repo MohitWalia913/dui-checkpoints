@@ -8,9 +8,6 @@ import type { CheckpointInsert } from "@/lib/checkpoints/types";
 import { NextRequest, NextResponse } from "next/server";
 
 export async function GET(request: NextRequest) {
-  const auth = await requireApiUser();
-  if (auth.response) return auth.response;
-
   const { searchParams } = request.nextUrl;
 
   const dashboard =

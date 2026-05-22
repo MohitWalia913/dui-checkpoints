@@ -18,14 +18,17 @@ const CheckpointsLocator = dynamic(
 export function CheckpointsLocatorDynamic({
   initialCheckpoints,
   loadError,
+  mapOnly = false,
 }: {
   initialCheckpoints: CheckpointListItem[];
   loadError: string | null;
+  mapOnly?: boolean;
 }) {
   return (
     <CheckpointsLocator
       initialCheckpoints={initialCheckpoints}
       loadError={loadError}
+      mapOnly={mapOnly}
     />
   );
 }
