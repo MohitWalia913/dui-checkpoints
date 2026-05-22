@@ -106,3 +106,40 @@ export function formatCheckpointFilterLabel(
   const monthLabel = MONTH_LABELS[month - 1];
   return `${monthLabel} ${year}`;
 }
+
+export function filterCheckpointsBySearch<
+  T extends {
+    Location: string;
+    City: string;
+    County: string;
+    State: string;
+    Date: string;
+    Time: string;
+  },
+>(checkpoints: T[], query: string): T[] {
+  const term = query.trim().toLowerCase();
+  if (!term) return checkpoints;
+
+  return checkpoints.filter((checkpoint) => {
+    const haystack = [
+      checkpoint.Location,
+      checkpoint.City,
+      checkpoint.County,
+      checkpoint.State,
+      checkpoint.Date,
+      checkpoint.Time,
+    ]
+      .join(" ")
+      .toLowerCase();
+    return haystack.includes(term);
+  });
+}
+
+export function hasActiveCheckpointFilters(
+  year: number | null,
+  month: number | null,
+  searchQuery: string,
+  tab: "upcoming" | "past",
+): boolean {
+  return Boolean(year || month || searchQuery.trim() || tab === "past");
+}

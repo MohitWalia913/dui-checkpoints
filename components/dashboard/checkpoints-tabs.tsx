@@ -2,17 +2,21 @@
 
 import { CheckpointsTable } from "@/components/dashboard/checkpoints-table";
 import {
+  filterCheckpointsBySearch,
   formatCheckpointFilterLabel,
   getCheckpointMonthOptions,
   getCheckpointYearOptions,
+  hasActiveCheckpointFilters,
 } from "@/lib/checkpoints/list-filters";
 import type { CheckpointListItem } from "@/lib/checkpoints/types";
+import { RotateCcw, Search } from "lucide-react";
 import { useRouter, useSearchParams } from "next/navigation";
+import { useMemo, useState } from "react";
 
 type Tab = "upcoming" | "past";
 
-const selectClassName =
-  "font-montserrat h-10 min-w-[140px] rounded-xl border border-white/10 bg-white/5 px-3 text-sm text-white focus:border-[#F57E3A]/50 focus:outline-none focus:ring-2 focus:ring-[#F57E3A]/25 disabled:cursor-not-allowed disabled:opacity-50";
+const controlClassName =
+  "font-montserrat h-10 shrink-0 rounded-xl border border-white/10 bg-white/5 text-sm text-white focus:border-[#F57E3A]/50 focus:outline-none focus:ring-2 focus:ring-[#F57E3A]/25 disabled:cursor-not-allowed disabled:opacity-50";
 
 export function CheckpointsTabs({
   upcoming,
@@ -36,8 +40,15 @@ export function CheckpointsTabs({
   const searchParams = useSearchParams();
   const router = useRouter();
   const tab: Tab = searchParams.get("tab") === "past" ? "past" : "upcoming";
-  const activeList = tab === "upcoming" ? upcoming : past;
+  const [searchQuery, setSearchQuery] = useState("");
+
+  const baseList = tab === "upcoming" ? upcoming : past;
   const activeTotal = tab === "upcoming" ? upcomingTotal : pastTotal;
+
+  const filteredList = useMemo(
+    () => filterCheckpointsBySearch(baseList, searchQuery),
+    [baseList, searchQuery],
+  );
 
   function replaceParams(mutate: (params: URLSearchParams) => void) {
     const params = new URLSearchParams(searchParams.toString());
@@ -80,8 +91,22 @@ export function CheckpointsTabs({
     });
   }
 
-  const emptyMessage =
-    tab === "upcoming"
+  function resetFilters() {
+    setSearchQuery("");
+    router.replace("/dashboard/checkpoints", { scroll: false });
+  }
+
+  const searchActive = searchQuery.trim().length > 0;
+  const canReset = hasActiveCheckpointFilters(
+    filterYear,
+    filterMonth,
+    searchQuery,
+    tab,
+  );
+
+  const emptyMessage = searchActive
+    ? "No checkpoints match your search."
+    : tab === "upcoming"
       ? filterYear
         ? `No upcoming checkpoints for ${formatCheckpointFilterLabel(filterYear, filterMonth)}.`
         : "No upcoming checkpoints scheduled."
@@ -94,118 +119,140 @@ export function CheckpointsTabs({
 
   return (
     <>
-      <div className="flex flex-col gap-4">
-        <div className="flex flex-wrap items-end gap-3">
-          <div className="flex flex-col gap-1.5">
-            <label
-              htmlFor="checkpoint-filter-year"
-              className="font-montserrat text-xs font-semibold uppercase tracking-wider text-white/50"
-            >
-              Year
-            </label>
-            <select
-              id="checkpoint-filter-year"
-              value={filterYear ?? ""}
-              onChange={(e) => setYear(e.target.value)}
-              className={selectClassName}
-              aria-label="Filter by year"
-            >
-              <option value="" className="bg-[#040F20]">
-                All years
+      <div className="flex flex-col gap-3">
+        <div className="flex items-center gap-2 overflow-x-auto pb-0.5 [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+          <select
+            id="checkpoint-filter-year"
+            value={filterYear ?? ""}
+            onChange={(e) => setYear(e.target.value)}
+            className={`${controlClassName} w-[108px] px-2.5`}
+            aria-label="Filter by year"
+          >
+            <option value="" className="bg-[#040F20]">
+              All years
+            </option>
+            {yearOptions.map((y) => (
+              <option key={y} value={String(y)} className="bg-[#040F20]">
+                {y}
               </option>
-              {yearOptions.map((y) => (
-                <option key={y} value={String(y)} className="bg-[#040F20]">
-                  {y}
-                </option>
-              ))}
-            </select>
-          </div>
+            ))}
+          </select>
 
-          <div className="flex flex-col gap-1.5">
-            <label
-              htmlFor="checkpoint-filter-month"
-              className="font-montserrat text-xs font-semibold uppercase tracking-wider text-white/50"
-            >
-              Month
-            </label>
-            <select
-              id="checkpoint-filter-month"
-              value={filterMonth ?? ""}
-              onChange={(e) => setMonth(e.target.value)}
-              disabled={!filterYear}
-              className={selectClassName}
-              aria-label="Filter by month"
-            >
-              <option value="" className="bg-[#040F20]">
-                All months
+          <select
+            id="checkpoint-filter-month"
+            value={filterMonth ?? ""}
+            onChange={(e) => setMonth(e.target.value)}
+            disabled={!filterYear}
+            className={`${controlClassName} w-[118px] px-2.5`}
+            aria-label="Filter by month"
+          >
+            <option value="" className="bg-[#040F20]">
+              All months
+            </option>
+            {monthOptions.map((m) => (
+              <option
+                key={m.value}
+                value={String(m.value)}
+                className="bg-[#040F20]"
+              >
+                {m.label}
               </option>
-              {monthOptions.map((m) => (
-                <option
-                  key={m.value}
-                  value={String(m.value)}
-                  className="bg-[#040F20]"
-                >
-                  {m.label}
-                </option>
-              ))}
-            </select>
-          </div>
+            ))}
+          </select>
 
-          {(filterYear || filterMonth) && (
+          <div
+            role="tablist"
+            aria-label="Checkpoint schedule"
+            className="inline-flex shrink-0 rounded-lg border border-white/10 bg-white/5 p-1"
+          >
             <button
               type="button"
-              onClick={() =>
-                replaceParams((params) => {
-                  params.delete("year");
-                  params.delete("month");
-                })
-              }
-              className="font-montserrat mb-0.5 h-10 rounded-xl border border-white/15 px-4 text-sm font-semibold text-white/70 transition-colors hover:border-[#F57E3A]/40 hover:text-[#F57E3A]"
+              role="tab"
+              aria-selected={tab === "upcoming"}
+              onClick={() => setTab("upcoming")}
+              className={`font-montserrat whitespace-nowrap rounded-md px-3 py-1.5 text-sm font-semibold transition-colors ${
+                tab === "upcoming"
+                  ? "bg-[#F57E3A] text-white"
+                  : "text-white/70 hover:text-white"
+              }`}
             >
-              Clear dates
+              Upcoming
+              <span className="ml-1 text-xs opacity-80">({upcomingTotal})</span>
             </button>
-          )}
-        </div>
+            <button
+              type="button"
+              role="tab"
+              aria-selected={tab === "past"}
+              onClick={() => setTab("past")}
+              className={`font-montserrat whitespace-nowrap rounded-md px-3 py-1.5 text-sm font-semibold transition-colors ${
+                tab === "past"
+                  ? "bg-[#F57E3A] text-white"
+                  : "text-white/70 hover:text-white"
+              }`}
+            >
+              Past
+              <span className="ml-1 text-xs opacity-80">({pastTotal})</span>
+            </button>
+          </div>
 
-        <div
-          role="tablist"
-          aria-label="Checkpoint filters"
-          className="inline-flex w-fit rounded-lg border border-white/10 bg-white/5 p-1"
-        >
+          <label className="relative min-w-[140px] flex-1">
+            <Search
+              className="pointer-events-none absolute top-1/2 left-3 size-4 -translate-y-1/2 text-white/40"
+              aria-hidden
+            />
+            <input
+              type="search"
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              placeholder="Search location, city, county…"
+              className={`${controlClassName} w-full min-w-[140px] pl-9 pr-3 placeholder:text-white/40`}
+              aria-label="Search checkpoints"
+            />
+          </label>
+
           <button
             type="button"
-            role="tab"
-            aria-selected={tab === "upcoming"}
-            onClick={() => setTab("upcoming")}
-            className={`font-montserrat rounded-md px-4 py-2 text-sm font-semibold transition-colors ${
-              tab === "upcoming"
-                ? "bg-[#F57E3A] text-white"
-                : "text-white/70 hover:text-white"
-            }`}
+            onClick={resetFilters}
+            disabled={!canReset}
+            className="font-montserrat inline-flex h-10 shrink-0 items-center gap-1.5 whitespace-nowrap rounded-xl border border-white/15 bg-white/5 px-3 text-sm font-semibold text-white/80 transition-colors hover:border-[#F57E3A]/40 hover:text-[#F57E3A] disabled:cursor-not-allowed disabled:opacity-40"
+            aria-label="Reset all filters"
           >
-            Upcoming
-            <span className="ml-1.5 text-xs opacity-80">({upcomingTotal})</span>
-          </button>
-          <button
-            type="button"
-            role="tab"
-            aria-selected={tab === "past"}
-            onClick={() => setTab("past")}
-            className={`font-montserrat rounded-md px-4 py-2 text-sm font-semibold transition-colors ${
-              tab === "past"
-                ? "bg-[#F57E3A] text-white"
-                : "text-white/70 hover:text-white"
-            }`}
-          >
-            Past
-            <span className="ml-1.5 text-xs opacity-80">({pastTotal})</span>
+            <RotateCcw className="size-3.5 shrink-0" aria-hidden />
+            Reset
           </button>
         </div>
 
         <p className="font-inter text-sm text-white/55">
-          {filterYear ? (
+          {searchActive ? (
             <>
-              Showing {activeList.length} of {activeTotal}{" "}
+              Showing {filteredList.length} of {baseList.length}{" "}
+              {tab === "upcoming" ? "upcoming" : "past"} checkpoint
+              {baseList.length === 1 ? "" : "s"}
+              {filterYear ? (
+                <>
+                  {" "}
+                  for{" "}
+                  <span className="font-medium text-white/80">
+                    {formatCheckpointFilterLabel(filterYear, filterMonth)}
+                  </span>
+                </>
+              ) : null}
+              {searchQuery.trim() ? (
+                <>
+                  {" "}
+                  matching &ldquo;
+                  <span className="font-medium text-white/80">
+                    {searchQuery.trim()}
+                  </span>
+                  &rdquo;.
+                </>
+              ) : (
+                "."
+              )}
+            </>
+          ) : filterYear ? (
+            <>
+              Showing {filteredList.length} of {activeTotal}{" "}
               {tab === "upcoming" ? "upcoming" : "past"} checkpoint
               {activeTotal === 1 ? "" : "s"} for{" "}
               <span className="font-medium text-white/80">
@@ -215,7 +262,7 @@ export function CheckpointsTabs({
             </>
           ) : (
             <>
-              Showing all {activeList.length}{" "}
+              Showing all {filteredList.length}{" "}
               {tab === "upcoming" ? "upcoming" : "past"} checkpoint
               {activeTotal === 1 ? "" : "s"}.
             </>
@@ -234,7 +281,7 @@ export function CheckpointsTabs({
         </div>
       ) : null}
 
-      <CheckpointsTable checkpoints={activeList} emptyMessage={emptyMessage} />
+      <CheckpointsTable checkpoints={filteredList} emptyMessage={emptyMessage} />
     </>
   );
 }
