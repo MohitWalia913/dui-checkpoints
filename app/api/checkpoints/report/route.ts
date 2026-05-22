@@ -1,3 +1,4 @@
+import { sendCheckpointReportAdminEmail } from "@/lib/email/checkpoint-report-admin";
 import { createCheckpointReport } from "@/lib/checkpoints/repository";
 import {
   REPORT_CHECKPOINT_REQUIRED,
@@ -46,6 +47,16 @@ export async function POST(request: NextRequest) {
 
   if (result.error) {
     return NextResponse.json({ error: result.error }, { status: 500 });
+  }
+
+  if (result.data) {
+    const emailResult = await sendCheckpointReportAdminEmail(result.data);
+    if (!emailResult.sent) {
+      console.warn(
+        "[checkpoint-report] Report saved but admin email was not sent:",
+        emailResult.error,
+      );
+    }
   }
 
   return NextResponse.json({ data: result.data }, { status: 201 });

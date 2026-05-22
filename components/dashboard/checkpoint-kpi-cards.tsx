@@ -28,8 +28,8 @@ const KPI_CONFIG = [
   },
   {
     key: "total" as const,
-    label: "Total records",
-    description: "Checkpoints in the last 365 days",
+    label: "Total Records (2 Years)",
+    description: "Checkpoints in the last 2 years",
     icon: Shield,
     accent: "text-violet-300",
     glow: "from-violet-400/15",

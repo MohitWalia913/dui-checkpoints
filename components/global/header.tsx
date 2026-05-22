@@ -76,7 +76,7 @@ export function Header() {
             src={logo}
             alt="DUI Checkpoints Locator — Statewide, Real-time Alerts"
             priority
-            className="h-[44px] w-auto md:h-[52px] lg:h-[57px]"
+            className="h-auto max-h-[44px] w-auto md:max-h-[52px] lg:max-h-[57px]"
           />
         </Link>
 

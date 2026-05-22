@@ -132,13 +132,13 @@ export async function getCheckpointStats(): Promise<{
   const supabase = await createClient();
   const today = getTodayDateString();
   const week = getWeekDateRange();
-  const last365Start = getDateDaysAgo(365);
+  const last2YearsStart = getDateDaysAgo(730);
 
   const [totalRes, upcomingRes, weekRes, countiesRes] = await Promise.all([
     supabase
       .from(CHECKPOINTS_TABLE)
       .select("*", { count: "exact", head: true })
-      .gte("Date", last365Start)
+      .gte("Date", last2YearsStart)
       .lte("Date", today),
     supabase
       .from(CHECKPOINTS_TABLE)

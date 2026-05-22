@@ -107,8 +107,21 @@
 
 /********style**************/
 .main-header-inner-row { padding-top: 20px;  padding-bottom: 20px;}
-.main-header-inner-row .logo-img-box {   width: 200px; max-width: 100%;}
-.main-header-inner-row .logo-img-box img { width: 100%; max-width: 100%; object-fit: cover;}
+.main-header-inner-row .logo-img-box {
+  display: flex;
+  align-items: center;
+  width: 200px;
+  max-width: 100%;
+  min-height: 57px;
+}
+.main-header-inner-row .logo-img-box img {
+  width: auto;
+  max-width: 100%;
+  height: auto;
+  max-height: 57px;
+  object-fit: contain;
+  object-position: left center;
+}
 .main-header-inner-row  nav { margin-right: 115px;}
 .main-header-inner-row  nav  ul li a  { font-family: 'Montserrat' !important; font-style: normal;font-weight: 500 !important;font-size: 14px !important;line-height: 22px;color: #FFFFFF !important;}
 .two-btn { gap: 20px;}

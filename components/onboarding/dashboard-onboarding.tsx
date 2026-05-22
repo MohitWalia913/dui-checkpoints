@@ -134,14 +134,14 @@ export function DashboardOnboarding({ userEmail }: { userEmail: string }) {
 
           {isLast ? (
             <div className="flex w-full flex-col gap-3 sm:flex-row sm:justify-center">
-              <Link
-                href="/dashboard/legal"
+              <button
+                type="button"
                 onClick={finish}
                 className="font-montserrat inline-flex h-12 flex-1 items-center justify-center gap-2 rounded-xl border border-white/20 bg-white px-6 text-sm font-bold text-[#040F20] transition-transform hover:scale-[1.02] active:scale-[0.99] sm:flex-initial sm:min-w-[200px]"
               >
                 <Check className="size-5" aria-hidden />
                 Get started
-              </Link>
+              </button>
             </div>
           ) : (
             <button
