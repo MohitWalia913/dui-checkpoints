@@ -50,7 +50,7 @@ const NAV_ITEMS = [
   },
   {
     title: "Report Checkpoint",
-    url: "/report",
+    url: "/dashboard/report",
     icon: Megaphone,
   },
 

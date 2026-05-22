@@ -1,32 +1,10 @@
 import { createCheckpoint } from "@/lib/checkpoints/repository";
+import {
+  REPORT_CHECKPOINT_REQUIRED,
+  type ReportCheckpointBody,
+} from "@/lib/checkpoints/report";
 import type { CheckpointInsert } from "@/lib/checkpoints/types";
 import { NextRequest, NextResponse } from "next/server";
-
-type ReportCheckpointBody = {
-  reporterName?: string;
-  reporterEmail?: string;
-  State?: string;
-  County?: string;
-  City?: string;
-  Location?: string;
-  Description?: string;
-  Date?: string;
-  Time?: string;
-  Source?: string;
-  mapurl?: string;
-};
-
-const REQUIRED: (keyof ReportCheckpointBody)[] = [
-  "reporterName",
-  "reporterEmail",
-  "State",
-  "County",
-  "City",
-  "Location",
-  "Description",
-  "Date",
-  "Time",
-];
 
 export async function POST(request: NextRequest) {
   let body: ReportCheckpointBody;
@@ -36,7 +14,7 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: "Invalid JSON body" }, { status: 400 });
   }
 
-  for (const field of REQUIRED) {
+  for (const field of REPORT_CHECKPOINT_REQUIRED) {
     if (!body[field] || String(body[field]).trim() === "") {
       return NextResponse.json(
         { error: `Missing required field: ${field}` },
