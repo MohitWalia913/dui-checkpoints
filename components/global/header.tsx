@@ -1,5 +1,6 @@
 "use client";
 
+import { HeaderAuthActions } from "@/components/global/header-auth-actions";
 import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
@@ -102,30 +103,12 @@ export function Header() {
             ))}
           </nav>
 
-          <div className="two-btn flex items-center gap-[15px]">
-            <Link
-              href="/auth/login"
-              className="same-btn"
-            >
-              Login
-            </Link>
-            <Link
-              href="/auth/sign-up"
-              className="same-btn same-ext-btn"
-            >
-              Get Started
-            </Link>
-          </div>
+          <HeaderAuthActions layout="desktop" />
         </div>
 
         {/* Mobile: CTA + hamburger */}
         <div className="flex items-center gap-3 lg:hidden">
-          <Link
-            href="/auth/sign-up"
-            className=" hidden font-inter inline-flex items-center justify-center bg-[#F57E3A] px-4 py-2 text-base font-medium leading-4 text-white sm:px-5 sm:py-2.5 sm:text-[18px]"
-          >
-            Get Started
-          </Link>
+          <HeaderAuthActions layout="mobile-bar" />
 
           <button
             type="button"
@@ -185,22 +168,10 @@ export function Header() {
             </Link>
           ))}
 
-          <div className="two-btn mt-8 flex flex-col gap-4">
-            <Link
-              href="/auth/login"
-              className="same-btn  font-inter inline-flex w-full items-center justify-center border border-white px-[25px] py-[10px] text-[20.8px] font-medium leading-4 text-white"
-              onClick={() => setMenuOpen(false)}
-            >
-              Login
-            </Link>
-            <Link
-              href="/auth/sign-up"
-              className="same-btn  same-ext-btn font-inter inline-flex w-full items-center justify-center bg-[#F57E3A] px-[25px] py-[10px] text-[20.8px] font-medium leading-4 text-white"
-              onClick={() => setMenuOpen(false)}
-            >
-              Get Started
-            </Link>
-          </div>
+          <HeaderAuthActions
+            layout="mobile"
+            onNavigate={() => setMenuOpen(false)}
+          />
         </nav>
       </div>
     </header>
