@@ -21,6 +21,34 @@ type ReportCheckpointFormProps = {
   defaultReporterEmail?: string;
 };
 
+function ReportFormField({
+  id,
+  label,
+  required,
+  isDashboard,
+  children,
+}: {
+  id: string;
+  label: string;
+  required?: boolean;
+  isDashboard: boolean;
+  children: React.ReactNode;
+}) {
+  const labelClass = isDashboard
+    ? "font-montserrat mb-1.5 block text-xs font-semibold text-white/80"
+    : "sr-only";
+
+  return (
+    <div className={isDashboard ? "space-y-0" : "w-full"}>
+      <label htmlFor={id} className={labelClass}>
+        {label}
+        {required ? (isDashboard ? " *" : null) : isDashboard ? " (optional)" : null}
+      </label>
+      {children}
+    </div>
+  );
+}
+
 export function ReportCheckpointForm({
   variant = "homepage",
   defaultReporterName = "",
@@ -39,9 +67,6 @@ export function ReportCheckpointForm({
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
   const inputClass = isDashboard ? dashboardInputClass : homepageInputClass;
-  const labelClass = isDashboard
-    ? "font-montserrat mb-1.5 block text-xs font-semibold text-white/80"
-    : "sr-only";
 
   function updateField<K extends keyof ReportCheckpointBody>(
     key: K,
@@ -84,28 +109,6 @@ export function ReportCheckpointForm({
     }
   }
 
-  function Field({
-    id,
-    label,
-    required,
-    children,
-  }: {
-    id: string;
-    label: string;
-    required?: boolean;
-    children: React.ReactNode;
-  }) {
-    return (
-      <div className={isDashboard ? "space-y-0" : "w-full"}>
-        <label htmlFor={id} className={labelClass}>
-          {label}
-          {required ? (isDashboard ? " *" : null) : isDashboard ? " (optional)" : null}
-        </label>
-        {children}
-      </div>
-    );
-  }
-
   const rowClass = isDashboard
     ? "grid gap-4 sm:grid-cols-2"
     : "form-flex mb-[20px] flex justify-between gap-5";
@@ -122,7 +125,7 @@ export function ReportCheckpointForm({
           </h3>
         ) : null}
         <div className={rowClass}>
-          <Field id="reporter-name" label="Full name" required>
+          <ReportFormField id="reporter-name" label="Full name" required isDashboard={isDashboard}>
             <input
               id="reporter-name"
               name="reporterName"
@@ -133,8 +136,8 @@ export function ReportCheckpointForm({
               onChange={(e) => updateField("reporterName", e.target.value)}
               required
             />
-          </Field>
-          <Field id="reporter-email" label="Email address" required>
+          </ReportFormField>
+          <ReportFormField id="reporter-email" label="Email address" required isDashboard={isDashboard}>
             <input
               id="reporter-email"
               name="reporterEmail"
@@ -145,7 +148,7 @@ export function ReportCheckpointForm({
               onChange={(e) => updateField("reporterEmail", e.target.value)}
               required
             />
-          </Field>
+          </ReportFormField>
         </div>
       </div>
 
@@ -156,7 +159,7 @@ export function ReportCheckpointForm({
           </h3>
         ) : null}
         <div className={rowClass}>
-          <Field id="state" label="State" required>
+          <ReportFormField id="state" label="State" required isDashboard={isDashboard}>
             <input
               id="state"
               name="State"
@@ -167,8 +170,8 @@ export function ReportCheckpointForm({
               onChange={(e) => updateField("State", e.target.value)}
               required
             />
-          </Field>
-          <Field id="county" label="County" required>
+          </ReportFormField>
+          <ReportFormField id="county" label="County" required isDashboard={isDashboard}>
             <input
               id="county"
               name="County"
@@ -179,10 +182,10 @@ export function ReportCheckpointForm({
               onChange={(e) => updateField("County", e.target.value)}
               required
             />
-          </Field>
+          </ReportFormField>
         </div>
         <div className={rowClass}>
-          <Field id="city" label="City" required>
+          <ReportFormField id="city" label="City" required isDashboard={isDashboard}>
             <input
               id="city"
               name="City"
@@ -193,8 +196,8 @@ export function ReportCheckpointForm({
               onChange={(e) => updateField("City", e.target.value)}
               required
             />
-          </Field>
-          <Field id="location" label="Checkpoint location" required>
+          </ReportFormField>
+          <ReportFormField id="location" label="Checkpoint location" required isDashboard={isDashboard}>
             <input
               id="location"
               name="Location"
@@ -205,7 +208,7 @@ export function ReportCheckpointForm({
               onChange={(e) => updateField("Location", e.target.value)}
               required
             />
-          </Field>
+          </ReportFormField>
         </div>
       </div>
 
@@ -216,7 +219,7 @@ export function ReportCheckpointForm({
           </h3>
         ) : null}
         <div className={rowClass}>
-          <Field id="date" label="Date" required>
+          <ReportFormField id="date" label="Date" required isDashboard={isDashboard}>
             <input
               id="date"
               name="Date"
@@ -226,8 +229,8 @@ export function ReportCheckpointForm({
               onChange={(e) => updateField("Date", e.target.value)}
               required
             />
-          </Field>
-          <Field id="time" label="Time" required>
+          </ReportFormField>
+          <ReportFormField id="time" label="Time" required isDashboard={isDashboard}>
             <input
               id="time"
               name="Time"
@@ -238,9 +241,9 @@ export function ReportCheckpointForm({
               onChange={(e) => updateField("Time", e.target.value)}
               required
             />
-          </Field>
+          </ReportFormField>
         </div>
-        <Field id="description" label="Description" required>
+        <ReportFormField id="description" label="Description" required isDashboard={isDashboard}>
           <textarea
             id="description"
             name="Description"
@@ -251,7 +254,7 @@ export function ReportCheckpointForm({
             onChange={(e) => updateField("Description", e.target.value)}
             required
           />
-        </Field>
+        </ReportFormField>
       </div>
 
       <div className={isDashboard ? "space-y-4" : undefined}>
@@ -261,7 +264,7 @@ export function ReportCheckpointForm({
           </h3>
         ) : null}
         <div className={rowClass}>
-          <Field id="source" label="Source URL">
+          <ReportFormField id="source" label="Source URL" isDashboard={isDashboard}>
             <input
               id="source"
               name="Source"
@@ -271,8 +274,8 @@ export function ReportCheckpointForm({
               value={form.Source}
               onChange={(e) => updateField("Source", e.target.value)}
             />
-          </Field>
-          <Field id="mapurl" label="Google Maps URL">
+          </ReportFormField>
+          <ReportFormField id="mapurl" label="Google Maps URL" isDashboard={isDashboard}>
             <input
               id="mapurl"
               name="mapurl"
@@ -282,7 +285,7 @@ export function ReportCheckpointForm({
               value={form.mapurl}
               onChange={(e) => updateField("mapurl", e.target.value)}
             />
-          </Field>
+          </ReportFormField>
         </div>
       </div>
 
