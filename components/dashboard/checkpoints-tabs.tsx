@@ -23,6 +23,7 @@ export function CheckpointsTabs({
   past,
   upcomingTotal,
   pastTotal,
+  totalInWindow,
   filterYear,
   filterMonth,
   error,
@@ -32,6 +33,7 @@ export function CheckpointsTabs({
   past: CheckpointListItem[];
   upcomingTotal: number;
   pastTotal: number;
+  totalInWindow: number;
   filterYear: number | null;
   filterMonth: number | null;
   error: string | null;
@@ -43,7 +45,7 @@ export function CheckpointsTabs({
   const [searchQuery, setSearchQuery] = useState("");
 
   const baseList = tab === "upcoming" ? upcoming : past;
-  const activeTotal = tab === "upcoming" ? upcomingTotal : pastTotal;
+  const countsAligned = pastTotal + upcomingTotal === totalInWindow;
 
   const filteredList = useMemo(
     () => filterCheckpointsBySearch(baseList, searchQuery),
@@ -252,19 +254,47 @@ export function CheckpointsTabs({
             </>
           ) : filterYear ? (
             <>
-              Showing {filteredList.length} of {activeTotal}{" "}
+              Showing {filteredList.length} of{" "}
+              {tab === "upcoming" ? upcomingTotal : pastTotal}{" "}
               {tab === "upcoming" ? "upcoming" : "past"} checkpoint
-              {activeTotal === 1 ? "" : "s"} for{" "}
+              {tab === "upcoming"
+                ? upcomingTotal === 1
+                  ? ""
+                  : "s"
+                : pastTotal === 1
+                  ? ""
+                  : "s"}{" "}
+              for{" "}
               <span className="font-medium text-white/80">
                 {formatCheckpointFilterLabel(filterYear, filterMonth)}
               </span>
-              .
+              .{" "}
+              {countsAligned ? (
+                <>
+                  Total in range:{" "}
+                  <span className="font-medium text-white/80">
+                    {totalInWindow}
+                  </span>{" "}
+                  (Past {pastTotal} + Upcoming {upcomingTotal}).
+                </>
+              ) : null}
             </>
           ) : (
             <>
-              Showing all {filteredList.length}{" "}
+              Showing {filteredList.length}{" "}
               {tab === "upcoming" ? "upcoming" : "past"} checkpoint
-              {activeTotal === 1 ? "" : "s"}.
+              {tab === "upcoming"
+                ? upcomingTotal === 1
+                  ? ""
+                  : "s"
+                : pastTotal === 1
+                  ? ""
+                  : "s"}{" "}
+              in the last 2 years.{" "}
+              <span className="font-medium text-white/80">
+                Past {pastTotal} + Upcoming {upcomingTotal} = {totalInWindow}
+              </span>{" "}
+              total (matches dashboard Total Records).
             </>
           )}
         </p>

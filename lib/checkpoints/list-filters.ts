@@ -1,5 +1,12 @@
+import { getCheckpointsTwoYearStartDate } from "@/lib/checkpoints/date";
+
 /** Max rows fetched on the checkpoints list page (all matching filters). */
 export const CHECKPOINTS_LIST_MAX = 5000;
+
+/** Default list window when no year/month filter is selected (matches KPI). */
+export function getDefaultCheckpointListFromDate(): string {
+  return getCheckpointsTwoYearStartDate();
+}
 
 const MONTH_LABELS = [
   "January",
@@ -50,11 +57,13 @@ export function parseCheckpointListFilters(searchParams: {
       : null;
 
   const range = getDateRangeForYearMonth(year, month);
+  const fromDate = range.fromDate ?? (year ? undefined : getDefaultCheckpointListFromDate());
 
   return {
     year,
     month,
-    ...range,
+    fromDate,
+    toDate: range.toDate,
   };
 }
 

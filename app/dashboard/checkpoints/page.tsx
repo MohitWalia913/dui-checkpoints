@@ -3,6 +3,7 @@ import {
   CHECKPOINTS_LIST_MAX,
   parseCheckpointListFilters,
 } from "@/lib/checkpoints/list-filters";
+import { getCheckpointTabCounts } from "@/lib/checkpoints/repository";
 import {
   fetchPastCheckpointsFromApiServer,
   fetchUpcomingCheckpointsFromApiServer,
@@ -37,12 +38,14 @@ export default async function CheckpointsPage({ searchParams }: PageProps) {
     toDate: filters.toDate,
   };
 
-  const [upcomingResult, pastResult] = await Promise.all([
+  const [upcomingResult, pastResult, tabCounts] = await Promise.all([
     fetchUpcomingCheckpointsFromApiServer(CHECKPOINTS_LIST_MAX, dateRange),
     fetchPastCheckpointsFromApiServer(CHECKPOINTS_LIST_MAX, dateRange),
+    getCheckpointTabCounts(dateRange),
   ]);
 
-  const error = upcomingResult.error ?? pastResult.error;
+  const error =
+    upcomingResult.error ?? pastResult.error ?? tabCounts.error;
   const isUnauthorized =
     upcomingResult.status === 401 || pastResult.status === 401;
 
@@ -65,8 +68,9 @@ export default async function CheckpointsPage({ searchParams }: PageProps) {
         <CheckpointsTabs
           upcoming={upcomingResult.data}
           past={pastResult.data}
-          upcomingTotal={upcomingResult.count}
-          pastTotal={pastResult.count}
+          upcomingTotal={tabCounts.upcoming}
+          pastTotal={tabCounts.past}
+          totalInWindow={tabCounts.totalInWindow}
           filterYear={filters.year}
           filterMonth={filters.month}
           error={error}

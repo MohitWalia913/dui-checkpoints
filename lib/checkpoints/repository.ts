@@ -1,9 +1,10 @@
 import { createClient } from "@/lib/supabase/server";
 import {
-  getDateDaysAgo,
-  getTodayDateString,
-  getWeekDateRange,
-} from "@/lib/checkpoints/date";
+  getCheckpointEventDate,
+  getCheckpointTabCountsFromItems,
+  filterCheckpointList,
+} from "@/lib/checkpoints/filter-records";
+import { getTodayDateString, getWeekDateRange } from "@/lib/checkpoints/date";
 import {
   CHECKPOINTS_TABLE,
   CHECKPOINT_REPORTS_TABLE,
@@ -21,20 +22,63 @@ import {
 const LIST_COLUMNS =
   "id, State, County, City, Location, Date, Time, Source, mapurl, location_id, created_at";
 
-export async function listCheckpoints(params: CheckpointsListParams = {}) {
+const CHECKPOINTS_FETCH_CAP = 5000;
+
+function usesInMemoryDateFiltering(params: CheckpointsListParams): boolean {
+  return Boolean(
+    params.upcoming ||
+      params.past ||
+      params.fromDate ||
+      params.toDate ||
+      params.latest,
+  );
+}
+
+export async function loadAllCheckpointListItems(): Promise<{
+  data: CheckpointListItem[];
+  error: string | null;
+}> {
   const supabase = await createClient();
-  const today = getTodayDateString();
+
+  const { data, error } = await supabase
+    .from(CHECKPOINTS_TABLE)
+    .select(LIST_COLUMNS)
+    .order("id", { ascending: true })
+    .limit(CHECKPOINTS_FETCH_CAP);
+
+  return {
+    data: (data ?? []) as CheckpointListItem[],
+    error: error?.message ?? null,
+  };
+}
+
+export async function listCheckpoints(params: CheckpointsListParams = {}) {
+  if (usesInMemoryDateFiltering(params)) {
+    const loaded = await loadAllCheckpointListItems();
+    if (loaded.error) {
+      return { data: [], count: 0, error: loaded.error };
+    }
+
+    const full = filterCheckpointList(loaded.data, {
+      ...params,
+      limit: loaded.data.length,
+      offset: 0,
+    });
+    const data = filterCheckpointList(loaded.data, params);
+
+    return {
+      data,
+      count: full.length,
+      error: null,
+    };
+  }
+
+  const supabase = await createClient();
 
   let query = supabase
     .from(CHECKPOINTS_TABLE)
     .select(LIST_COLUMNS, { count: "exact" });
 
-  if (params.upcoming) {
-    query = query.gte("Date", today);
-  }
-  if (params.past) {
-    query = query.lt("Date", today);
-  }
   if (params.state) {
     query = query.eq("State", params.state);
   }
@@ -44,23 +88,11 @@ export async function listCheckpoints(params: CheckpointsListParams = {}) {
   if (params.city) {
     query = query.eq("City", params.city);
   }
-  if (params.fromDate) {
-    query = query.gte("Date", params.fromDate);
-  }
-  if (params.toDate) {
-    query = query.lte("Date", params.toDate);
-  }
 
-  if (params.latest) {
-    query = query
-      .order("Date", { ascending: false })
-      .order("created_at", { ascending: false });
-  } else {
-    query = query
-      .order("Date", { ascending: true })
-      .order("County", { ascending: true })
-      .order("City", { ascending: true });
-  }
+  query = query
+    .order("Date", { ascending: true })
+    .order("County", { ascending: true })
+    .order("City", { ascending: true });
 
   const limit = params.limit ?? 50;
   const offset = params.offset ?? 0;
@@ -125,55 +157,58 @@ export async function getCheckpointById(id: number) {
   };
 }
 
+export async function getCheckpointTabCounts(params?: {
+  fromDate?: string;
+  toDate?: string;
+}): Promise<{
+  past: number;
+  upcoming: number;
+  totalInWindow: number;
+  error: string | null;
+}> {
+  const loaded = await loadAllCheckpointListItems();
+  if (loaded.error) {
+    return { past: 0, upcoming: 0, totalInWindow: 0, error: loaded.error };
+  }
+
+  const counts = getCheckpointTabCountsFromItems(loaded.data, params);
+  return { ...counts, error: null };
+}
+
 export async function getCheckpointStats(): Promise<{
   data: CheckpointStats | null;
   error: string | null;
 }> {
-  const supabase = await createClient();
-  const today = getTodayDateString();
-  const week = getWeekDateRange();
-  const last2YearsStart = getDateDaysAgo(730);
-
-  const [totalRes, upcomingRes, weekRes, countiesRes] = await Promise.all([
-    supabase
-      .from(CHECKPOINTS_TABLE)
-      .select("*", { count: "exact", head: true })
-      .gte("Date", last2YearsStart)
-      .lte("Date", today),
-    supabase
-      .from(CHECKPOINTS_TABLE)
-      .select("*", { count: "exact", head: true })
-      .gte("Date", today),
-    supabase
-      .from(CHECKPOINTS_TABLE)
-      .select("*", { count: "exact", head: true })
-      .gte("Date", week.start)
-      .lte("Date", week.end),
-    supabase.from(CHECKPOINTS_TABLE).select("County"),
-  ]);
-
-  const firstError =
-    totalRes.error?.message ||
-    upcomingRes.error?.message ||
-    weekRes.error?.message ||
-    countiesRes.error?.message ||
-    null;
-
-  if (firstError) {
-    return { data: null, error: firstError };
+  const loaded = await loadAllCheckpointListItems();
+  if (loaded.error) {
+    return { data: null, error: loaded.error };
   }
 
+  const today = getTodayDateString();
+  const week = getWeekDateRange();
+  const tabCounts = getCheckpointTabCountsFromItems(loaded.data);
+
+  const upcoming = loaded.data.filter((row) => {
+    const eventDate = getCheckpointEventDate(row);
+    return eventDate != null && eventDate >= today;
+  }).length;
+
+  const thisWeek = loaded.data.filter((row) => {
+    const eventDate = getCheckpointEventDate(row);
+    return (
+      eventDate != null && eventDate >= week.start && eventDate <= week.end
+    );
+  }).length;
+
   const uniqueCounties = new Set(
-    (countiesRes.data ?? [])
-      .map((row) => row.County as string)
-      .filter(Boolean),
+    loaded.data.map((row) => row.County).filter(Boolean),
   );
 
   return {
     data: {
-      total: totalRes.count ?? 0,
-      upcoming: upcomingRes.count ?? 0,
-      thisWeek: weekRes.count ?? 0,
+      total: tabCounts.totalInWindow,
+      upcoming,
+      thisWeek,
       counties: uniqueCounties.size,
     },
     error: null,
