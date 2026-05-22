@@ -210,6 +210,157 @@ export async function createCheckpointReport(payload: CheckpointReportInsert) {
   };
 }
 
+export async function listCheckpointReports(params?: {
+  status?: CheckpointReport["status"];
+  limit?: number;
+}) {
+  const supabase = await createClient();
+  const limit = params?.limit ?? 100;
+
+  let query = supabase
+    .from(CHECKPOINT_REPORTS_TABLE)
+    .select("*")
+    .order("created_at", { ascending: false })
+    .limit(limit);
+
+  if (params?.status) {
+    query = query.eq("status", params.status);
+  }
+
+  const { data, error } = await query;
+
+  return {
+    data: (data ?? []) as CheckpointReport[],
+    error: error?.message ?? null,
+  };
+}
+
+export async function getCheckpointReportById(id: number) {
+  const supabase = await createClient();
+
+  const { data, error } = await supabase
+    .from(CHECKPOINT_REPORTS_TABLE)
+    .select("*")
+    .eq("id", id)
+    .maybeSingle();
+
+  return {
+    data: (data as CheckpointReport | null) ?? null,
+    error: error?.message ?? null,
+  };
+}
+
+function reportToCheckpointInsert(
+  report: CheckpointReport,
+): CheckpointInsert {
+  return {
+    State: report.State,
+    County: report.County,
+    City: report.City,
+    Location: report.Location,
+    Description: report.Description,
+    Date: report.Date,
+    Time: report.Time,
+    Source:
+      report.Source?.trim() ||
+      `Approved user report #${report.id}`,
+    mapurl: report.mapurl,
+    location_id: null,
+  };
+}
+
+export async function approveCheckpointReport(
+  id: number,
+  reviewerUserId: string,
+) {
+  const existing = await getCheckpointReportById(id);
+
+  if (existing.error) {
+    return { data: null, checkpoint: null, error: existing.error };
+  }
+
+  if (!existing.data) {
+    return { data: null, checkpoint: null, error: "Report not found" };
+  }
+
+  if (existing.data.status !== "pending") {
+    return {
+      data: null,
+      checkpoint: null,
+      error: `Report is already ${existing.data.status}`,
+    };
+  }
+
+  const created = await createCheckpoint(reportToCheckpointInsert(existing.data));
+
+  if (created.error || !created.data) {
+    return {
+      data: null,
+      checkpoint: null,
+      error: created.error ?? "Failed to publish checkpoint",
+    };
+  }
+
+  const supabase = await createClient();
+  const { data, error } = await supabase
+    .from(CHECKPOINT_REPORTS_TABLE)
+    .update({
+      status: "approved",
+      approved_checkpoint_id: created.data.id,
+      reviewed_at: new Date().toISOString(),
+      reviewed_by: reviewerUserId,
+    })
+    .eq("id", id)
+    .eq("status", "pending")
+    .select("*")
+    .maybeSingle();
+
+  return {
+    data: (data as CheckpointReport | null) ?? null,
+    checkpoint: created.data,
+    error: error?.message ?? null,
+  };
+}
+
+export async function rejectCheckpointReport(
+  id: number,
+  reviewerUserId: string,
+  adminNotes?: string | null,
+) {
+  const existing = await getCheckpointReportById(id);
+
+  if (existing.error) {
+    return { data: null, error: existing.error };
+  }
+
+  if (!existing.data) {
+    return { data: null, error: "Report not found" };
+  }
+
+  if (existing.data.status !== "pending") {
+    return { data: null, error: `Report is already ${existing.data.status}` };
+  }
+
+  const supabase = await createClient();
+  const { data, error } = await supabase
+    .from(CHECKPOINT_REPORTS_TABLE)
+    .update({
+      status: "rejected",
+      admin_notes: adminNotes?.trim() || null,
+      reviewed_at: new Date().toISOString(),
+      reviewed_by: reviewerUserId,
+    })
+    .eq("id", id)
+    .eq("status", "pending")
+    .select("*")
+    .maybeSingle();
+
+  return {
+    data: (data as CheckpointReport | null) ?? null,
+    error: error?.message ?? null,
+  };
+}
+
 export async function updateCheckpoint(id: number, payload: CheckpointUpdate) {
   const supabase = await createClient();
 

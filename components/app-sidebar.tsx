@@ -5,6 +5,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import {
   CalendarClock,
+  ClipboardList,
   LayoutDashboard,
   Map,
   Megaphone,
@@ -53,7 +54,11 @@ const NAV_ITEMS = [
     url: "/dashboard/report",
     icon: Megaphone,
   },
-
+  {
+    title: "Review Reports",
+    url: "/dashboard/reports",
+    icon: ClipboardList,
+  },
 ] as const;
 
 export function AppSidebar({
@@ -117,8 +122,11 @@ export function AppSidebar({
                       : item.url === "/dashboard/legal"
                         ? pathname === "/dashboard/legal" ||
                           pathname.startsWith("/dashboard/legal/")
-                        : pathname === item.url ||
-                          pathname.startsWith(`${item.url}/`);
+                        : item.url === "/dashboard/reports"
+                          ? pathname === "/dashboard/reports" ||
+                            pathname.startsWith("/dashboard/reports/")
+                          : pathname === item.url ||
+                            pathname.startsWith(`${item.url}/`);
 
               return (
                 <SidebarMenuItem key={item.title}>
