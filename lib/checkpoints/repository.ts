@@ -1,5 +1,9 @@
 import { createClient } from "@/lib/supabase/server";
-import { getTodayDateString, getWeekDateRange } from "@/lib/checkpoints/date";
+import {
+  getDateDaysAgo,
+  getTodayDateString,
+  getWeekDateRange,
+} from "@/lib/checkpoints/date";
 import {
   CHECKPOINTS_TABLE,
   type Checkpoint,
@@ -125,9 +129,14 @@ export async function getCheckpointStats(): Promise<{
   const supabase = await createClient();
   const today = getTodayDateString();
   const week = getWeekDateRange();
+  const last365Start = getDateDaysAgo(365);
 
   const [totalRes, upcomingRes, weekRes, countiesRes] = await Promise.all([
-    supabase.from(CHECKPOINTS_TABLE).select("*", { count: "exact", head: true }),
+    supabase
+      .from(CHECKPOINTS_TABLE)
+      .select("*", { count: "exact", head: true })
+      .gte("Date", last365Start)
+      .lte("Date", today),
     supabase
       .from(CHECKPOINTS_TABLE)
       .select("*", { count: "exact", head: true })

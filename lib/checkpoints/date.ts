@@ -1,9 +1,17 @@
 export function getTodayDateString(): string {
-  const now = new Date();
-  const year = now.getFullYear();
-  const month = String(now.getMonth() + 1).padStart(2, "0");
-  const day = String(now.getDate()).padStart(2, "0");
-  return `${year}-${month}-${day}`;
+  return formatDateParts(new Date());
+}
+
+/** ISO date string for N days before today (inclusive window start). */
+export function getDateDaysAgo(days: number): string {
+  const date = new Date();
+  date.setDate(date.getDate() - days);
+  return formatDateParts(date);
+}
+
+/** First day of the current calendar year (YYYY-01-01). */
+export function getCalendarYearStartDateString(): string {
+  return `${new Date().getFullYear()}-01-01`;
 }
 
 export function getWeekDateRange(): { start: string; end: string } {
