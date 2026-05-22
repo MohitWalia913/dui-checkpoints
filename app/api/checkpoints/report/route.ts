@@ -1,10 +1,29 @@
-import { createCheckpoint } from "@/lib/checkpoints/repository";
+import { createCheckpointReport } from "@/lib/checkpoints/repository";
 import {
   REPORT_CHECKPOINT_REQUIRED,
   type ReportCheckpointBody,
 } from "@/lib/checkpoints/report";
-import type { CheckpointInsert } from "@/lib/checkpoints/types";
+import type { CheckpointReportInsert } from "@/lib/checkpoints/types";
 import { NextRequest, NextResponse } from "next/server";
+
+function toReportInsert(body: ReportCheckpointBody): CheckpointReportInsert {
+  const sourceUrl = body.Source?.trim() ?? "";
+  const reporterEmail = String(body.reporterEmail).trim();
+
+  return {
+    reporter_name: String(body.reporterName).trim(),
+    reporter_email: reporterEmail,
+    State: String(body.State).trim(),
+    County: String(body.County).trim(),
+    City: String(body.City).trim(),
+    Location: String(body.Location).trim(),
+    Description: String(body.Description).trim(),
+    Date: String(body.Date).trim(),
+    Time: String(body.Time).trim(),
+    Source: sourceUrl || `User report — ${reporterEmail}`,
+    mapurl: body.mapurl?.trim() || null,
+  };
+}
 
 export async function POST(request: NextRequest) {
   let body: ReportCheckpointBody;
@@ -23,25 +42,7 @@ export async function POST(request: NextRequest) {
     }
   }
 
-  const reporterName = String(body.reporterName).trim();
-  const reporterEmail = String(body.reporterEmail).trim();
-  const description = String(body.Description).trim();
-  const sourceUrl = body.Source?.trim() ?? "";
-
-  const payload: CheckpointInsert = {
-    State: String(body.State).trim(),
-    County: String(body.County).trim(),
-    City: String(body.City).trim(),
-    Location: String(body.Location).trim(),
-    Description: `${description}\n\nReported by: ${reporterName} (${reporterEmail})`,
-    Date: String(body.Date).trim(),
-    Time: String(body.Time).trim(),
-    Source: sourceUrl || `User report — ${reporterEmail}`,
-    mapurl: body.mapurl?.trim() || null,
-    location_id: null,
-  };
-
-  const result = await createCheckpoint(payload);
+  const result = await createCheckpointReport(toReportInsert(body));
 
   if (result.error) {
     return NextResponse.json({ error: result.error }, { status: 500 });

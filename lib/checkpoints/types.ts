@@ -1,4 +1,45 @@
 export const CHECKPOINTS_TABLE = "Checkpoints" as const;
+export const CHECKPOINT_REPORTS_TABLE = "checkpoint_reports" as const;
+
+export type CheckpointReportStatus = "pending" | "approved" | "rejected";
+
+export type CheckpointReport = {
+  id: number;
+  reporter_name: string;
+  reporter_email: string;
+  State: string;
+  County: string;
+  City: string;
+  Location: string;
+  Description: string;
+  Date: string;
+  Time: string;
+  Source: string | null;
+  mapurl: string | null;
+  status: CheckpointReportStatus;
+  admin_notes: string | null;
+  reviewed_at: string | null;
+  reviewed_by: string | null;
+  approved_checkpoint_id: number | null;
+  created_at: string;
+  updated_at: string;
+};
+
+export type CheckpointReportInsert = Pick<
+  CheckpointReport,
+  | "reporter_name"
+  | "reporter_email"
+  | "State"
+  | "County"
+  | "City"
+  | "Location"
+  | "Description"
+  | "Date"
+  | "Time"
+> & {
+  Source?: string | null;
+  mapurl?: string | null;
+};
 
 export type Checkpoint = {
   id: number;

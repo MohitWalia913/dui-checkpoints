@@ -6,9 +6,12 @@ import {
 } from "@/lib/checkpoints/date";
 import {
   CHECKPOINTS_TABLE,
+  CHECKPOINT_REPORTS_TABLE,
   type Checkpoint,
   type CheckpointInsert,
   type CheckpointListItem,
+  type CheckpointReport,
+  type CheckpointReportInsert,
   type CheckpointStats,
   type CheckpointUpdate,
   type CheckpointsListParams,
@@ -188,6 +191,21 @@ export async function createCheckpoint(payload: CheckpointInsert) {
 
   return {
     data: (data as Checkpoint | null) ?? null,
+    error: error?.message ?? null,
+  };
+}
+
+export async function createCheckpointReport(payload: CheckpointReportInsert) {
+  const supabase = await createClient();
+
+  const { data, error } = await supabase
+    .from(CHECKPOINT_REPORTS_TABLE)
+    .insert(payload)
+    .select("*")
+    .single();
+
+  return {
+    data: (data as CheckpointReport | null) ?? null,
     error: error?.message ?? null,
   };
 }
