@@ -10,6 +10,7 @@ import {
   SidebarTrigger,
 } from "@/components/ui/sidebar";
 import { TooltipProvider } from "@/components/ui/tooltip";
+import { cn } from "@/lib/utils";
 import { usePathname } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 
@@ -75,7 +76,14 @@ export function DashboardShell({
             </div>
             <HeaderHelpCtas />
           </header>
-          <main className="relative flex min-h-0 flex-1 flex-col overflow-hidden">
+          <main
+            className={cn(
+              "relative flex min-h-0 flex-1 flex-col",
+              isMapRoute
+                ? "overflow-hidden"
+                : "overflow-x-hidden overflow-y-auto",
+            )}
+          >
             {children}
           </main>
         </SidebarInset>
