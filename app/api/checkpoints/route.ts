@@ -8,25 +8,53 @@ import type { CheckpointInsert } from "@/lib/checkpoints/types";
 import { NextRequest, NextResponse } from "next/server";
 
 export async function GET(request: NextRequest) {
-  const { searchParams } = request.nextUrl;
+  try {
+    const { searchParams } = request.nextUrl;
 
-  const dashboard =
-    searchParams.get("dashboard") === "true" ||
-    searchParams.get("dashboard") === "1";
-  const upcoming =
-    searchParams.get("upcoming") === "true" ||
-    searchParams.get("upcoming") === "1";
-  const past =
-    searchParams.get("past") === "true" || searchParams.get("past") === "1";
-  const latest =
-    searchParams.get("latest") === "true" ||
-    searchParams.get("latest") === "1";
-  const limit = Number(searchParams.get("limit") ?? "50");
-  const offset = Number(searchParams.get("offset") ?? "0");
+    const dashboard =
+      searchParams.get("dashboard") === "true" ||
+      searchParams.get("dashboard") === "1";
+    const upcoming =
+      searchParams.get("upcoming") === "true" ||
+      searchParams.get("upcoming") === "1";
+    const past =
+      searchParams.get("past") === "true" || searchParams.get("past") === "1";
+    const latest =
+      searchParams.get("latest") === "true" ||
+      searchParams.get("latest") === "1";
+    const limit = Number(searchParams.get("limit") ?? "50");
+    const offset = Number(searchParams.get("offset") ?? "0");
 
-  if (dashboard) {
-    const dashLimit = Number.isFinite(limit) ? limit : 12;
-    const result = await getDashboardCheckpoints(dashLimit);
+    if (dashboard) {
+      const dashLimit = Number.isFinite(limit) ? limit : 12;
+      const result = await getDashboardCheckpoints(dashLimit);
+
+      if (result.error) {
+        return NextResponse.json({ error: result.error }, { status: 500 });
+      }
+
+      return NextResponse.json({
+        data: result.data,
+        meta: {
+          listType: result.listType,
+          count: result.data.length,
+          limit: dashLimit,
+        },
+      });
+    }
+
+    const result = await listCheckpoints({
+      upcoming: upcoming || undefined,
+      past: past || undefined,
+      latest: latest || undefined,
+      state: searchParams.get("state") ?? undefined,
+      county: searchParams.get("county") ?? undefined,
+      city: searchParams.get("city") ?? undefined,
+      fromDate: searchParams.get("fromDate") ?? undefined,
+      toDate: searchParams.get("toDate") ?? undefined,
+      limit: Number.isFinite(limit) ? limit : 50,
+      offset: Number.isFinite(offset) ? offset : 0,
+    });
 
     if (result.error) {
       return NextResponse.json({ error: result.error }, { status: 500 });
@@ -34,31 +62,14 @@ export async function GET(request: NextRequest) {
 
     return NextResponse.json({
       data: result.data,
-      meta: { listType: result.listType, count: result.data.length, limit: dashLimit },
+      meta: { count: result.count, limit, offset },
     });
+  } catch (err) {
+    const message =
+      err instanceof Error ? err.message : "Failed to load checkpoints";
+    console.error("[api/checkpoints]", err);
+    return NextResponse.json({ error: message }, { status: 500 });
   }
-
-  const result = await listCheckpoints({
-    upcoming: upcoming || undefined,
-    past: past || undefined,
-    latest: latest || undefined,
-    state: searchParams.get("state") ?? undefined,
-    county: searchParams.get("county") ?? undefined,
-    city: searchParams.get("city") ?? undefined,
-    fromDate: searchParams.get("fromDate") ?? undefined,
-    toDate: searchParams.get("toDate") ?? undefined,
-    limit: Number.isFinite(limit) ? limit : 50,
-    offset: Number.isFinite(offset) ? offset : 0,
-  });
-
-  if (result.error) {
-    return NextResponse.json({ error: result.error }, { status: 500 });
-  }
-
-  return NextResponse.json({
-    data: result.data,
-    meta: { count: result.count, limit, offset },
-  });
 }
 
 export async function POST(request: NextRequest) {

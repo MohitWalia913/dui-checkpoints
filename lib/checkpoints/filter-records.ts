@@ -8,7 +8,6 @@ import type { CheckpointsListParams } from "@/lib/checkpoints/types";
 
 type DateLikeRow = {
   Date: string | null;
-  created_at?: string | null;
 };
 
 /** Normalize event dates stored as text (ISO, M/D/YYYY, etc.). */
@@ -43,11 +42,9 @@ export function normalizeCheckpointDateString(
   return null;
 }
 
-/** Event date for filters; falls back to created_at date when Date is missing/unparseable. */
+/** Event date for filters (normalized from the Date text column). */
 export function getCheckpointEventDate(row: DateLikeRow): string | null {
-  return (
-    normalizeCheckpointDateString(row.Date) ?? row.created_at?.slice(0, 10) ?? null
-  );
+  return normalizeCheckpointDateString(row.Date);
 }
 
 export function isCheckpointInTwoYearWindow(row: DateLikeRow): boolean {
@@ -56,9 +53,10 @@ export function isCheckpointInTwoYearWindow(row: DateLikeRow): boolean {
   return eventDate >= getCheckpointsTwoYearStartDate();
 }
 
-export function filterCheckpointList<
-  T extends CheckpointListItem & { created_at?: string | null },
->(items: T[], params: CheckpointsListParams): T[] {
+export function filterCheckpointList<T extends CheckpointListItem>(
+  items: T[],
+  params: CheckpointsListParams,
+): T[] {
   const today = getTodayDateString();
   let result = items;
 
@@ -102,7 +100,7 @@ export function filterCheckpointList<
         getCheckpointEventDate(a) ?? "",
       );
       if (dateCmp !== 0) return dateCmp;
-      return (b.created_at ?? "").localeCompare(a.created_at ?? "");
+      return b.id - a.id;
     });
   } else {
     result = [...result].sort((a, b) => {

@@ -20,7 +20,7 @@ import {
 } from "@/lib/checkpoints/types";
 
 const LIST_COLUMNS =
-  "id, State, County, City, Location, Date, Time, Source, mapurl, location_id, created_at";
+  "id, State, County, City, Location, Date, Time, Source, mapurl, location_id";
 
 const CHECKPOINTS_FETCH_CAP = 5000;
 

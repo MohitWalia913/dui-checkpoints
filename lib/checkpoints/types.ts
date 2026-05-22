@@ -68,7 +68,6 @@ export type CheckpointListItem = Pick<
   | "Source"
   | "mapurl"
   | "location_id"
-  | "created_at"
 >;
 
 export type CheckpointInsert = Omit<Checkpoint, "id" | "created_at"> & {
