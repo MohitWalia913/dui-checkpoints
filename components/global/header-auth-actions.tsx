@@ -9,7 +9,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { createClient } from "@/lib/supabase/client";
 import { cn } from "@/lib/utils";
-import { ChevronDown, LogOut, User } from "lucide-react";
+import { CircleUser, LogOut, User } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
@@ -168,11 +168,11 @@ export function HeaderAuthActions({
 
       <DropdownMenu>
         <DropdownMenuTrigger
-          className="same-btn font-montserrat inline-flex items-center gap-1.5 outline-none focus-visible:ring-2 focus-visible:ring-[#F57E3A] focus-visible:ring-offset-2 focus-visible:ring-offset-[#040F20]"
+          className="same-btn inline-flex size-[41px] shrink-0 items-center justify-center p-0 outline-none focus-visible:ring-2 focus-visible:ring-[#F57E3A] focus-visible:ring-offset-2 focus-visible:ring-offset-[#040F20]"
           aria-label="Profile menu"
         >
-          Profile
-          <ChevronDown className="size-4 opacity-80" aria-hidden />
+          <CircleUser className="size-6 text-white" strokeWidth={1.75} aria-hidden />
+          <span className="sr-only">Profile</span>
         </DropdownMenuTrigger>
         <DropdownMenuContent
           align="end"
