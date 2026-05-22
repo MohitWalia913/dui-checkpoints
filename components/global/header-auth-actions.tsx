@@ -23,6 +23,9 @@ function displayName(user: SupabaseUser): string {
   return email.split("@")[0] || "Account";
 }
 
+const profileMenuItemClass =
+  "cursor-pointer gap-2 text-white focus:!bg-[#F57E3A]/15 focus:!text-white data-[highlighted]:!bg-[#F57E3A]/15 data-[highlighted]:!text-white [&_svg]:text-[#F57E3A]";
+
 type HeaderAuthActionsProps = {
   layout?: "desktop" | "mobile" | "mobile-bar";
   onNavigate?: () => void;
@@ -192,21 +195,22 @@ export function HeaderAuthActions({
               <p className="truncate text-[11px] text-white/55">{user.email}</p>
             ) : null}
           </div>
-          <DropdownMenuItem asChild>
-            <Link
-              href="/dashboard"
-              className="cursor-pointer text-white focus:bg-[#F57E3A]/15 focus:text-white"
-            >
-              <User className="text-[#F57E3A]" />
-              My Profile
-            </Link>
+          <DropdownMenuItem
+            className={profileMenuItemClass}
+            onSelect={() => {
+              onNavigate?.();
+              router.push("/dashboard");
+            }}
+          >
+            <User className="text-[#F57E3A]" aria-hidden />
+            My Profile
           </DropdownMenuItem>
           <DropdownMenuSeparator className="bg-white/10" />
           <DropdownMenuItem
-            onClick={() => void logout()}
-            className="cursor-pointer text-white focus:bg-[#F57E3A]/15 focus:text-white"
+            className={profileMenuItemClass}
+            onSelect={() => void logout()}
           >
-            <LogOut className="text-[#F57E3A]" />
+            <LogOut className="text-[#F57E3A]" aria-hidden />
             Log out
           </DropdownMenuItem>
         </DropdownMenuContent>
