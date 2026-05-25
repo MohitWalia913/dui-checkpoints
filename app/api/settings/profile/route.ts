@@ -1,4 +1,6 @@
 import { requireApiUser } from "@/lib/api/auth";
+import { alertContactFromUser } from "@/lib/dashboard/alert-contact";
+import { syncAlertContactFields } from "@/lib/dashboard/alert-settings-repository";
 import { buildProfileSettingsData } from "@/lib/dashboard/profile-settings";
 import type { ProfileSettingsInput } from "@/lib/dashboard/settings-types";
 import { NextRequest, NextResponse } from "next/server";
@@ -58,6 +60,8 @@ export async function PUT(request: NextRequest) {
   if (!data.user) {
     return NextResponse.json({ error: "Profile update failed" }, { status: 500 });
   }
+
+  await syncAlertContactFields(data.user.id, alertContactFromUser(data.user));
 
   return NextResponse.json({
     data: buildProfileSettingsData(data.user),

@@ -1,3 +1,4 @@
+import { notifyNearbyUsersOfNewCheckpoint } from "@/lib/alerts/notify-nearby-users";
 import { requireApiUser } from "@/lib/api/auth";
 import {
   createCheckpoint,
@@ -107,6 +108,19 @@ export async function POST(request: NextRequest) {
 
   if (result.error) {
     return NextResponse.json({ error: result.error }, { status: 500 });
+  }
+
+  if (result.data) {
+    void notifyNearbyUsersOfNewCheckpoint(result.data).then((notify) => {
+      if (notify.notified > 0) {
+        console.info(
+          `[checkpoint-alerts] Sent ${notify.notified} proximity alert(s) for checkpoint ${result.data?.id}`,
+        );
+      }
+      if (notify.errors.length > 0) {
+        console.warn("[checkpoint-alerts]", notify.errors.join("; "));
+      }
+    });
   }
 
   return NextResponse.json({ data: result.data }, { status: 201 });

@@ -1,9 +1,5 @@
 import type { CheckpointReport } from "@/lib/checkpoints/types";
-
-const RESEND_API_URL = "https://api.resend.com/emails";
-
-export const CHECKPOINT_REPORT_ADMIN_EMAIL =
-  process.env.CHECKPOINT_REPORT_ADMIN_EMAIL?.trim() || "mohit@webds.com";
+import { parseAdminEmails, sendResendEmail } from "@/lib/email/resend-client";
 
 function escapeHtml(value: string): string {
   return value
@@ -71,54 +67,21 @@ function buildEmailText(report: CheckpointReport): string {
 export async function sendCheckpointReportAdminEmail(
   report: CheckpointReport,
 ): Promise<{ sent: boolean; error: string | null }> {
-  const apiKey = process.env.RESEND_API_KEY?.trim();
-  if (!apiKey) {
-    console.warn(
-      "[checkpoint-report] RESEND_API_KEY is not set; admin notification email skipped.",
-    );
-    return { sent: false, error: "Email not configured" };
-  }
-
-  const from =
-    process.env.RESEND_FROM_EMAIL?.trim() ||
-    "DUI Checkpoints Locator <onboarding@resend.dev>";
-
   const subject = `New checkpoint report #${report.id} — ${report.City}, ${report.County}`;
+  const result = await sendResendEmail({
+    to: parseAdminEmails(),
+    subject,
+    html: buildEmailHtml(report),
+    text: buildEmailText(report),
+    replyTo: report.reporter_email,
+  });
 
-  try {
-    const response = await fetch(RESEND_API_URL, {
-      method: "POST",
-      headers: {
-        Authorization: `Bearer ${apiKey}`,
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        from,
-        to: [CHECKPOINT_REPORT_ADMIN_EMAIL],
-        subject,
-        html: buildEmailHtml(report),
-        text: buildEmailText(report),
-        reply_to: report.reporter_email,
-      }),
-    });
-
-    const json = (await response.json().catch(() => ({}))) as {
-      message?: string;
-      id?: string;
-    };
-
-    if (!response.ok) {
-      const message =
-        json.message ?? `Resend API error (${response.status})`;
-      console.error("[checkpoint-report] Admin email failed:", message);
-      return { sent: false, error: message };
-    }
-
-    return { sent: true, error: null };
-  } catch (err) {
-    const message =
-      err instanceof Error ? err.message : "Failed to send admin email";
-    console.error("[checkpoint-report] Admin email failed:", message);
-    return { sent: false, error: message };
+  if (!result.sent) {
+    console.warn(
+      "[checkpoint-report] Admin notification skipped:",
+      result.error ?? "unknown",
+    );
   }
+
+  return result;
 }

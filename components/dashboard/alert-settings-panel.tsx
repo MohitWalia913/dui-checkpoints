@@ -1,6 +1,7 @@
 "use client";
 
 import {
+  ALERT_LEAD_TIME_OPTIONS,
   alertSettingsToInput,
   formatAlertSettingsForDisplay,
   type UserAlertSettings,
@@ -99,7 +100,8 @@ export function AlertSettingsPanel({
             Alert settings
           </h2>
           <p className="font-inter mt-1 text-sm text-white/60">
-            DUI checkpoint notifications saved to your account.
+            Email alerts for upcoming checkpoints near your zip code. Set your
+            zip in Profile settings.
           </p>
         </div>
         {!editing ? (
@@ -157,6 +159,34 @@ export function AlertSettingsPanel({
               Send email notifications
             </span>
           </label>
+
+          <div>
+            <label htmlFor="alert-lead-time" className={labelClass}>
+              Alert window (hours before checkpoint)
+            </label>
+            <select
+              id="alert-lead-time"
+              value={draft.alert_lead_time_hours}
+              onChange={(e) =>
+                updateField(
+                  "alert_lead_time_hours",
+                  Number(e.target.value),
+                )
+              }
+              disabled={!draft.alerts_enabled}
+              className={inputClass}
+            >
+              {ALERT_LEAD_TIME_OPTIONS.map((hours) => (
+                <option key={hours} value={hours}>
+                  {hours} hours
+                </option>
+              ))}
+            </select>
+            <p className="font-inter mt-1.5 text-xs text-white/50">
+              You will get an email when a new upcoming checkpoint is added
+              within this many hours of its scheduled date and near your zip.
+            </p>
+          </div>
 
           <div>
             <label htmlFor="preferred-counties" className={labelClass}>
