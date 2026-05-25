@@ -7,7 +7,13 @@ import {
   type UserAlertSettings,
   type UserAlertSettingsInput,
 } from "@/lib/dashboard/alert-settings-types";
-import { Pencil } from "lucide-react";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import { ChevronDown, Pencil } from "lucide-react";
 import { useMemo, useState } from "react";
 
 const inputClass =
@@ -18,6 +24,13 @@ const labelClass =
 
 const SETTINGS_PANEL_CLASS =
   "w-full rounded-xl border border-white/10 bg-white/5 p-6 md:p-8";
+
+const alertMenuItemClass =
+  "cursor-pointer rounded-md px-3 py-2 text-sm text-white/90 focus:bg-[#F57E3A]/25 focus:text-white data-[highlighted]:bg-[#F57E3A]/25 data-[highlighted]:text-white";
+
+function formatLeadTimeLabel(hours: number): string {
+  return hours === 1 ? "1 hour" : `${hours} hours`;
+}
 
 export function AlertSettingsPanel({
   initialSettings,
@@ -174,24 +187,40 @@ export function AlertSettingsPanel({
             <label htmlFor="alert-lead-time" className={labelClass}>
               Alert window (hours before checkpoint)
             </label>
-            <select
-              id="alert-lead-time"
-              value={draft.alert_lead_time_hours}
-              onChange={(e) =>
-                updateField(
-                  "alert_lead_time_hours",
-                  Number(e.target.value),
-                )
-              }
-              disabled={!draft.alerts_enabled}
-              className={inputClass}
-            >
-              {ALERT_LEAD_TIME_OPTIONS.map((hours) => (
-                <option key={hours} value={hours}>
-                  {hours} hours
-                </option>
-              ))}
-            </select>
+            <DropdownMenu>
+              <DropdownMenuTrigger
+                id="alert-lead-time"
+                disabled={!draft.alerts_enabled}
+                className={`${inputClass} flex w-full items-center justify-between gap-2 text-left disabled:cursor-not-allowed disabled:opacity-50`}
+              >
+                <span>{formatLeadTimeLabel(draft.alert_lead_time_hours)}</span>
+                <ChevronDown
+                  className="size-4 shrink-0 text-white/50"
+                  aria-hidden
+                />
+              </DropdownMenuTrigger>
+              <DropdownMenuContent
+                align="start"
+                className="min-w-[var(--radix-dropdown-menu-trigger-width)] rounded-lg border border-white/10 bg-[#0a1628] p-1 font-inter text-white shadow-lg"
+              >
+                {ALERT_LEAD_TIME_OPTIONS.map((hours) => (
+                  <DropdownMenuItem
+                    key={hours}
+                    className={alertMenuItemClass}
+                    onSelect={() =>
+                      updateField("alert_lead_time_hours", hours)
+                    }
+                  >
+                    {formatLeadTimeLabel(hours)}
+                    {draft.alert_lead_time_hours === hours ? (
+                      <span className="ml-auto text-xs font-semibold text-[#F57E3A]">
+                        Selected
+                      </span>
+                    ) : null}
+                  </DropdownMenuItem>
+                ))}
+              </DropdownMenuContent>
+            </DropdownMenu>
             <p className="font-inter mt-1.5 text-xs text-white/50">
               Email when a new upcoming checkpoint is added within this window
               (e.g. 1 hour = same-day alerts).
