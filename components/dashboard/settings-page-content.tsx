@@ -1,6 +1,8 @@
 "use client";
 
+import { AlertSettingsPanel } from "@/components/dashboard/alert-settings-panel";
 import type { ProfileSettingsData } from "@/lib/dashboard/settings-types";
+import type { UserAlertSettings } from "@/lib/dashboard/alert-settings-types";
 import { cn } from "@/lib/utils";
 import { Bell, User } from "lucide-react";
 import Link from "next/link";
@@ -8,10 +10,15 @@ import { useState } from "react";
 
 type SettingsTab = "profile" | "alerts";
 
+const SETTINGS_PANEL_CLASS =
+  "w-full rounded-xl border border-white/10 bg-white/5 p-6 md:p-8";
+
 export function SettingsPageContent({
   profile,
+  alertSettings,
 }: {
   profile: ProfileSettingsData;
+  alertSettings: UserAlertSettings | null;
 }) {
   const [tab, setTab] = useState<SettingsTab>("profile");
 
@@ -70,7 +77,7 @@ export function SettingsPageContent({
         <section
           role="tabpanel"
           aria-labelledby="profile-settings-heading"
-          className="max-w-xl rounded-xl border border-white/10 bg-white/5 p-6 md:p-8"
+          className={SETTINGS_PANEL_CLASS}
         >
           <h2
             id="profile-settings-heading"
@@ -103,21 +110,7 @@ export function SettingsPageContent({
           </div>
         </section>
       ) : (
-        <section
-          role="tabpanel"
-          aria-labelledby="alert-settings-heading"
-          className="max-w-xl rounded-xl border border-white/10 bg-white/5 p-6 md:p-8"
-        >
-          <h2
-            id="alert-settings-heading"
-            className="font-montserrat text-lg font-semibold text-white"
-          >
-            Alert settings
-          </h2>
-          <p className="font-inter mt-4 text-sm text-white/55">
-            Alert preferences will be available here soon.
-          </p>
-        </section>
+        <AlertSettingsPanel initialSettings={alertSettings} />
       )}
     </div>
   );
