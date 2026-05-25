@@ -1,6 +1,9 @@
 import { geocodeCheckpoint, geocodeUsZip } from "@/lib/alerts/geocode";
 import { haversineMiles } from "@/lib/alerts/distance";
+import { cityKey } from "@/lib/alerts/location-catalog";
+import { defaultSelectedCounties } from "@/lib/alerts/california-counties";
 import type { AlertSubscriber } from "@/lib/dashboard/alert-settings-repository";
+import type { AlertCitySelection } from "@/lib/dashboard/alert-settings-types";
 import type { Checkpoint } from "@/lib/checkpoints/types";
 import type { LatLng } from "@/lib/checkpoints/coordinates";
 
@@ -24,61 +27,111 @@ function normalizePlace(value: string): string {
     .trim();
 }
 
-export function matchesCityAndCounty(
-  userCity: string,
-  userCounty: string,
-  checkpoint: Pick<Checkpoint, "City" | "County">,
-): boolean {
-  const city = normalizePlace(userCity);
-  const county = normalizePlace(userCounty);
-  if (!city || !county) return false;
-
-  const checkpointCity = normalizePlace(checkpoint.City ?? "");
-  const checkpointCounty = normalizePlace(checkpoint.County ?? "");
-
-  const cityMatch =
-    checkpointCity === city ||
-    checkpointCity.includes(city) ||
-    city.includes(checkpointCity);
-
-  const countyMatch =
-    checkpointCounty === county ||
-    checkpointCounty.includes(county) ||
-    county.includes(checkpointCounty);
-
-  return cityMatch && countyMatch;
+function placesMatch(a: string, b: string): boolean {
+  const left = normalizePlace(a);
+  const right = normalizePlace(b);
+  if (!left || !right) return false;
+  return left === right || left.includes(right) || right.includes(left);
 }
 
-export function matchesPreferredCounties(
-  preferred: string | null | undefined,
+function parseSubscriberCounties(
+  subscriber: AlertSubscriber,
+): string[] {
+  const raw = subscriber.selected_counties;
+  if (Array.isArray(raw)) {
+    return raw
+      .filter((c): c is string => typeof c === "string")
+      .map((c) => c.trim())
+      .filter(Boolean);
+  }
+  if (subscriber.preferred_counties?.trim()) {
+    return subscriber.preferred_counties
+      .split(/[,;]/)
+      .map((c) => c.trim())
+      .filter(Boolean);
+  }
+  return defaultSelectedCounties();
+}
+
+function parseSubscriberCities(
+  subscriber: AlertSubscriber,
+): AlertCitySelection[] {
+  const raw = subscriber.selected_cities;
+  if (!Array.isArray(raw)) {
+    if (
+      subscriber.use_city_county_alerts &&
+      subscriber.alert_city?.trim() &&
+      subscriber.alert_county?.trim()
+    ) {
+      return [
+        {
+          city: subscriber.alert_city.trim(),
+          county: subscriber.alert_county.trim(),
+        },
+      ];
+    }
+    return [];
+  }
+
+  const result: AlertCitySelection[] = [];
+  for (const item of raw) {
+    if (!item || typeof item !== "object") continue;
+    const row = item as Record<string, unknown>;
+    const city = typeof row.city === "string" ? row.city.trim() : "";
+    const county = typeof row.county === "string" ? row.county.trim() : "";
+    if (!city || !county) continue;
+    result.push({ city, county });
+  }
+  return result;
+}
+
+export function matchesSelectedCounty(
+  selectedCounties: string[],
   checkpointCounty: string,
 ): boolean {
-  const raw = preferred?.trim();
-  if (!raw) return true;
-
-  const counties = raw
-    .split(/[,;]/)
-    .map((c) => normalizePlace(c))
-    .filter(Boolean);
-
+  if (selectedCounties.length === 0) return false;
   const checkpointNorm = normalizePlace(checkpointCounty);
-  return counties.some(
-    (c) =>
-      checkpointNorm.includes(c) ||
-      c.includes(checkpointNorm),
+  return selectedCounties.some((county) =>
+    placesMatch(county, checkpointNorm),
   );
+}
+
+export function matchesSelectedCity(
+  selectedCities: AlertCitySelection[],
+  checkpoint: Pick<Checkpoint, "City" | "County">,
+): boolean {
+  if (selectedCities.length === 0) return false;
+  const checkpointKey = cityKey(checkpoint.City, checkpoint.County);
+  return selectedCities.some(
+    (entry) => cityKey(entry.city, entry.county) === checkpointKey,
+  );
+}
+
+export function matchesSelectedLocations(
+  subscriber: AlertSubscriber,
+  checkpoint: Checkpoint,
+): boolean {
+  const counties = parseSubscriberCounties(subscriber);
+  const cities = parseSubscriberCities(subscriber);
+
+  if (matchesSelectedCity(cities, checkpoint)) {
+    return true;
+  }
+
+  if (matchesSelectedCounty(counties, checkpoint.County)) {
+    return true;
+  }
+
+  return false;
 }
 
 export function subscriberHasLocationConfig(
   subscriber: AlertSubscriber,
 ): boolean {
   const hasZip = Boolean(subscriber.zip_code?.trim());
-  const hasCityCounty =
-    subscriber.use_city_county_alerts &&
-    Boolean(subscriber.alert_city?.trim()) &&
-    Boolean(subscriber.alert_county?.trim());
-
-  return hasZip || hasCityCounty;
+  const counties = parseSubscriberCounties(subscriber);
+  const cities = parseSubscriberCities(subscriber);
+  return hasZip || counties.length > 0 || cities.length > 0;
 }
 
 export async function matchesZipProximity(
@@ -103,20 +156,9 @@ export async function matchesZipProximity(
   };
 }
 
-export function matchesCityCountyAlert(
-  subscriber: AlertSubscriber,
-  checkpoint: Checkpoint,
-): boolean {
-  if (!subscriber.use_city_county_alerts) return false;
-  const city = subscriber.alert_city?.trim() ?? "";
-  const county = subscriber.alert_county?.trim() ?? "";
-  if (!city || !county) return false;
-  return matchesCityAndCounty(city, county, checkpoint);
-}
-
 export type LocationMatchResult = {
   matched: boolean;
-  matchType: "zip" | "city_county" | null;
+  matchType: "zip" | "county" | "city" | null;
   distanceMiles: number | null;
 };
 
@@ -125,12 +167,14 @@ export async function resolveSubscriberLocationMatch(
   checkpoint: Checkpoint,
   checkpointCoords: LatLng | null,
 ): Promise<LocationMatchResult> {
-  if (!matchesPreferredCounties(subscriber.preferred_counties, checkpoint.County)) {
-    return { matched: false, matchType: null, distanceMiles: null };
+  const cities = parseSubscriberCities(subscriber);
+  if (matchesSelectedCity(cities, checkpoint)) {
+    return { matched: true, matchType: "city", distanceMiles: null };
   }
 
-  if (matchesCityCountyAlert(subscriber, checkpoint)) {
-    return { matched: true, matchType: "city_county", distanceMiles: null };
+  const counties = parseSubscriberCounties(subscriber);
+  if (matchesSelectedCounty(counties, checkpoint.County)) {
+    return { matched: true, matchType: "county", distanceMiles: null };
   }
 
   if (checkpointCoords && subscriber.zip_code?.trim()) {

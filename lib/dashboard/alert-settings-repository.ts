@@ -1,15 +1,17 @@
 import type { AlertContactFields } from "@/lib/dashboard/alert-contact";
 import type {
+  AlertCitySelection,
   UserAlertSettings,
   UserAlertSettingsInput,
 } from "@/lib/dashboard/alert-settings-types";
+import { serializeSelectedCities } from "@/lib/dashboard/alert-settings-types";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { createClient } from "@/lib/supabase/server";
 
 const TABLE = "user_alert_settings" as const;
 
 const SELECT_COLUMNS =
-  "user_id, alerts_enabled, email_notifications, preferred_counties, alert_lead_time_hours, zip_code, email, display_name, alert_city, alert_county, use_city_county_alerts, created_at, updated_at";
+  "user_id, alerts_enabled, email_notifications, preferred_counties, alert_lead_time_hours, zip_code, email, display_name, alert_city, alert_county, use_city_county_alerts, selected_counties, selected_cities, notify_new_checkpoints, created_at, updated_at";
 
 export type AlertSubscriber = Pick<
   UserAlertSettings,
@@ -24,7 +26,14 @@ export type AlertSubscriber = Pick<
   | "alert_city"
   | "alert_county"
   | "use_city_county_alerts"
+  | "selected_counties"
+  | "selected_cities"
+  | "notify_new_checkpoints"
 >;
+
+function parseRow(data: Record<string, unknown>): UserAlertSettings {
+  return data as unknown as UserAlertSettings;
+}
 
 export async function getUserAlertSettings(
   userId: string,
@@ -41,7 +50,11 @@ export async function getUserAlertSettings(
     return { data: null, error: error.message };
   }
 
-  return { data: (data as UserAlertSettings | null) ?? null, error: null };
+  if (!data) {
+    return { data: null, error: null };
+  }
+
+  return { data: parseRow(data as Record<string, unknown>), error: null };
 }
 
 export async function syncAlertContactFields(
@@ -79,20 +92,27 @@ export async function upsertUserAlertSettings(
 ): Promise<{ data: UserAlertSettings | null; error: string | null }> {
   const supabase = await createClient();
 
+  const cities: AlertCitySelection[] = serializeSelectedCities(
+    input.selected_cities,
+  );
+
   const payload: Record<string, unknown> = {
     user_id: userId,
     alerts_enabled: input.alerts_enabled,
     email_notifications: input.email_notifications,
-    preferred_counties: input.preferred_counties.trim() || null,
+    preferred_counties: null,
     alert_lead_time_hours: input.alert_lead_time_hours,
-    alert_city: input.alert_city.trim() || null,
-    alert_county: input.alert_county.trim() || null,
-    use_city_county_alerts: input.use_city_county_alerts,
+    selected_counties: input.selected_counties,
+    selected_cities: cities,
+    notify_new_checkpoints: input.notify_new_checkpoints,
+    use_city_county_alerts: cities.length > 0,
+    alert_city: cities[0]?.city ?? null,
+    alert_county: cities[0]?.county ?? null,
+    zip_code: input.zip_code.trim() || null,
   };
 
   if (contact) {
     payload.email = contact.email;
-    payload.zip_code = contact.zip_code;
     payload.display_name = contact.display_name;
   }
 
@@ -106,7 +126,7 @@ export async function upsertUserAlertSettings(
     return { data: null, error: error.message };
   }
 
-  return { data: data as UserAlertSettings, error: null };
+  return { data: parseRow(data as Record<string, unknown>), error: null };
 }
 
 export async function listAlertSubscribers(): Promise<{
@@ -125,7 +145,7 @@ export async function listAlertSubscribers(): Promise<{
   const { data, error } = await admin
     .from(TABLE)
     .select(
-      "user_id, alerts_enabled, email_notifications, preferred_counties, alert_lead_time_hours, zip_code, email, display_name, alert_city, alert_county, use_city_county_alerts",
+      "user_id, alerts_enabled, email_notifications, preferred_counties, alert_lead_time_hours, zip_code, email, display_name, alert_city, alert_county, use_city_county_alerts, selected_counties, selected_cities, notify_new_checkpoints",
     )
     .eq("alerts_enabled", true)
     .eq("email_notifications", true);

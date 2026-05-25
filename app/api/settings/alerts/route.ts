@@ -6,10 +6,20 @@ import {
 } from "@/lib/dashboard/alert-settings-repository";
 import {
   parseAlertLeadTimeHours,
+  parseCitySelectionsInput,
+  serializeSelectedCities,
   validateAlertSettingsInput,
   type UserAlertSettingsInput,
 } from "@/lib/dashboard/alert-settings-types";
 import { NextRequest, NextResponse } from "next/server";
+
+function parseStringArray(value: unknown): string[] {
+  if (!Array.isArray(value)) return [];
+  return value
+    .filter((item): item is string => typeof item === "string")
+    .map((item) => item.trim())
+    .filter(Boolean);
+}
 
 function parseBody(body: unknown): UserAlertSettingsInput | null {
   if (!body || typeof body !== "object") return null;
@@ -21,12 +31,13 @@ function parseBody(body: unknown): UserAlertSettingsInput | null {
   return {
     alerts_enabled: Boolean(b.alerts_enabled),
     email_notifications: Boolean(b.email_notifications),
-    preferred_counties:
-      typeof b.preferred_counties === "string" ? b.preferred_counties : "",
     alert_lead_time_hours: leadTime,
-    alert_city: typeof b.alert_city === "string" ? b.alert_city : "",
-    alert_county: typeof b.alert_county === "string" ? b.alert_county : "",
-    use_city_county_alerts: Boolean(b.use_city_county_alerts),
+    zip_code: typeof b.zip_code === "string" ? b.zip_code : "",
+    selected_counties: parseStringArray(b.selected_counties),
+    selected_cities: serializeSelectedCities(
+      parseCitySelectionsInput(b.selected_cities),
+    ),
+    notify_new_checkpoints: b.notify_new_checkpoints !== false,
   };
 }
 
@@ -67,14 +78,33 @@ export async function PUT(request: NextRequest) {
     return NextResponse.json({ error: validationError }, { status: 400 });
   }
 
+  const contact = alertContactFromUser(auth.user);
+  const zipFromInput = input.zip_code.trim();
+  const contactWithZip = {
+    ...contact,
+    zip_code: zipFromInput || contact.zip_code,
+  };
+
   const result = await upsertUserAlertSettings(
     auth.user.id,
     input,
-    alertContactFromUser(auth.user),
+    contactWithZip,
   );
 
   if (result.error) {
     return NextResponse.json({ error: result.error }, { status: 500 });
+  }
+
+  if (zipFromInput) {
+    const existingMeta =
+      auth.user.user_metadata &&
+      typeof auth.user.user_metadata === "object" &&
+      !Array.isArray(auth.user.user_metadata)
+        ? auth.user.user_metadata
+        : {};
+    await auth.supabase.auth.updateUser({
+      data: { ...existingMeta, zip_code: zipFromInput },
+    });
   }
 
   return NextResponse.json({ data: result.data });

@@ -14,8 +14,6 @@ function formatAccountTimestamp(value: string | undefined): string {
 type UserMetadata = {
   full_name?: string;
   name?: string;
-  address?: string;
-  zip_code?: string;
 };
 
 function resolveDisplayName(meta: UserMetadata, email: string): string {
@@ -42,8 +40,6 @@ export function buildProfileSettingsData(user: User): ProfileSettingsData {
   return {
     displayName: resolveDisplayName(meta, email),
     email,
-    address: meta.address?.trim() ?? "",
-    zipCode: meta.zip_code?.trim() ?? "",
     signInMethod: resolveSignInMethod(user),
     accountCreated: formatAccountTimestamp(user.created_at),
     lastSignIn: formatAccountTimestamp(user.last_sign_in_at),

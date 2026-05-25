@@ -7,6 +7,8 @@ import {
   type UserAlertSettings,
   type UserAlertSettingsInput,
 } from "@/lib/dashboard/alert-settings-types";
+import { CALIFORNIA_COUNTIES } from "@/lib/alerts/california-counties";
+import { cityKey, type AlertCityOption } from "@/lib/alerts/location-catalog";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -14,7 +16,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { ChevronDown, Pencil } from "lucide-react";
-import { useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 
 const inputClass =
   "font-inter w-full rounded-lg border border-white/15 bg-white/5 px-3 py-2.5 text-sm text-white placeholder:text-white/40 focus:border-[#F57E3A]/50 focus:outline-none focus:ring-1 focus:ring-[#F57E3A]/40";
@@ -28,8 +30,15 @@ const SETTINGS_PANEL_CLASS =
 const alertMenuItemClass =
   "cursor-pointer rounded-md px-3 py-2 text-sm text-white/90 focus:bg-[#F57E3A]/25 focus:text-white data-[highlighted]:bg-[#F57E3A]/25 data-[highlighted]:text-white";
 
+const listBoxClass =
+  "max-h-48 overflow-y-auto rounded-lg border border-white/10 bg-[#0a1628]/80 p-2";
+
 function formatLeadTimeLabel(hours: number): string {
   return hours === 1 ? "1 hour" : `${hours} hours`;
+}
+
+function normalizeCounty(value: string): string {
+  return value.trim().toLowerCase();
 }
 
 export function AlertSettingsPanel({
@@ -44,10 +53,65 @@ export function AlertSettingsPanel({
   const [editing, setEditing] = useState(false);
   const [status, setStatus] = useState<"idle" | "loading" | "error">("idle");
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  const [catalogCities, setCatalogCities] = useState<AlertCityOption[]>([]);
+  const [countyFilter, setCountyFilter] = useState("");
+  const [cityFilter, setCityFilter] = useState("");
 
   const displayRows = useMemo(
     () => formatAlertSettingsForDisplay(saved),
     [saved],
+  );
+
+  const loadCatalog = useCallback(async () => {
+    try {
+      const response = await fetch("/api/settings/alerts/locations");
+      if (!response.ok) return;
+      const json = (await response.json()) as {
+        data?: { cities?: AlertCityOption[] };
+      };
+      if (json.data?.cities) {
+        setCatalogCities(json.data.cities);
+      }
+    } catch {
+      /* catalog is optional for editing */
+    }
+  }, []);
+
+  useEffect(() => {
+    void loadCatalog();
+  }, [loadCatalog]);
+
+  const allCounties = useMemo(() => [...CALIFORNIA_COUNTIES], []);
+
+  const filteredCounties = useMemo(() => {
+    const q = countyFilter.trim().toLowerCase();
+    if (!q) return allCounties;
+    return allCounties.filter((c) => c.toLowerCase().includes(q));
+  }, [allCounties, countyFilter]);
+
+  const selectedCountySet = useMemo(
+    () => new Set(draft.selected_counties.map(normalizeCounty)),
+    [draft.selected_counties],
+  );
+
+  const visibleCities = useMemo(() => {
+    const countyNorm = selectedCountySet;
+    const q = cityFilter.trim().toLowerCase();
+    return catalogCities.filter((entry) => {
+      if (countyNorm.size > 0 && !countyNorm.has(normalizeCounty(entry.county))) {
+        return false;
+      }
+      if (!q) return true;
+      return (
+        entry.city.toLowerCase().includes(q) ||
+        entry.county.toLowerCase().includes(q)
+      );
+    });
+  }, [catalogCities, cityFilter, selectedCountySet]);
+
+  const selectedCityKeys = useMemo(
+    () => new Set(draft.selected_cities.map((c) => cityKey(c.city, c.county))),
+    [draft.selected_cities],
   );
 
   function updateField<K extends keyof UserAlertSettingsInput>(
@@ -57,29 +121,75 @@ export function AlertSettingsPanel({
     setDraft((prev) => ({ ...prev, [key]: value }));
   }
 
+  function toggleCounty(county: string, checked: boolean) {
+    setDraft((prev) => {
+      const set = new Set(prev.selected_counties);
+      if (checked) {
+        set.add(county);
+      } else {
+        set.delete(county);
+      }
+      return { ...prev, selected_counties: Array.from(set).sort() };
+    });
+  }
+
+  function setAllCounties(selected: boolean) {
+    updateField(
+      "selected_counties",
+      selected ? [...CALIFORNIA_COUNTIES] : [],
+    );
+  }
+
+  function toggleCity(entry: AlertCityOption, checked: boolean) {
+    setDraft((prev) => {
+      const key = entry.key;
+      const next = new Map(
+        prev.selected_cities.map((c) => [cityKey(c.city, c.county), c]),
+      );
+      if (checked) {
+        next.set(key, { city: entry.city, county: entry.county });
+      } else {
+        next.delete(key);
+      }
+      return {
+        ...prev,
+        selected_cities: Array.from(next.values()),
+      };
+    });
+  }
+
+  function setAllVisibleCities(selected: boolean) {
+    setDraft((prev) => {
+      const next = new Map(
+        prev.selected_cities.map((c) => [cityKey(c.city, c.county), c]),
+      );
+      for (const entry of visibleCities) {
+        if (selected) {
+          next.set(entry.key, { city: entry.city, county: entry.county });
+        } else {
+          next.delete(entry.key);
+        }
+      }
+      return { ...prev, selected_cities: Array.from(next.values()) };
+    });
+  }
+
   function startEdit() {
     setDraft(saved);
     setErrorMessage(null);
     setEditing(true);
+    void loadCatalog();
   }
 
   function cancelEdit() {
     setDraft(saved);
     setErrorMessage(null);
+    setCountyFilter("");
+    setCityFilter("");
     setEditing(false);
   }
 
   async function saveSettings() {
-    if (
-      draft.use_city_county_alerts &&
-      (!draft.alert_city.trim() || !draft.alert_county.trim())
-    ) {
-      setErrorMessage(
-        "Enter both city and county when city & county alerts are enabled.",
-      );
-      return;
-    }
-
     setStatus("loading");
     setErrorMessage(null);
 
@@ -99,6 +209,8 @@ export function AlertSettingsPanel({
 
       setSaved(draft);
       setEditing(false);
+      setCountyFilter("");
+      setCityFilter("");
       setStatus("idle");
     } catch (err) {
       setStatus("error");
@@ -123,8 +235,9 @@ export function AlertSettingsPanel({
             Alert settings
           </h2>
           <p className="font-inter mt-1 text-sm text-white/60">
-            Get email when a new upcoming checkpoint matches your zip (Profile)
-            and/or your city &amp; county below.
+            Email when a new upcoming checkpoint is added in your selected
+            California counties or cities. Optional zip code adds proximity
+            alerts.
           </p>
         </div>
         {!editing ? (
@@ -183,9 +296,40 @@ export function AlertSettingsPanel({
             </span>
           </label>
 
+          <label className="flex items-center gap-3">
+            <input
+              type="checkbox"
+              checked={draft.notify_new_checkpoints}
+              onChange={(e) =>
+                updateField("notify_new_checkpoints", e.target.checked)
+              }
+              disabled={!draft.alerts_enabled}
+              className="size-4 rounded border-white/20 bg-white/5 text-[#F57E3A] focus:ring-[#F57E3A]/40 disabled:opacity-50"
+            />
+            <span className="font-inter text-sm text-white">
+              Email immediately when a new checkpoint is added
+            </span>
+          </label>
+
+          <div>
+            <label htmlFor="alert-zip" className={labelClass}>
+              Zip code (optional proximity alerts)
+            </label>
+            <input
+              id="alert-zip"
+              type="text"
+              inputMode="numeric"
+              value={draft.zip_code}
+              onChange={(e) => updateField("zip_code", e.target.value)}
+              placeholder="e.g. 90210"
+              className={inputClass}
+              disabled={!draft.alerts_enabled}
+            />
+          </div>
+
           <div>
             <label htmlFor="alert-lead-time" className={labelClass}>
-              Alert window (hours before checkpoint)
+              Upcoming alert window
             </label>
             <DropdownMenu>
               <DropdownMenuTrigger
@@ -222,83 +366,130 @@ export function AlertSettingsPanel({
               </DropdownMenuContent>
             </DropdownMenu>
             <p className="font-inter mt-1.5 text-xs text-white/50">
-              Email when a new upcoming checkpoint is added within this window
-              (e.g. 1 hour = same-day alerts).
+              Used for labeling upcoming checkpoints; new checkpoints trigger
+              email right away when they match your areas.
             </p>
           </div>
 
           <div className="rounded-lg border border-white/10 bg-white/[0.02] p-4">
-            <label className="flex items-center gap-3">
-              <input
-                type="checkbox"
-                checked={draft.use_city_county_alerts}
-                onChange={(e) =>
-                  updateField("use_city_county_alerts", e.target.checked)
-                }
-                disabled={!draft.alerts_enabled}
-                className="size-4 rounded border-white/20 bg-white/5 text-[#F57E3A] focus:ring-[#F57E3A]/40 disabled:opacity-50"
-              />
-              <span className="font-inter text-sm font-medium text-white">
-                Match by city &amp; county
-              </span>
-            </label>
-            <p className="font-inter mt-2 text-xs text-white/50">
-              Use when checkpoints lack zip codes. Alerts when a new entry is in
-              your city and county (zip matching still applies if set in
-              Profile).
-            </p>
-
-            <div className="mt-4 grid gap-4 sm:grid-cols-2">
-              <div>
-                <label htmlFor="alert-city" className={labelClass}>
-                  Your city
-                </label>
-                <input
-                  id="alert-city"
-                  type="text"
-                  value={draft.alert_city}
-                  onChange={(e) => updateField("alert_city", e.target.value)}
-                  placeholder="e.g. Los Angeles"
-                  className={inputClass}
-                  disabled={
-                    !draft.alerts_enabled || !draft.use_city_county_alerts
-                  }
-                />
-              </div>
-              <div>
-                <label htmlFor="alert-county" className={labelClass}>
-                  Your county
-                </label>
-                <input
-                  id="alert-county"
-                  type="text"
-                  value={draft.alert_county}
-                  onChange={(e) => updateField("alert_county", e.target.value)}
-                  placeholder="e.g. Los Angeles"
-                  className={inputClass}
-                  disabled={
-                    !draft.alerts_enabled || !draft.use_city_county_alerts
-                  }
-                />
+            <div className="flex flex-wrap items-center justify-between gap-2">
+              <label className={labelClass}>California counties</label>
+              <div className="flex gap-2">
+                <button
+                  type="button"
+                  disabled={!draft.alerts_enabled}
+                  onClick={() => setAllCounties(true)}
+                  className="font-inter text-xs text-[#F57E3A] hover:underline disabled:opacity-50"
+                >
+                  Select all
+                </button>
+                <button
+                  type="button"
+                  disabled={!draft.alerts_enabled}
+                  onClick={() => setAllCounties(false)}
+                  className="font-inter text-xs text-white/60 hover:underline disabled:opacity-50"
+                >
+                  Clear
+                </button>
               </div>
             </div>
-          </div>
-
-          <div>
-            <label htmlFor="preferred-counties" className={labelClass}>
-              Preferred counties (optional filter)
-            </label>
             <input
-              id="preferred-counties"
-              type="text"
-              value={draft.preferred_counties}
-              onChange={(e) =>
-                updateField("preferred_counties", e.target.value)
-              }
-              placeholder="e.g. Los Angeles, Riverside (leave empty for all)"
-              className={inputClass}
+              type="search"
+              value={countyFilter}
+              onChange={(e) => setCountyFilter(e.target.value)}
+              placeholder="Filter counties…"
+              className={`${inputClass} mt-2`}
               disabled={!draft.alerts_enabled}
             />
+            <div className={`${listBoxClass} mt-2 grid gap-1 sm:grid-cols-2`}>
+              {filteredCounties.map((county) => (
+                <label
+                  key={county}
+                  className="flex cursor-pointer items-center gap-2 rounded px-1 py-0.5 text-sm text-white/90 hover:bg-white/5"
+                >
+                  <input
+                    type="checkbox"
+                    checked={selectedCountySet.has(normalizeCounty(county))}
+                    onChange={(e) => toggleCounty(county, e.target.checked)}
+                    disabled={!draft.alerts_enabled}
+                    className="size-3.5 shrink-0 rounded border-white/20 text-[#F57E3A]"
+                  />
+                  <span className="truncate">{county}</span>
+                </label>
+              ))}
+            </div>
+            <p className="font-inter mt-2 text-xs text-white/50">
+              {draft.selected_counties.length} of {allCounties.length} counties
+              selected. Leave cities empty to alert for any city in selected
+              counties.
+            </p>
+          </div>
+
+          <div className="rounded-lg border border-white/10 bg-white/[0.02] p-4">
+            <div className="flex flex-wrap items-center justify-between gap-2">
+              <label className={labelClass}>
+                Cities (optional — from checkpoint data)
+              </label>
+              <div className="flex gap-2">
+                <button
+                  type="button"
+                  disabled={!draft.alerts_enabled || visibleCities.length === 0}
+                  onClick={() => setAllVisibleCities(true)}
+                  className="font-inter text-xs text-[#F57E3A] hover:underline disabled:opacity-50"
+                >
+                  Select visible
+                </button>
+                <button
+                  type="button"
+                  disabled={!draft.alerts_enabled || visibleCities.length === 0}
+                  onClick={() => setAllVisibleCities(false)}
+                  className="font-inter text-xs text-white/60 hover:underline disabled:opacity-50"
+                >
+                  Clear visible
+                </button>
+              </div>
+            </div>
+            <input
+              type="search"
+              value={cityFilter}
+              onChange={(e) => setCityFilter(e.target.value)}
+              placeholder="Filter cities…"
+              className={`${inputClass} mt-2`}
+              disabled={!draft.alerts_enabled}
+            />
+            <div className={`${listBoxClass} mt-2`}>
+              {visibleCities.length === 0 ? (
+                <p className="px-2 py-3 text-xs text-white/50">
+                  {catalogCities.length === 0
+                    ? "Loading cities from checkpoint data…"
+                    : "No cities match your filter or county selection."}
+                </p>
+              ) : (
+                visibleCities.map((entry) => (
+                  <label
+                    key={entry.key}
+                    className="flex cursor-pointer items-center gap-2 rounded px-1 py-1 text-sm text-white/90 hover:bg-white/5"
+                  >
+                    <input
+                      type="checkbox"
+                      checked={selectedCityKeys.has(entry.key)}
+                      onChange={(e) => toggleCity(entry, e.target.checked)}
+                      disabled={!draft.alerts_enabled}
+                      className="size-3.5 shrink-0 rounded border-white/20 text-[#F57E3A]"
+                    />
+                    <span>
+                      {entry.city}
+                      <span className="text-white/45"> · {entry.county}</span>
+                    </span>
+                  </label>
+                ))
+              )}
+            </div>
+            <p className="font-inter mt-2 text-xs text-white/50">
+              {draft.selected_cities.length === 0
+                ? "No specific cities — county selection applies."
+                : `${draft.selected_cities.length} cities selected.`}
+            </p>
           </div>
 
           <div className="flex flex-wrap gap-3">
