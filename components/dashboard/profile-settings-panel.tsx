@@ -1,13 +1,12 @@
 "use client";
 
-import {
-  alertSettingsToInput,
-  formatAlertSettingsForDisplay,
-  type UserAlertSettings,
-  type UserAlertSettingsInput,
-} from "@/lib/dashboard/alert-settings-types";
+import type {
+  ProfileSettingsData,
+  ProfileSettingsInput,
+} from "@/lib/dashboard/settings-types";
 import { Pencil } from "lucide-react";
-import { useMemo, useState } from "react";
+import Link from "next/link";
+import { useState } from "react";
 
 const inputClass =
   "font-inter w-full rounded-lg border border-white/15 bg-white/5 px-3 py-2.5 text-sm text-white placeholder:text-white/40 focus:border-[#F57E3A]/50 focus:outline-none focus:ring-1 focus:ring-[#F57E3A]/40";
@@ -18,54 +17,44 @@ const labelClass =
 const SETTINGS_PANEL_CLASS =
   "w-full rounded-xl border border-white/10 bg-white/5 p-6 md:p-8";
 
-export function AlertSettingsPanel({
-  initialSettings,
+export function ProfileSettingsPanel({
+  initialProfile,
 }: {
-  initialSettings: UserAlertSettings | null;
+  initialProfile: ProfileSettingsData;
 }) {
-  const [saved, setSaved] = useState<UserAlertSettingsInput>(() =>
-    alertSettingsToInput(initialSettings),
-  );
-  const [draft, setDraft] = useState<UserAlertSettingsInput>(saved);
+  const [saved, setSaved] = useState(initialProfile);
+  const [draft, setDraft] = useState<ProfileSettingsInput>({
+    address: initialProfile.address,
+    zipCode: initialProfile.zipCode,
+  });
   const [editing, setEditing] = useState(false);
   const [status, setStatus] = useState<"idle" | "loading" | "error">("idle");
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
-  const displayRows = useMemo(
-    () => formatAlertSettingsForDisplay(saved),
-    [saved],
-  );
-
-  function updateField<K extends keyof UserAlertSettingsInput>(
-    key: K,
-    value: UserAlertSettingsInput[K],
-  ) {
-    setDraft((prev) => ({ ...prev, [key]: value }));
-  }
-
   function startEdit() {
-    setDraft(saved);
+    setDraft({ address: saved.address, zipCode: saved.zipCode });
     setErrorMessage(null);
     setEditing(true);
   }
 
   function cancelEdit() {
-    setDraft(saved);
+    setDraft({ address: saved.address, zipCode: saved.zipCode });
     setErrorMessage(null);
     setEditing(false);
   }
 
-  async function saveSettings() {
+  async function saveProfile() {
     setStatus("loading");
     setErrorMessage(null);
 
     try {
-      const response = await fetch("/api/settings/alerts", {
+      const response = await fetch("/api/settings/profile", {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(draft),
       });
       const json = (await response.json().catch(() => ({}))) as {
+        data?: ProfileSettingsData;
         error?: string;
       };
 
@@ -73,33 +62,43 @@ export function AlertSettingsPanel({
         throw new Error(json.error ?? `Save failed (${response.status})`);
       }
 
-      setSaved(draft);
+      if (json.data) {
+        setSaved(json.data);
+      } else {
+        setSaved((prev) => ({
+          ...prev,
+          address: draft.address.trim(),
+          zipCode: draft.zipCode.trim(),
+        }));
+      }
       setEditing(false);
       setStatus("idle");
     } catch (err) {
       setStatus("error");
       setErrorMessage(
-        err instanceof Error ? err.message : "Could not save alert settings",
+        err instanceof Error ? err.message : "Could not save profile",
       );
     }
   }
 
+  const displayValue = (value: string) => value.trim() || "—";
+
   return (
     <section
       role="tabpanel"
-      aria-labelledby="alert-settings-heading"
+      aria-labelledby="profile-settings-heading"
       className={SETTINGS_PANEL_CLASS}
     >
       <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
         <div>
           <h2
-            id="alert-settings-heading"
+            id="profile-settings-heading"
             className="font-montserrat text-lg font-semibold text-white"
           >
-            Alert settings
+            Profile settings
           </h2>
           <p className="font-inter mt-1 text-sm text-white/60">
-            DUI checkpoint notifications saved to your account.
+            Information from your signed-in account.
           </p>
         </div>
         {!editing ? (
@@ -125,57 +124,44 @@ export function AlertSettingsPanel({
 
       {editing ? (
         <form
-          className="mt-6 grid gap-6"
+          className="mt-6 grid gap-6 lg:grid-cols-2"
           onSubmit={(e) => {
             e.preventDefault();
-            void saveSettings();
+            void saveProfile();
           }}
         >
-          <label className="flex items-center gap-3">
-            <input
-              type="checkbox"
-              checked={draft.alerts_enabled}
-              onChange={(e) => updateField("alerts_enabled", e.target.checked)}
-              className="size-4 rounded border-white/20 bg-white/5 text-[#F57E3A] focus:ring-[#F57E3A]/40"
-            />
-            <span className="font-inter text-sm text-white">
-              Enable checkpoint alerts
-            </span>
-          </label>
-
-          <label className="flex items-center gap-3">
-            <input
-              type="checkbox"
-              checked={draft.email_notifications}
-              onChange={(e) =>
-                updateField("email_notifications", e.target.checked)
-              }
-              disabled={!draft.alerts_enabled}
-              className="size-4 rounded border-white/20 bg-white/5 text-[#F57E3A] focus:ring-[#F57E3A]/40 disabled:opacity-50"
-            />
-            <span className="font-inter text-sm text-white">
-              Send email notifications
-            </span>
-          </label>
-
-          <div>
-            <label htmlFor="preferred-counties" className={labelClass}>
-              Preferred counties
+          <div className="lg:col-span-2">
+            <label htmlFor="profile-address" className={labelClass}>
+              Address
             </label>
             <input
-              id="preferred-counties"
+              id="profile-address"
               type="text"
-              value={draft.preferred_counties}
+              value={draft.address}
               onChange={(e) =>
-                updateField("preferred_counties", e.target.value)
+                setDraft((prev) => ({ ...prev, address: e.target.value }))
               }
-              placeholder="e.g. Los Angeles, Riverside (leave empty for all)"
+              placeholder="Street address"
               className={inputClass}
-              disabled={!draft.alerts_enabled}
             />
           </div>
-
-          <div className="flex flex-wrap gap-3">
+          <div>
+            <label htmlFor="profile-zip" className={labelClass}>
+              Zip code
+            </label>
+            <input
+              id="profile-zip"
+              type="text"
+              inputMode="numeric"
+              value={draft.zipCode}
+              onChange={(e) =>
+                setDraft((prev) => ({ ...prev, zipCode: e.target.value }))
+              }
+              placeholder="e.g. 90210"
+              className={inputClass}
+            />
+          </div>
+          <div className="flex flex-wrap gap-3 lg:col-span-2">
             <button
               type="submit"
               disabled={status === "loading"}
@@ -193,21 +179,37 @@ export function AlertSettingsPanel({
             </button>
           </div>
         </form>
-      ) : (
-        <dl className="font-inter mt-6 divide-y divide-white/10 text-sm">
-          {Object.entries(displayRows).map(([label, value]) => (
-            <div
-              key={label}
-              className="flex flex-col gap-1 py-4 sm:flex-row sm:items-center sm:justify-between sm:gap-4"
-            >
-              <dt className="font-montserrat text-xs font-semibold uppercase tracking-wider text-white/50">
-                {label}
-              </dt>
-              <dd className="font-medium text-white/90 sm:text-right">{value}</dd>
-            </div>
-          ))}
-        </dl>
-      )}
+      ) : null}
+
+      <dl className="font-inter mt-6 divide-y divide-white/10 text-sm">
+        <ProfileRow label="Display name" value={displayValue(saved.displayName)} />
+        <ProfileRow label="Email" value={displayValue(saved.email)} />
+        <ProfileRow label="Address" value={displayValue(saved.address)} />
+        <ProfileRow label="Zip code" value={displayValue(saved.zipCode)} />
+        <ProfileRow label="Sign-in method" value={displayValue(saved.signInMethod)} />
+        <ProfileRow label="Account created" value={saved.accountCreated} />
+        <ProfileRow label="Last sign-in" value={saved.lastSignIn} />
+      </dl>
+
+      <div className="mt-8 flex flex-wrap gap-3">
+        <Link
+          href="/auth/update-password"
+          className="font-montserrat inline-flex items-center justify-center rounded-xl bg-[#F57E3A] px-5 py-2.5 text-sm font-semibold text-white transition-opacity hover:opacity-90"
+        >
+          Update password
+        </Link>
+      </div>
     </section>
+  );
+}
+
+function ProfileRow({ label, value }: { label: string; value: string }) {
+  return (
+    <div className="flex flex-col gap-1 py-4 sm:flex-row sm:items-center sm:justify-between sm:gap-4">
+      <dt className="font-montserrat text-xs font-semibold uppercase tracking-wider text-white/50">
+        {label}
+      </dt>
+      <dd className="font-medium text-white/90 sm:text-right">{value}</dd>
+    </div>
   );
 }

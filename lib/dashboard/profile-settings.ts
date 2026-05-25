@@ -11,14 +11,16 @@ function formatAccountTimestamp(value: string | undefined): string {
   }).format(date);
 }
 
-function resolveDisplayName(user: User): string {
-  const meta = user.user_metadata as {
-    full_name?: string;
-    name?: string;
-  };
-  const fromMeta = meta?.full_name ?? meta?.name;
+type UserMetadata = {
+  full_name?: string;
+  name?: string;
+  address?: string;
+  zip_code?: string;
+};
+
+function resolveDisplayName(meta: UserMetadata, email: string): string {
+  const fromMeta = meta.full_name ?? meta.name;
   if (fromMeta && String(fromMeta).trim()) return String(fromMeta).trim();
-  const email = user.email ?? "";
   return email.split("@")[0] || "User";
 }
 
@@ -34,9 +36,14 @@ function resolveSignInMethod(user: User): string {
 }
 
 export function buildProfileSettingsData(user: User): ProfileSettingsData {
+  const meta = (user.user_metadata ?? {}) as UserMetadata;
+  const email = user.email ?? "";
+
   return {
-    displayName: resolveDisplayName(user),
-    email: user.email ?? "",
+    displayName: resolveDisplayName(meta, email),
+    email,
+    address: meta.address?.trim() ?? "",
+    zipCode: meta.zip_code?.trim() ?? "",
     signInMethod: resolveSignInMethod(user),
     accountCreated: formatAccountTimestamp(user.created_at),
     lastSignIn: formatAccountTimestamp(user.last_sign_in_at),

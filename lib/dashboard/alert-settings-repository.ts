@@ -13,7 +13,9 @@ export async function getUserAlertSettings(
 
   const { data, error } = await supabase
     .from(TABLE)
-    .select("*")
+    .select(
+      "user_id, alerts_enabled, email_notifications, preferred_counties, created_at, updated_at",
+    )
     .eq("user_id", userId)
     .maybeSingle();
 
@@ -35,14 +37,14 @@ export async function upsertUserAlertSettings(
     alerts_enabled: input.alerts_enabled,
     email_notifications: input.email_notifications,
     preferred_counties: input.preferred_counties.trim() || null,
-    alert_lead_time_hours: input.alert_lead_time_hours,
-    additional_notes: input.additional_notes.trim() || null,
   };
 
   const { data, error } = await supabase
     .from(TABLE)
     .upsert(payload, { onConflict: "user_id" })
-    .select("*")
+    .select(
+      "user_id, alerts_enabled, email_notifications, preferred_counties, created_at, updated_at",
+    )
     .single();
 
   if (error) {

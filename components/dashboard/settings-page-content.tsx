@@ -1,17 +1,14 @@
 "use client";
 
 import { AlertSettingsPanel } from "@/components/dashboard/alert-settings-panel";
+import { ProfileSettingsPanel } from "@/components/dashboard/profile-settings-panel";
 import type { ProfileSettingsData } from "@/lib/dashboard/settings-types";
 import type { UserAlertSettings } from "@/lib/dashboard/alert-settings-types";
 import { cn } from "@/lib/utils";
 import { Bell, User } from "lucide-react";
-import Link from "next/link";
 import { useState } from "react";
 
 type SettingsTab = "profile" | "alerts";
-
-const SETTINGS_PANEL_CLASS =
-  "w-full rounded-xl border border-white/10 bg-white/5 p-6 md:p-8";
 
 export function SettingsPageContent({
   profile,
@@ -74,55 +71,10 @@ export function SettingsPageContent({
       </div>
 
       {tab === "profile" ? (
-        <section
-          role="tabpanel"
-          aria-labelledby="profile-settings-heading"
-          className={SETTINGS_PANEL_CLASS}
-        >
-          <h2
-            id="profile-settings-heading"
-            className="font-montserrat text-lg font-semibold text-white"
-          >
-            Profile settings
-          </h2>
-          <p className="font-inter mt-1 text-sm text-white/60">
-            Information from your signed-in account.
-          </p>
-
-          <dl className="font-inter mt-6 divide-y divide-white/10 text-sm">
-            <ProfileRow label="Display name" value={profile.displayName} />
-            <ProfileRow label="Email" value={profile.email || "—"} />
-            <ProfileRow
-              label="Sign-in method"
-              value={profile.signInMethod || "—"}
-            />
-            <ProfileRow label="Account created" value={profile.accountCreated} />
-            <ProfileRow label="Last sign-in" value={profile.lastSignIn} />
-          </dl>
-
-          <div className="mt-8 flex flex-wrap gap-3">
-            <Link
-              href="/auth/update-password"
-              className="font-montserrat inline-flex items-center justify-center rounded-xl bg-[#F57E3A] px-5 py-2.5 text-sm font-semibold text-white transition-opacity hover:opacity-90"
-            >
-              Update password
-            </Link>
-          </div>
-        </section>
+        <ProfileSettingsPanel initialProfile={profile} />
       ) : (
         <AlertSettingsPanel initialSettings={alertSettings} />
       )}
-    </div>
-  );
-}
-
-function ProfileRow({ label, value }: { label: string; value: string }) {
-  return (
-    <div className="flex flex-col gap-1 py-4 sm:flex-row sm:items-center sm:justify-between sm:gap-4">
-      <dt className="font-montserrat text-xs font-semibold uppercase tracking-wider text-white/50">
-        {label}
-      </dt>
-      <dd className="font-medium text-white/90 sm:text-right">{value}</dd>
     </div>
   );
 }

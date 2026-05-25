@@ -10,17 +10,11 @@ function parseBody(body: unknown): UserAlertSettingsInput | null {
   if (!body || typeof body !== "object") return null;
   const b = body as Record<string, unknown>;
 
-  const lead = Number(b.alert_lead_time_hours);
-  if (!Number.isFinite(lead) || lead < 1 || lead > 168) return null;
-
   return {
     alerts_enabled: Boolean(b.alerts_enabled),
     email_notifications: Boolean(b.email_notifications),
     preferred_counties:
       typeof b.preferred_counties === "string" ? b.preferred_counties : "",
-    alert_lead_time_hours: Math.round(lead),
-    additional_notes:
-      typeof b.additional_notes === "string" ? b.additional_notes : "",
   };
 }
 

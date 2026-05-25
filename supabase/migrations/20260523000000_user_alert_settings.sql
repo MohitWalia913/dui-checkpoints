@@ -6,9 +6,6 @@ create table if not exists public.user_alert_settings (
   alerts_enabled boolean not null default true,
   email_notifications boolean not null default true,
   preferred_counties text,
-  alert_lead_time_hours integer not null default 24
-    check (alert_lead_time_hours >= 1 and alert_lead_time_hours <= 168),
-  additional_notes text,
 
   created_at timestamptz not null default now(),
   updated_at timestamptz not null default now()
