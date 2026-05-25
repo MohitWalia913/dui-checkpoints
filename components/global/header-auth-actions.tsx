@@ -199,7 +199,7 @@ export function HeaderAuthActions({
             className={profileMenuItemClass}
             onSelect={() => {
               onNavigate?.();
-              router.push("/dashboard");
+              router.push("/dashboard/settings");
             }}
           >
             <User className="text-[#F57E3A]" aria-hidden />
