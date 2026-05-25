@@ -1,24 +1,20 @@
-import { geocodeCheckpoint, geocodeUsZip } from "@/lib/alerts/geocode";
-import { haversineMiles } from "@/lib/alerts/distance";
 import { isUpcomingWithinLeadTime } from "@/lib/alerts/checkpoint-timing";
+import {
+  getCheckpointCoords,
+  resetCheckpointCoordsCache,
+  resolveSubscriberLocationMatch,
+  subscriberHasLocationConfig,
+} from "@/lib/alerts/location-match";
 import { sendCheckpointProximityAlertEmail } from "@/lib/email/checkpoint-proximity-alert";
 import { listAlertSubscribers } from "@/lib/dashboard/alert-settings-repository";
 import { getTodayDateString } from "@/lib/checkpoints/date";
 import type { Checkpoint } from "@/lib/checkpoints/types";
 
-const DEFAULT_RADIUS_MILES = 40;
-
-function getAlertRadiusMiles(): number {
-  const parsed = Number(process.env.CHECKPOINT_ALERT_RADIUS_MILES);
-  if (Number.isFinite(parsed) && parsed > 0 && parsed <= 200) {
-    return parsed;
-  }
-  return DEFAULT_RADIUS_MILES;
-}
-
 export async function notifyNearbyUsersOfNewCheckpoint(
   checkpoint: Checkpoint,
 ): Promise<{ notified: number; skipped: number; errors: string[] }> {
+  resetCheckpointCoordsCache();
+
   const errors: string[] = [];
   let notified = 0;
   let skipped = 0;
@@ -31,29 +27,42 @@ export async function notifyNearbyUsersOfNewCheckpoint(
     };
   }
 
-  const checkpointCoords = await geocodeCheckpoint(checkpoint);
-  if (!checkpointCoords) {
-    return {
-      notified: 0,
-      skipped: 0,
-      errors: ["Could not resolve checkpoint location for proximity matching"],
-    };
-  }
-
-  const radiusMiles = getAlertRadiusMiles();
   const subscribers = await listAlertSubscribers();
-
   if (subscribers.error) {
     return { notified: 0, skipped: 0, errors: [subscribers.error] };
+  }
+
+  const needsZipGeocode = subscribers.data.some((s) => s.zip_code?.trim());
+  const checkpointCoords = needsZipGeocode
+    ? await getCheckpointCoords(checkpoint)
+    : null;
+
+  if (needsZipGeocode && !checkpointCoords) {
+    const onlyCityCounty = subscribers.data.every(
+      (s) =>
+        s.use_city_county_alerts &&
+        s.alert_city?.trim() &&
+        s.alert_county?.trim() &&
+        !s.zip_code?.trim(),
+    );
+    if (!onlyCityCounty) {
+      errors.push(
+        "Could not resolve checkpoint map location for zip-based alerts",
+      );
+    }
   }
 
   for (const subscriber of subscribers.data) {
     if (
       !subscriber.alerts_enabled ||
       !subscriber.email_notifications ||
-      !subscriber.email?.trim() ||
-      !subscriber.zip_code?.trim()
+      !subscriber.email?.trim()
     ) {
+      skipped += 1;
+      continue;
+    }
+
+    if (!subscriberHasLocationConfig(subscriber)) {
       skipped += 1;
       continue;
     }
@@ -68,32 +77,13 @@ export async function notifyNearbyUsersOfNewCheckpoint(
       continue;
     }
 
-    const userCoords = await geocodeUsZip(subscriber.zip_code);
-    if (!userCoords) {
-      skipped += 1;
-      continue;
-    }
+    const match = await resolveSubscriberLocationMatch(
+      subscriber,
+      checkpoint,
+      checkpointCoords,
+    );
 
-    const preferred = subscriber.preferred_counties?.trim();
-    if (preferred) {
-      const counties = preferred
-        .split(/[,;]/)
-        .map((c) => c.trim().toLowerCase())
-        .filter(Boolean);
-      const checkpointCounty = checkpoint.County.trim().toLowerCase();
-      const matches = counties.some(
-        (c) =>
-          checkpointCounty.includes(c) ||
-          c.includes(checkpointCounty.replace(/\s+county$/i, "")),
-      );
-      if (!matches) {
-        skipped += 1;
-        continue;
-      }
-    }
-
-    const distance = haversineMiles(userCoords, checkpointCoords);
-    if (distance > radiusMiles) {
+    if (!match.matched || !match.matchType) {
       skipped += 1;
       continue;
     }
@@ -102,8 +92,9 @@ export async function notifyNearbyUsersOfNewCheckpoint(
       to: subscriber.email.trim(),
       userName: subscriber.display_name?.trim() || "there",
       checkpoint,
-      distanceMiles: distance,
       leadTimeHours: subscriber.alert_lead_time_hours,
+      matchType: match.matchType,
+      distanceMiles: match.distanceMiles,
     });
 
     if (result.sent) {

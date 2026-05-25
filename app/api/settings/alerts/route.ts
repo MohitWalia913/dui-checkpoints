@@ -6,6 +6,7 @@ import {
 } from "@/lib/dashboard/alert-settings-repository";
 import {
   parseAlertLeadTimeHours,
+  validateAlertSettingsInput,
   type UserAlertSettingsInput,
 } from "@/lib/dashboard/alert-settings-types";
 import { NextRequest, NextResponse } from "next/server";
@@ -23,6 +24,9 @@ function parseBody(body: unknown): UserAlertSettingsInput | null {
     preferred_counties:
       typeof b.preferred_counties === "string" ? b.preferred_counties : "",
     alert_lead_time_hours: leadTime,
+    alert_city: typeof b.alert_city === "string" ? b.alert_city : "",
+    alert_county: typeof b.alert_county === "string" ? b.alert_county : "",
+    use_city_county_alerts: Boolean(b.use_city_county_alerts),
   };
 }
 
@@ -56,6 +60,11 @@ export async function PUT(request: NextRequest) {
       { error: "Invalid alert settings payload" },
       { status: 400 },
     );
+  }
+
+  const validationError = validateAlertSettingsInput(input);
+  if (validationError) {
+    return NextResponse.json({ error: validationError }, { status: 400 });
   }
 
   const result = await upsertUserAlertSettings(

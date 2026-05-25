@@ -9,7 +9,7 @@ import { createClient } from "@/lib/supabase/server";
 const TABLE = "user_alert_settings" as const;
 
 const SELECT_COLUMNS =
-  "user_id, alerts_enabled, email_notifications, preferred_counties, alert_lead_time_hours, zip_code, email, display_name, created_at, updated_at";
+  "user_id, alerts_enabled, email_notifications, preferred_counties, alert_lead_time_hours, zip_code, email, display_name, alert_city, alert_county, use_city_county_alerts, created_at, updated_at";
 
 export type AlertSubscriber = Pick<
   UserAlertSettings,
@@ -21,6 +21,9 @@ export type AlertSubscriber = Pick<
   | "zip_code"
   | "email"
   | "display_name"
+  | "alert_city"
+  | "alert_county"
+  | "use_city_county_alerts"
 >;
 
 export async function getUserAlertSettings(
@@ -82,6 +85,9 @@ export async function upsertUserAlertSettings(
     email_notifications: input.email_notifications,
     preferred_counties: input.preferred_counties.trim() || null,
     alert_lead_time_hours: input.alert_lead_time_hours,
+    alert_city: input.alert_city.trim() || null,
+    alert_county: input.alert_county.trim() || null,
+    use_city_county_alerts: input.use_city_county_alerts,
   };
 
   if (contact) {
@@ -119,7 +125,7 @@ export async function listAlertSubscribers(): Promise<{
   const { data, error } = await admin
     .from(TABLE)
     .select(
-      "user_id, alerts_enabled, email_notifications, preferred_counties, alert_lead_time_hours, zip_code, email, display_name",
+      "user_id, alerts_enabled, email_notifications, preferred_counties, alert_lead_time_hours, zip_code, email, display_name, alert_city, alert_county, use_city_county_alerts",
     )
     .eq("alerts_enabled", true)
     .eq("email_notifications", true);

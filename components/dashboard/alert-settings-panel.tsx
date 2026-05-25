@@ -57,6 +57,16 @@ export function AlertSettingsPanel({
   }
 
   async function saveSettings() {
+    if (
+      draft.use_city_county_alerts &&
+      (!draft.alert_city.trim() || !draft.alert_county.trim())
+    ) {
+      setErrorMessage(
+        "Enter both city and county when city & county alerts are enabled.",
+      );
+      return;
+    }
+
     setStatus("loading");
     setErrorMessage(null);
 
@@ -100,8 +110,8 @@ export function AlertSettingsPanel({
             Alert settings
           </h2>
           <p className="font-inter mt-1 text-sm text-white/60">
-            Email alerts for upcoming checkpoints near your zip code. Set your
-            zip in Profile settings.
+            Get email when a new upcoming checkpoint matches your zip (Profile)
+            and/or your city &amp; county below.
           </p>
         </div>
         {!editing ? (
@@ -183,14 +193,71 @@ export function AlertSettingsPanel({
               ))}
             </select>
             <p className="font-inter mt-1.5 text-xs text-white/50">
-              You will get an email when a new upcoming checkpoint is added
-              within this many hours of its scheduled date and near your zip.
+              Email when a new upcoming checkpoint is added within this window
+              (e.g. 1 hour = same-day alerts).
             </p>
+          </div>
+
+          <div className="rounded-lg border border-white/10 bg-white/[0.02] p-4">
+            <label className="flex items-center gap-3">
+              <input
+                type="checkbox"
+                checked={draft.use_city_county_alerts}
+                onChange={(e) =>
+                  updateField("use_city_county_alerts", e.target.checked)
+                }
+                disabled={!draft.alerts_enabled}
+                className="size-4 rounded border-white/20 bg-white/5 text-[#F57E3A] focus:ring-[#F57E3A]/40 disabled:opacity-50"
+              />
+              <span className="font-inter text-sm font-medium text-white">
+                Match by city &amp; county
+              </span>
+            </label>
+            <p className="font-inter mt-2 text-xs text-white/50">
+              Use when checkpoints lack zip codes. Alerts when a new entry is in
+              your city and county (zip matching still applies if set in
+              Profile).
+            </p>
+
+            <div className="mt-4 grid gap-4 sm:grid-cols-2">
+              <div>
+                <label htmlFor="alert-city" className={labelClass}>
+                  Your city
+                </label>
+                <input
+                  id="alert-city"
+                  type="text"
+                  value={draft.alert_city}
+                  onChange={(e) => updateField("alert_city", e.target.value)}
+                  placeholder="e.g. Los Angeles"
+                  className={inputClass}
+                  disabled={
+                    !draft.alerts_enabled || !draft.use_city_county_alerts
+                  }
+                />
+              </div>
+              <div>
+                <label htmlFor="alert-county" className={labelClass}>
+                  Your county
+                </label>
+                <input
+                  id="alert-county"
+                  type="text"
+                  value={draft.alert_county}
+                  onChange={(e) => updateField("alert_county", e.target.value)}
+                  placeholder="e.g. Los Angeles"
+                  className={inputClass}
+                  disabled={
+                    !draft.alerts_enabled || !draft.use_city_county_alerts
+                  }
+                />
+              </div>
+            </div>
           </div>
 
           <div>
             <label htmlFor="preferred-counties" className={labelClass}>
-              Preferred counties
+              Preferred counties (optional filter)
             </label>
             <input
               id="preferred-counties"
