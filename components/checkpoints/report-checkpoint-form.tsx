@@ -16,9 +16,6 @@ const dashboardInputClass =
 
 type ReportCheckpointFormProps = {
   variant?: "homepage" | "dashboard";
-  /** Pre-fill reporter fields when logged in */
-  defaultReporterName?: string;
-  defaultReporterEmail?: string;
 };
 
 function ReportFormField({
@@ -42,7 +39,8 @@ function ReportFormField({
     <div className={isDashboard ? "space-y-0" : "w-full"}>
       <label htmlFor={id} className={labelClass}>
         {label}
-        {required ? (isDashboard ? " *" : null) : isDashboard ? " (optional)" : null}
+        {required && isDashboard ? " *" : null}
+        {!required && isDashboard ? " (optional)" : null}
       </label>
       {children}
     </div>
@@ -51,16 +49,12 @@ function ReportFormField({
 
 export function ReportCheckpointForm({
   variant = "homepage",
-  defaultReporterName = "",
-  defaultReporterEmail = "",
 }: ReportCheckpointFormProps) {
   const isDashboard = variant === "dashboard";
 
-  const [form, setForm] = useState<ReportCheckpointBody>(() => ({
-    ...REPORT_CHECKPOINT_INITIAL,
-    reporterName: defaultReporterName,
-    reporterEmail: defaultReporterEmail,
-  }));
+  const [form, setForm] = useState<ReportCheckpointBody>(
+    () => REPORT_CHECKPOINT_INITIAL,
+  );
   const [status, setStatus] = useState<"idle" | "loading" | "success" | "error">(
     "idle",
   );
@@ -98,11 +92,7 @@ export function ReportCheckpointForm({
       }
 
       setStatus("success");
-      setForm({
-        ...REPORT_CHECKPOINT_INITIAL,
-        reporterName: defaultReporterName,
-        reporterEmail: defaultReporterEmail,
-      });
+      setForm({ ...REPORT_CHECKPOINT_INITIAL });
     } catch {
       setStatus("error");
       setErrorMessage("Network error. Please try again.");
@@ -121,45 +111,11 @@ export function ReportCheckpointForm({
       <div className={isDashboard ? "space-y-4" : undefined}>
         {isDashboard ? (
           <h3 className="font-montserrat text-sm font-semibold uppercase tracking-wide text-[#F57E3A]">
-            Your information
-          </h3>
-        ) : null}
-        <div className={rowClass}>
-          <ReportFormField id="reporter-name" label="Full name" required isDashboard={isDashboard}>
-            <input
-              id="reporter-name"
-              name="reporterName"
-              type="text"
-              placeholder={isDashboard ? "Jane Doe" : "Full Name"}
-              className={inputClass}
-              value={form.reporterName}
-              onChange={(e) => updateField("reporterName", e.target.value)}
-              required
-            />
-          </ReportFormField>
-          <ReportFormField id="reporter-email" label="Email address" required isDashboard={isDashboard}>
-            <input
-              id="reporter-email"
-              name="reporterEmail"
-              type="email"
-              placeholder={isDashboard ? "you@example.com" : "Email Address"}
-              className={inputClass}
-              value={form.reporterEmail}
-              onChange={(e) => updateField("reporterEmail", e.target.value)}
-              required
-            />
-          </ReportFormField>
-        </div>
-      </div>
-
-      <div className={isDashboard ? "space-y-4" : undefined}>
-        {isDashboard ? (
-          <h3 className="font-montserrat text-sm font-semibold uppercase tracking-wide text-[#F57E3A]">
             Location
           </h3>
         ) : null}
         <div className={rowClass}>
-          <ReportFormField id="state" label="State" required isDashboard={isDashboard}>
+          <ReportFormField id="state" label="State" isDashboard={isDashboard}>
             <input
               id="state"
               name="State"
@@ -168,10 +124,14 @@ export function ReportCheckpointForm({
               className={inputClass}
               value={form.State}
               onChange={(e) => updateField("State", e.target.value)}
-              required
             />
           </ReportFormField>
-          <ReportFormField id="county" label="County" required isDashboard={isDashboard}>
+          <ReportFormField
+            id="county"
+            label="County"
+            required
+            isDashboard={isDashboard}
+          >
             <input
               id="county"
               name="County"
@@ -185,7 +145,7 @@ export function ReportCheckpointForm({
           </ReportFormField>
         </div>
         <div className={rowClass}>
-          <ReportFormField id="city" label="City" required isDashboard={isDashboard}>
+          <ReportFormField id="city" label="City" isDashboard={isDashboard}>
             <input
               id="city"
               name="City"
@@ -194,10 +154,13 @@ export function ReportCheckpointForm({
               className={inputClass}
               value={form.City}
               onChange={(e) => updateField("City", e.target.value)}
-              required
             />
           </ReportFormField>
-          <ReportFormField id="location" label="Checkpoint location" required isDashboard={isDashboard}>
+          <ReportFormField
+            id="location"
+            label="Checkpoint location"
+            isDashboard={isDashboard}
+          >
             <input
               id="location"
               name="Location"
@@ -206,7 +169,6 @@ export function ReportCheckpointForm({
               className={inputClass}
               value={form.Location}
               onChange={(e) => updateField("Location", e.target.value)}
-              required
             />
           </ReportFormField>
         </div>
@@ -219,7 +181,7 @@ export function ReportCheckpointForm({
           </h3>
         ) : null}
         <div className={rowClass}>
-          <ReportFormField id="date" label="Date" required isDashboard={isDashboard}>
+          <ReportFormField id="date" label="Date" isDashboard={isDashboard}>
             <input
               id="date"
               name="Date"
@@ -227,10 +189,9 @@ export function ReportCheckpointForm({
               className={inputClass}
               value={form.Date}
               onChange={(e) => updateField("Date", e.target.value)}
-              required
             />
           </ReportFormField>
-          <ReportFormField id="time" label="Time" required isDashboard={isDashboard}>
+          <ReportFormField id="time" label="Time" isDashboard={isDashboard}>
             <input
               id="time"
               name="Time"
@@ -239,11 +200,14 @@ export function ReportCheckpointForm({
               className={inputClass}
               value={form.Time}
               onChange={(e) => updateField("Time", e.target.value)}
-              required
             />
           </ReportFormField>
         </div>
-        <ReportFormField id="description" label="Description" required isDashboard={isDashboard}>
+        <ReportFormField
+          id="description"
+          label="Description"
+          isDashboard={isDashboard}
+        >
           <textarea
             id="description"
             name="Description"
@@ -252,41 +216,33 @@ export function ReportCheckpointForm({
             className={cn(inputClass, "resize-y")}
             value={form.Description}
             onChange={(e) => updateField("Description", e.target.value)}
-            required
           />
         </ReportFormField>
       </div>
 
       <div className={isDashboard ? "space-y-4" : undefined}>
         {isDashboard ? (
-          <h3 className="font-montserrat text-sm font-semibold uppercase tracking-wide text-white/50">
-            Optional links
+          <h3 className="font-montserrat text-sm font-semibold uppercase tracking-wide text-[#F57E3A]">
+            Source
           </h3>
         ) : null}
-        <div className={rowClass}>
-          <ReportFormField id="source" label="Source URL" isDashboard={isDashboard}>
-            <input
-              id="source"
-              name="Source"
-              type="url"
-              placeholder="https://…"
-              className={inputClass}
-              value={form.Source}
-              onChange={(e) => updateField("Source", e.target.value)}
-            />
-          </ReportFormField>
-          <ReportFormField id="mapurl" label="Google Maps URL" isDashboard={isDashboard}>
-            <input
-              id="mapurl"
-              name="mapurl"
-              type="url"
-              placeholder="https://maps.google.com/…"
-              className={inputClass}
-              value={form.mapurl}
-              onChange={(e) => updateField("mapurl", e.target.value)}
-            />
-          </ReportFormField>
-        </div>
+        <ReportFormField
+          id="source"
+          label="Source URL"
+          required
+          isDashboard={isDashboard}
+        >
+          <input
+            id="source"
+            name="Source"
+            type="url"
+            placeholder="https://…"
+            className={inputClass}
+            value={form.Source}
+            onChange={(e) => updateField("Source", e.target.value)}
+            required
+          />
+        </ReportFormField>
       </div>
 
       {status === "success" ? (

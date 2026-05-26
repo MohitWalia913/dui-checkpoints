@@ -1,3 +1,4 @@
+import { isAnonymousReporterEmail } from "@/lib/checkpoints/report";
 import type { CheckpointReport } from "@/lib/checkpoints/types";
 import { getSiteUrl } from "@/lib/email/brand";
 import {
@@ -65,7 +66,9 @@ export async function sendCheckpointReportAdminEmail(
     subject,
     html,
     text,
-    replyTo: report.reporter_email,
+    replyTo: isAnonymousReporterEmail(report.reporter_email)
+      ? undefined
+      : report.reporter_email,
   });
 
   if (!result.sent) {
