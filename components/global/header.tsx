@@ -33,11 +33,6 @@ const NAV_LINKS: NavLink[] = [
     sectionId: "report-checkpoint",
     label: "Report Checkpoints",
   },
-  {
-    kind: "page",
-    href: "/dashboard/settings",
-    label: "Settings",
-  },
 ];
 
 function scrollToSection(sectionId: string) {

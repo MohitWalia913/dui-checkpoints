@@ -34,7 +34,7 @@ export function CheckpointsTabs({
   upcomingTotal: number;
   pastTotal: number;
   totalInWindow: number;
-  filterYear: number | null;
+  filterYear: number;
   filterMonth: number | null;
   error: string | null;
   isUnauthorized: boolean;
@@ -125,14 +125,11 @@ export function CheckpointsTabs({
         <div className="flex items-center gap-2 overflow-x-auto pb-0.5 [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
           <select
             id="checkpoint-filter-year"
-            value={filterYear ?? ""}
+            value={String(filterYear)}
             onChange={(e) => setYear(e.target.value)}
             className={`${controlClassName} w-[108px] px-2.5`}
             aria-label="Filter by year"
           >
-            <option value="" className="bg-[#040F20]">
-              All years
-            </option>
             {yearOptions.map((y) => (
               <option key={y} value={String(y)} className="bg-[#040F20]">
                 {y}

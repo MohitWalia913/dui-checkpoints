@@ -24,7 +24,8 @@ const MONTH_LABELS = [
 ] as const;
 
 export type CheckpointListFilterParams = {
-  year: number | null;
+  /** Always current or previous calendar year (defaults to current). */
+  year: number;
   month: number | null;
   fromDate?: string;
   toDate?: string;
@@ -44,10 +45,13 @@ export function parseCheckpointListFilters(searchParams: {
   const yearParsed = yearRaw ? Number.parseInt(yearRaw, 10) : Number.NaN;
   const monthParsed = monthRaw ? Number.parseInt(monthRaw, 10) : Number.NaN;
 
+  const allowedYears = new Set(getCheckpointYearOptions());
+  const defaultYear = getCheckpointYearOptions()[0];
+
   const year =
-    Number.isFinite(yearParsed) && yearParsed >= 2000 && yearParsed <= 2100
+    Number.isFinite(yearParsed) && allowedYears.has(yearParsed)
       ? yearParsed
-      : null;
+      : defaultYear;
   const month =
     year &&
     Number.isFinite(monthParsed) &&
@@ -57,7 +61,7 @@ export function parseCheckpointListFilters(searchParams: {
       : null;
 
   const range = getDateRangeForYearMonth(year, month);
-  const fromDate = range.fromDate ?? (year ? undefined : getDefaultCheckpointListFromDate());
+  const fromDate = range.fromDate;
 
   return {
     year,
@@ -90,13 +94,10 @@ export function getDateRangeForYearMonth(
   };
 }
 
-/** Years for dropdown (newest first), includes next calendar year for scheduled data. */
+/** Years for dropdown: current calendar year and previous year (newest first). */
 export function getCheckpointYearOptions(): number[] {
-  const end = new Date().getFullYear() + 1;
-  const start = 2018;
-  const years: number[] = [];
-  for (let y = end; y >= start; y--) years.push(y);
-  return years;
+  const thisYear = new Date().getFullYear();
+  return [thisYear, thisYear - 1];
 }
 
 export function getCheckpointMonthOptions(): { value: number; label: string }[] {
@@ -150,5 +151,7 @@ export function hasActiveCheckpointFilters(
   searchQuery: string,
   tab: "upcoming" | "past",
 ): boolean {
-  return Boolean(year || month || searchQuery.trim() || tab === "past");
+  const defaultYear = getCheckpointYearOptions()[0];
+  const yearChanged = year != null && year !== defaultYear;
+  return Boolean(yearChanged || month || searchQuery.trim() || tab === "past");
 }
