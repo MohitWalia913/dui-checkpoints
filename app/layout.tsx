@@ -9,8 +9,7 @@ const defaultUrl = process.env.VERCEL_URL
 
 export const metadata: Metadata = {
   metadataBase: new URL(defaultUrl),
-  title:
-    "California DUI Checkpoints Locator Map & Real-Time Database | DUI Checkpoints Locator",
+  title: "The Original DUI Checkpoint App.",
   description:
     "Stay informed with real-time DUI checkpoints and incident mapping across California. Statewide coverage, live alerts, and checkpoint data updated every 24 hours.",
 };
