@@ -243,7 +243,7 @@ export function ReportCheckpointForm({
             id="source"
             name="Source"
             type="url"
-            placeholder="https://…"
+            placeholder="Source URL"
             className={inputClass}
             value={form.Source}
             onChange={(e) => updateField("Source", e.target.value)}
