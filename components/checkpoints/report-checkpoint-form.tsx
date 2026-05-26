@@ -18,6 +18,7 @@ type ReportCheckpointFormProps = {
   variant?: "homepage" | "dashboard";
 };
 
+
 function ReportFormField({
   id,
   label,
