@@ -79,11 +79,11 @@ export function Footer() {
           </div>
         </div>
 
-        <div className="mt-10 border-t border-white/15 pt-8 text-center">
-          <p className="font-inter mx-auto max-w-4xl text-[10px] leading-relaxed font-normal text-white/55 sm:text-[11px]">
+        <div className="mt-10 w-full border-t border-white/15 pt-8">
+          <p className="font-inter w-full text-left text-[10px] leading-relaxed font-normal text-white/55 sm:text-[11px]">
             {getFooterDisclaimer()}
           </p>
-          <p className="font-inter mt-4 text-sm font-normal leading-normal text-white/80">
+          <p className="font-inter mt-4 text-center text-sm font-normal leading-normal text-white/80">
             © 2026 Meehan Law Firm. All rights reserved.
           </p>
         </div>
