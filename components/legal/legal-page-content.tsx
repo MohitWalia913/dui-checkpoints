@@ -180,13 +180,6 @@ export function LegalPageContent() {
             {LEGAL_HELP_PHONE_DISPLAY}
           </p>
         ) : null}
-        <p className="font-inter mt-6 text-xs text-white/45">
-          Prefer the app flow? Use{" "}
-          <Link href="/dashboard" className="font-semibold text-[#F57E3A] hover:underline">
-            Find a DUI
-          </Link>{" "}
-          in the sidebar for quick access to counsel.
-        </p>
       </section>
     </div>
   );

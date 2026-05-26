@@ -6,8 +6,6 @@ import {
 } from "@/lib/dashboard/alert-settings-repository";
 import {
   parseAlertLeadTimeHours,
-  parseCitySelectionsInput,
-  serializeSelectedCities,
   validateAlertSettingsInput,
   type UserAlertSettingsInput,
 } from "@/lib/dashboard/alert-settings-types";
@@ -34,9 +32,7 @@ function parseBody(body: unknown): UserAlertSettingsInput | null {
     alert_lead_time_hours: leadTime,
     zip_code: typeof b.zip_code === "string" ? b.zip_code : "",
     selected_counties: parseStringArray(b.selected_counties),
-    selected_cities: serializeSelectedCities(
-      parseCitySelectionsInput(b.selected_cities),
-    ),
+    selected_cities: [],
     notify_new_checkpoints: b.notify_new_checkpoints !== false,
   };
 }

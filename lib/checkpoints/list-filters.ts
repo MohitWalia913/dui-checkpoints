@@ -3,7 +3,7 @@ import { getCheckpointsTwoYearStartDate } from "@/lib/checkpoints/date";
 /** Max rows fetched on the checkpoints list page (all matching filters). */
 export const CHECKPOINTS_LIST_MAX = 5000;
 
-/** Default list window when no year/month filter is selected (matches KPI). */
+/** Default list window (matches dashboard KPI — last 2 years). */
 export function getDefaultCheckpointListFromDate(): string {
   return getCheckpointsTwoYearStartDate();
 }
@@ -24,87 +24,18 @@ const MONTH_LABELS = [
 ] as const;
 
 export type CheckpointListFilterParams = {
-  /** Always current or previous calendar year (defaults to current). */
-  year: number;
-  month: number | null;
-  fromDate?: string;
+  fromDate: string;
   toDate?: string;
 };
 
-export function parseCheckpointListFilters(searchParams: {
-  year?: string | string[];
-  month?: string | string[];
+export function parseCheckpointListFilters(_searchParams?: {
+  tab?: string;
+  year?: string;
+  month?: string;
 }): CheckpointListFilterParams {
-  const yearRaw = Array.isArray(searchParams.year)
-    ? searchParams.year[0]
-    : searchParams.year;
-  const monthRaw = Array.isArray(searchParams.month)
-    ? searchParams.month[0]
-    : searchParams.month;
-
-  const yearParsed = yearRaw ? Number.parseInt(yearRaw, 10) : Number.NaN;
-  const monthParsed = monthRaw ? Number.parseInt(monthRaw, 10) : Number.NaN;
-
-  const allowedYears = new Set(getCheckpointYearOptions());
-  const defaultYear = getCheckpointYearOptions()[0];
-
-  const year =
-    Number.isFinite(yearParsed) && allowedYears.has(yearParsed)
-      ? yearParsed
-      : defaultYear;
-  const month =
-    year &&
-    Number.isFinite(monthParsed) &&
-    monthParsed >= 1 &&
-    monthParsed <= 12
-      ? monthParsed
-      : null;
-
-  const range = getDateRangeForYearMonth(year, month);
-  const fromDate = range.fromDate;
-
   return {
-    year,
-    month,
-    fromDate,
-    toDate: range.toDate,
+    fromDate: getDefaultCheckpointListFromDate(),
   };
-}
-
-export function getDateRangeForYearMonth(
-  year: number | null,
-  month: number | null,
-): { fromDate?: string; toDate?: string } {
-  if (!year) return {};
-
-  if (!month) {
-    return {
-      fromDate: `${year}-01-01`,
-      toDate: `${year}-12-31`,
-    };
-  }
-
-  const monthStr = String(month).padStart(2, "0");
-  const lastDay = new Date(year, month, 0).getDate();
-  const dayStr = String(lastDay).padStart(2, "0");
-
-  return {
-    fromDate: `${year}-${monthStr}-01`,
-    toDate: `${year}-${monthStr}-${dayStr}`,
-  };
-}
-
-/** Years for dropdown: current calendar year and previous year (newest first). */
-export function getCheckpointYearOptions(): number[] {
-  const thisYear = new Date().getFullYear();
-  return [thisYear, thisYear - 1];
-}
-
-export function getCheckpointMonthOptions(): { value: number; label: string }[] {
-  return MONTH_LABELS.map((label, index) => ({
-    value: index + 1,
-    label,
-  }));
 }
 
 export function formatCheckpointFilterLabel(
@@ -146,12 +77,8 @@ export function filterCheckpointsBySearch<
 }
 
 export function hasActiveCheckpointFilters(
-  year: number | null,
-  month: number | null,
   searchQuery: string,
   tab: "upcoming" | "past",
 ): boolean {
-  const defaultYear = getCheckpointYearOptions()[0];
-  const yearChanged = year != null && year !== defaultYear;
-  return Boolean(yearChanged || month || searchQuery.trim() || tab === "past");
+  return Boolean(searchQuery.trim() || tab === "past");
 }

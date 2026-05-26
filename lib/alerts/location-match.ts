@@ -1,7 +1,6 @@
 import { geocodeCheckpoint, geocodeUsZip } from "@/lib/alerts/geocode";
 import { haversineMiles } from "@/lib/alerts/distance";
 import { cityKey } from "@/lib/alerts/location-catalog";
-import { defaultSelectedCounties } from "@/lib/alerts/california-counties";
 import type { AlertSubscriber } from "@/lib/dashboard/alert-settings-repository";
 import type { AlertCitySelection } from "@/lib/dashboard/alert-settings-types";
 import type { Checkpoint } from "@/lib/checkpoints/types";
@@ -50,7 +49,7 @@ function parseSubscriberCounties(
       .map((c) => c.trim())
       .filter(Boolean);
   }
-  return defaultSelectedCounties();
+  return [];
 }
 
 function parseSubscriberCities(

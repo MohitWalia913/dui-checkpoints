@@ -47,8 +47,8 @@ export function Hero() {
             </p>
 
             <h1 className="font-inter mt-4 w-full max-w-[482px] text-[24px] font-semibold leading-[1.2] text-white sm:text-[28px] md:text-[32px] lg:text-[40px] xl:text-[48px]">
-              <span className="text-white">California DUI</span>
-              <span className="text-[#F57E3A]">Checkpoints Locator Map</span>
+              <span className="text-white">California DUI </span>
+              <span className="text-[#F57E3A]">Checkpoints Locator Map </span>
               <span className="text-white">&amp; Real-Time Database</span>
             </h1>
 

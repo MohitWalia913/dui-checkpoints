@@ -116,7 +116,12 @@ export function ReportCheckpointForm({
           </h3>
         ) : null}
         <div className={rowClass}>
-          <ReportFormField id="state" label="State" isDashboard={isDashboard}>
+          <ReportFormField
+            id="state"
+            label="State"
+            required
+            isDashboard={isDashboard}
+          >
             <input
               id="state"
               name="State"
@@ -125,6 +130,7 @@ export function ReportCheckpointForm({
               className={inputClass}
               value={form.State}
               onChange={(e) => updateField("State", e.target.value)}
+              required
             />
           </ReportFormField>
           <ReportFormField
@@ -229,7 +235,7 @@ export function ReportCheckpointForm({
         ) : null}
         <ReportFormField
           id="source"
-          label="Source URL"
+          label="Source"
           required
           isDashboard={isDashboard}
         >

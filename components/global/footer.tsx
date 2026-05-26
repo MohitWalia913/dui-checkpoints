@@ -1,3 +1,4 @@
+import { getFooterDisclaimer } from "@/lib/legal/site-disclaimer";
 import Image from "next/image";
 import Link from "next/link";
 
@@ -79,7 +80,10 @@ export function Footer() {
         </div>
 
         <div className="mt-10 border-t border-white/15 pt-8">
-          <p className="font-inter text-center text-sm font-normal leading-normal text-white/80">
+          <p className="font-inter max-w-4xl text-left text-[10px] leading-relaxed font-normal text-white/55 sm:text-[11px]">
+            {getFooterDisclaimer()}
+          </p>
+          <p className="font-inter mt-4 text-left text-sm font-normal leading-normal text-white/80">
             © 2026 Meehan Law Firm. All rights reserved.
           </p>
         </div>

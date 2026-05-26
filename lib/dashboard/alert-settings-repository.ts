@@ -1,10 +1,8 @@
 import type { AlertContactFields } from "@/lib/dashboard/alert-contact";
 import type {
-  AlertCitySelection,
   UserAlertSettings,
   UserAlertSettingsInput,
 } from "@/lib/dashboard/alert-settings-types";
-import { serializeSelectedCities } from "@/lib/dashboard/alert-settings-types";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { createClient } from "@/lib/supabase/server";
 
@@ -92,10 +90,6 @@ export async function upsertUserAlertSettings(
 ): Promise<{ data: UserAlertSettings | null; error: string | null }> {
   const supabase = await createClient();
 
-  const cities: AlertCitySelection[] = serializeSelectedCities(
-    input.selected_cities,
-  );
-
   const payload: Record<string, unknown> = {
     user_id: userId,
     alerts_enabled: input.alerts_enabled,
@@ -103,11 +97,11 @@ export async function upsertUserAlertSettings(
     preferred_counties: null,
     alert_lead_time_hours: input.alert_lead_time_hours,
     selected_counties: input.selected_counties,
-    selected_cities: cities,
+    selected_cities: [],
     notify_new_checkpoints: input.notify_new_checkpoints,
-    use_city_county_alerts: cities.length > 0,
-    alert_city: cities[0]?.city ?? null,
-    alert_county: cities[0]?.county ?? null,
+    use_city_county_alerts: input.selected_counties.length > 0,
+    alert_city: null,
+    alert_county: null,
     zip_code: input.zip_code.trim() || null,
   };
 

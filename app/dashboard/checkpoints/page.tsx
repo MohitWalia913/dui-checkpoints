@@ -59,8 +59,8 @@ export default async function CheckpointsPage({ searchParams }: PageProps) {
           Checkpoints
         </h1>
         <p className="font-inter mt-3 max-w-2xl text-base leading-relaxed text-white/70">
-          Browse upcoming and past DUI checkpoints. Filter by year and month,
-          or switch tabs to filter by schedule.
+          Browse upcoming and past DUI checkpoints from the live database (last
+          2 years). Use tabs and search to narrow the list.
         </p>
       </div>
 
@@ -71,8 +71,6 @@ export default async function CheckpointsPage({ searchParams }: PageProps) {
           upcomingTotal={tabCounts.upcoming}
           pastTotal={tabCounts.past}
           totalInWindow={tabCounts.totalInWindow}
-          filterYear={filters.year}
-          filterMonth={filters.month}
           error={error}
           isUnauthorized={isUnauthorized}
         />

@@ -8,7 +8,6 @@ import {
   type UserAlertSettingsInput,
 } from "@/lib/dashboard/alert-settings-types";
 import { CALIFORNIA_COUNTIES } from "@/lib/alerts/california-counties";
-import { cityKey, type AlertCityOption } from "@/lib/alerts/location-catalog";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -16,7 +15,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { ChevronDown, Pencil } from "lucide-react";
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useMemo, useState } from "react";
 
 const inputClass =
   "font-inter w-full rounded-lg border border-white/15 bg-white/5 px-3 py-2.5 text-sm text-white placeholder:text-white/40 focus:border-[#F57E3A]/50 focus:outline-none focus:ring-1 focus:ring-[#F57E3A]/40";
@@ -53,33 +52,12 @@ export function AlertSettingsPanel({
   const [editing, setEditing] = useState(false);
   const [status, setStatus] = useState<"idle" | "loading" | "error">("idle");
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
-  const [catalogCities, setCatalogCities] = useState<AlertCityOption[]>([]);
   const [countyFilter, setCountyFilter] = useState("");
-  const [cityFilter, setCityFilter] = useState("");
 
   const displayRows = useMemo(
     () => formatAlertSettingsForDisplay(saved),
     [saved],
   );
-
-  const loadCatalog = useCallback(async () => {
-    try {
-      const response = await fetch("/api/settings/alerts/locations");
-      if (!response.ok) return;
-      const json = (await response.json()) as {
-        data?: { cities?: AlertCityOption[] };
-      };
-      if (json.data?.cities) {
-        setCatalogCities(json.data.cities);
-      }
-    } catch {
-      /* catalog is optional for editing */
-    }
-  }, []);
-
-  useEffect(() => {
-    void loadCatalog();
-  }, [loadCatalog]);
 
   const allCounties = useMemo(() => [...CALIFORNIA_COUNTIES], []);
 
@@ -92,26 +70,6 @@ export function AlertSettingsPanel({
   const selectedCountySet = useMemo(
     () => new Set(draft.selected_counties.map(normalizeCounty)),
     [draft.selected_counties],
-  );
-
-  const visibleCities = useMemo(() => {
-    const countyNorm = selectedCountySet;
-    const q = cityFilter.trim().toLowerCase();
-    return catalogCities.filter((entry) => {
-      if (countyNorm.size > 0 && !countyNorm.has(normalizeCounty(entry.county))) {
-        return false;
-      }
-      if (!q) return true;
-      return (
-        entry.city.toLowerCase().includes(q) ||
-        entry.county.toLowerCase().includes(q)
-      );
-    });
-  }, [catalogCities, cityFilter, selectedCountySet]);
-
-  const selectedCityKeys = useMemo(
-    () => new Set(draft.selected_cities.map((c) => cityKey(c.city, c.county))),
-    [draft.selected_cities],
   );
 
   function updateField<K extends keyof UserAlertSettingsInput>(
@@ -140,52 +98,16 @@ export function AlertSettingsPanel({
     );
   }
 
-  function toggleCity(entry: AlertCityOption, checked: boolean) {
-    setDraft((prev) => {
-      const key = entry.key;
-      const next = new Map(
-        prev.selected_cities.map((c) => [cityKey(c.city, c.county), c]),
-      );
-      if (checked) {
-        next.set(key, { city: entry.city, county: entry.county });
-      } else {
-        next.delete(key);
-      }
-      return {
-        ...prev,
-        selected_cities: Array.from(next.values()),
-      };
-    });
-  }
-
-  function setAllVisibleCities(selected: boolean) {
-    setDraft((prev) => {
-      const next = new Map(
-        prev.selected_cities.map((c) => [cityKey(c.city, c.county), c]),
-      );
-      for (const entry of visibleCities) {
-        if (selected) {
-          next.set(entry.key, { city: entry.city, county: entry.county });
-        } else {
-          next.delete(entry.key);
-        }
-      }
-      return { ...prev, selected_cities: Array.from(next.values()) };
-    });
-  }
-
   function startEdit() {
     setDraft(saved);
     setErrorMessage(null);
     setEditing(true);
-    void loadCatalog();
   }
 
   function cancelEdit() {
     setDraft(saved);
     setErrorMessage(null);
     setCountyFilter("");
-    setCityFilter("");
     setEditing(false);
   }
 
@@ -210,7 +132,6 @@ export function AlertSettingsPanel({
       setSaved(draft);
       setEditing(false);
       setCountyFilter("");
-      setCityFilter("");
       setStatus("idle");
     } catch (err) {
       setStatus("error");
@@ -235,9 +156,8 @@ export function AlertSettingsPanel({
             Alert settings
           </h2>
           <p className="font-inter mt-1 text-sm text-white/60">
-            Email when a new upcoming checkpoint is added in your selected
-            California counties or cities. Optional zip code adds proximity
-            alerts.
+            Email when a new checkpoint is added in your selected counties.
+            Optional zip code adds proximity alerts.
           </p>
         </div>
         {!editing ? (
@@ -373,7 +293,7 @@ export function AlertSettingsPanel({
 
           <div className="rounded-lg border border-white/10 bg-white/[0.02] p-4">
             <div className="flex flex-wrap items-center justify-between gap-2">
-              <label className={labelClass}>California counties</label>
+              <label className={labelClass}>County only</label>
               <div className="flex gap-2">
                 <button
                   type="button"
@@ -419,76 +339,8 @@ export function AlertSettingsPanel({
               ))}
             </div>
             <p className="font-inter mt-2 text-xs text-white/50">
-              {draft.selected_counties.length} of {allCounties.length} counties
-              selected. Leave cities empty to alert for any city in selected
-              counties.
-            </p>
-          </div>
-
-          <div className="rounded-lg border border-white/10 bg-white/[0.02] p-4">
-            <div className="flex flex-wrap items-center justify-between gap-2">
-              <label className={labelClass}>
-                Cities (optional — from checkpoint data)
-              </label>
-              <div className="flex gap-2">
-                <button
-                  type="button"
-                  disabled={!draft.alerts_enabled || visibleCities.length === 0}
-                  onClick={() => setAllVisibleCities(true)}
-                  className="font-inter text-xs text-[#F57E3A] hover:underline disabled:opacity-50"
-                >
-                  Select visible
-                </button>
-                <button
-                  type="button"
-                  disabled={!draft.alerts_enabled || visibleCities.length === 0}
-                  onClick={() => setAllVisibleCities(false)}
-                  className="font-inter text-xs text-white/60 hover:underline disabled:opacity-50"
-                >
-                  Clear visible
-                </button>
-              </div>
-            </div>
-            <input
-              type="search"
-              value={cityFilter}
-              onChange={(e) => setCityFilter(e.target.value)}
-              placeholder="Filter cities…"
-              className={`${inputClass} mt-2`}
-              disabled={!draft.alerts_enabled}
-            />
-            <div className={`${listBoxClass} mt-2`}>
-              {visibleCities.length === 0 ? (
-                <p className="px-2 py-3 text-xs text-white/50">
-                  {catalogCities.length === 0
-                    ? "Loading cities from checkpoint data…"
-                    : "No cities match your filter or county selection."}
-                </p>
-              ) : (
-                visibleCities.map((entry) => (
-                  <label
-                    key={entry.key}
-                    className="flex cursor-pointer items-center gap-2 rounded px-1 py-1 text-sm text-white/90 hover:bg-white/5"
-                  >
-                    <input
-                      type="checkbox"
-                      checked={selectedCityKeys.has(entry.key)}
-                      onChange={(e) => toggleCity(entry, e.target.checked)}
-                      disabled={!draft.alerts_enabled}
-                      className="size-3.5 shrink-0 rounded border-white/20 text-[#F57E3A]"
-                    />
-                    <span>
-                      {entry.city}
-                      <span className="text-white/45"> · {entry.county}</span>
-                    </span>
-                  </label>
-                ))
-              )}
-            </div>
-            <p className="font-inter mt-2 text-xs text-white/50">
-              {draft.selected_cities.length === 0
-                ? "No specific cities — county selection applies."
-                : `${draft.selected_cities.length} cities selected.`}
+              Select one or more counties. You will be emailed when a new
+              checkpoint is added in any selected county.
             </p>
           </div>
 

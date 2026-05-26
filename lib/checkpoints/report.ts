@@ -12,6 +12,7 @@ export type ReportCheckpointBody = {
 };
 
 export const REPORT_CHECKPOINT_REQUIRED: (keyof ReportCheckpointBody)[] = [
+  "State",
   "County",
   "Source",
 ];

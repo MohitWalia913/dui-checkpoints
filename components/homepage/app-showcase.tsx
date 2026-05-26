@@ -64,7 +64,7 @@ export function AppShowcase() {
         <div className="flex items-center flex-col gap-9 md:flex-row lg:gap-10 xl:gap-16 justify-between">
           <div className="max-w-[100%] w-full md:max-w-[50%] lg:max-w-[415px]">
             <h3 className="max-w-[347px] w-full font-inter text-[28px] font-bold leading-[1.24] text-[#242E4E] md:text-[32px] lg:text-[36px] lg:leading-[44.8px]">
-              The App That Keeps You Ahead
+              The Original DUI Checkpoint App.
             </h3>
             <p className="font-inter mt-4 text-[16px] md:text-[18px] font-normal leading-[1.6] text-[#242E4E]">
               Real-time information. Legal protection. Total peace of mind.

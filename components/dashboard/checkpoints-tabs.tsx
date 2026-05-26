@@ -3,9 +3,6 @@
 import { CheckpointsTable } from "@/components/dashboard/checkpoints-table";
 import {
   filterCheckpointsBySearch,
-  formatCheckpointFilterLabel,
-  getCheckpointMonthOptions,
-  getCheckpointYearOptions,
   hasActiveCheckpointFilters,
 } from "@/lib/checkpoints/list-filters";
 import type { CheckpointListItem } from "@/lib/checkpoints/types";
@@ -24,8 +21,6 @@ export function CheckpointsTabs({
   upcomingTotal,
   pastTotal,
   totalInWindow,
-  filterYear,
-  filterMonth,
   error,
   isUnauthorized,
 }: {
@@ -34,8 +29,6 @@ export function CheckpointsTabs({
   upcomingTotal: number;
   pastTotal: number;
   totalInWindow: number;
-  filterYear: number;
-  filterMonth: number | null;
   error: string | null;
   isUnauthorized: boolean;
 }) {
@@ -69,27 +62,8 @@ export function CheckpointsTabs({
       } else {
         params.set("tab", "past");
       }
-    });
-  }
-
-  function setYear(value: string) {
-    replaceParams((params) => {
-      if (!value) {
-        params.delete("year");
-        params.delete("month");
-      } else {
-        params.set("year", value);
-      }
-    });
-  }
-
-  function setMonth(value: string) {
-    replaceParams((params) => {
-      if (!value) {
-        params.delete("month");
-      } else {
-        params.set("month", value);
-      }
+      params.delete("year");
+      params.delete("month");
     });
   }
 
@@ -99,66 +73,18 @@ export function CheckpointsTabs({
   }
 
   const searchActive = searchQuery.trim().length > 0;
-  const canReset = hasActiveCheckpointFilters(
-    filterYear,
-    filterMonth,
-    searchQuery,
-    tab,
-  );
+  const canReset = hasActiveCheckpointFilters(searchQuery, tab);
 
   const emptyMessage = searchActive
     ? "No checkpoints match your search."
     : tab === "upcoming"
-      ? filterYear
-        ? `No upcoming checkpoints for ${formatCheckpointFilterLabel(filterYear, filterMonth)}.`
-        : "No upcoming checkpoints scheduled."
-      : filterYear
-        ? `No past checkpoints for ${formatCheckpointFilterLabel(filterYear, filterMonth)}.`
-        : "No past checkpoints found.";
-
-  const yearOptions = getCheckpointYearOptions();
-  const monthOptions = getCheckpointMonthOptions();
+      ? "No upcoming checkpoints scheduled."
+      : "No past checkpoints found.";
 
   return (
     <>
       <div className="flex flex-col gap-3">
-        <div className="flex items-center gap-2 overflow-x-auto pb-0.5 [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
-          <select
-            id="checkpoint-filter-year"
-            value={String(filterYear)}
-            onChange={(e) => setYear(e.target.value)}
-            className={`${controlClassName} w-[108px] px-2.5`}
-            aria-label="Filter by year"
-          >
-            {yearOptions.map((y) => (
-              <option key={y} value={String(y)} className="bg-[#040F20]">
-                {y}
-              </option>
-            ))}
-          </select>
-
-          <select
-            id="checkpoint-filter-month"
-            value={filterMonth ?? ""}
-            onChange={(e) => setMonth(e.target.value)}
-            disabled={!filterYear}
-            className={`${controlClassName} w-[118px] px-2.5`}
-            aria-label="Filter by month"
-          >
-            <option value="" className="bg-[#040F20]">
-              All months
-            </option>
-            {monthOptions.map((m) => (
-              <option
-                key={m.value}
-                value={String(m.value)}
-                className="bg-[#040F20]"
-              >
-                {m.label}
-              </option>
-            ))}
-          </select>
-
+        <div className="flex flex-wrap items-center gap-2">
           <div
             role="tablist"
             aria-label="Checkpoint schedule"
@@ -226,55 +152,11 @@ export function CheckpointsTabs({
             <>
               Showing {filteredList.length} of {baseList.length}{" "}
               {tab === "upcoming" ? "upcoming" : "past"} checkpoint
-              {baseList.length === 1 ? "" : "s"}
-              {filterYear ? (
-                <>
-                  {" "}
-                  for{" "}
-                  <span className="font-medium text-white/80">
-                    {formatCheckpointFilterLabel(filterYear, filterMonth)}
-                  </span>
-                </>
-              ) : null}
-              {searchQuery.trim() ? (
-                <>
-                  {" "}
-                  matching &ldquo;
-                  <span className="font-medium text-white/80">
-                    {searchQuery.trim()}
-                  </span>
-                  &rdquo;.
-                </>
-              ) : (
-                "."
-              )}
-            </>
-          ) : filterYear ? (
-            <>
-              Showing {filteredList.length} of{" "}
-              {tab === "upcoming" ? upcomingTotal : pastTotal}{" "}
-              {tab === "upcoming" ? "upcoming" : "past"} checkpoint
-              {tab === "upcoming"
-                ? upcomingTotal === 1
-                  ? ""
-                  : "s"
-                : pastTotal === 1
-                  ? ""
-                  : "s"}{" "}
-              for{" "}
+              {baseList.length === 1 ? "" : "s"} matching &ldquo;
               <span className="font-medium text-white/80">
-                {formatCheckpointFilterLabel(filterYear, filterMonth)}
+                {searchQuery.trim()}
               </span>
-              .{" "}
-              {countsAligned ? (
-                <>
-                  Total in range:{" "}
-                  <span className="font-medium text-white/80">
-                    {totalInWindow}
-                  </span>{" "}
-                  (Past {pastTotal} + Upcoming {upcomingTotal}).
-                </>
-              ) : null}
+              &rdquo;.
             </>
           ) : (
             <>
@@ -288,10 +170,14 @@ export function CheckpointsTabs({
                   ? ""
                   : "s"}{" "}
               in the last 2 years.{" "}
-              <span className="font-medium text-white/80">
-                Past {pastTotal} + Upcoming {upcomingTotal} = {totalInWindow}
-              </span>{" "}
-              total (matches dashboard Total Records).
+              {countsAligned ? (
+                <>
+                  <span className="font-medium text-white/80">
+                    Past {pastTotal} + Upcoming {upcomingTotal} = {totalInWindow}
+                  </span>{" "}
+                  total (matches dashboard Total Records).
+                </>
+              ) : null}
             </>
           )}
         </p>

@@ -1,4 +1,3 @@
-import { defaultSelectedCounties } from "@/lib/alerts/california-counties";
 import { cityKey } from "@/lib/alerts/location-catalog";
 
 export const ALERT_LEAD_TIME_OPTIONS = [1, 6, 12, 24, 48, 72, 168] as const;
@@ -44,7 +43,7 @@ export const DEFAULT_ALERT_SETTINGS_INPUT: UserAlertSettingsInput = {
   email_notifications: true,
   alert_lead_time_hours: DEFAULT_ALERT_LEAD_TIME_HOURS,
   zip_code: "",
-  selected_counties: defaultSelectedCounties(),
+  selected_counties: [],
   selected_cities: [],
   notify_new_checkpoints: true,
 };
@@ -107,10 +106,7 @@ function migrateLegacySelections(row: UserAlertSettings): {
     return { counties: legacyCounties, cities: [] };
   }
 
-  return {
-    counties: defaultSelectedCounties(),
-    cities: [],
-  };
+  return { counties: [], cities: [] };
 }
 
 export function alertSettingsToInput(
@@ -132,10 +128,7 @@ export function alertSettingsToInput(
     email_notifications: row.email_notifications,
     alert_lead_time_hours: leadHours,
     zip_code: row.zip_code ?? "",
-    selected_counties:
-      migrated.counties.length > 0
-        ? migrated.counties
-        : defaultSelectedCounties(),
+    selected_counties: migrated.counties,
     selected_cities: migrated.cities,
     notify_new_checkpoints: row.notify_new_checkpoints ?? true,
   };
@@ -151,11 +144,6 @@ export function formatAlertSettingsForDisplay(
         ? "All California counties"
         : `${input.selected_counties.length} counties`;
 
-  const cityLabel =
-    input.selected_cities.length === 0
-      ? "Any city in selected counties"
-      : `${input.selected_cities.length} cities`;
-
   return {
     "Checkpoint alerts": input.alerts_enabled ? "On" : "Off",
     "Email notifications": input.email_notifications ? "On" : "Off",
@@ -164,8 +152,7 @@ export function formatAlertSettingsForDisplay(
       : "Off",
     "Alert window": `${input.alert_lead_time_hours} hour${input.alert_lead_time_hours === 1 ? "" : "s"} before upcoming checkpoints`,
     "Zip code (optional)": input.zip_code.trim() || "—",
-    Counties: countyLabel,
-    Cities: cityLabel,
+    "County only": countyLabel,
   };
 }
 
@@ -206,10 +193,9 @@ export function validateAlertSettingsInput(
   if (
     input.alerts_enabled &&
     input.selected_counties.length === 0 &&
-    input.selected_cities.length === 0 &&
     !input.zip_code.trim()
   ) {
-    return "Select at least one county or city, or enter a zip code for alerts.";
+    return "Select at least one county, or enter a zip code for proximity alerts.";
   }
   return null;
 }
