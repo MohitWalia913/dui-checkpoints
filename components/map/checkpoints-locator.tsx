@@ -80,7 +80,7 @@ export function CheckpointsLocator({
 
   const [searchQuery, setSearchQuery] = useState("");
   const [statusFilter, setStatusFilter] = useState<"all" | "upcoming" | "past">(
-    mapOnly ? "all" : "upcoming",
+    "all",
   );
   const [countyFilter, setCountyFilter] = useState("");
   const [mapLayer, setMapLayer] = useState<MapLayerStyle>("standard");
