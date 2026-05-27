@@ -32,11 +32,11 @@ export const REPORT_FIELD_LABELS: Record<keyof ReportCheckpointBody, string> = {
   State: "State",
   County: "County",
   City: "City",
-  Location: "Checkpoint location",
+  Location: "Street / cross streets / area",
   Description: "Description",
   Date: "Date",
-  Time: "Time",
-  Source: "Source URL",
+  Time: "Agency",
+  Source: "Link to announcement",
 };
 
 const ANONYMOUS_REPORTER_EMAIL = "noreply@californiaduicheckpoints.com";

@@ -126,7 +126,7 @@ export function ReportCheckpointForm({
               id="state"
               name="State"
               type="text"
-              placeholder="State"
+              placeholder="California"
               className={inputClass}
               value={form.State}
               onChange={(e) => updateField("State", e.target.value)}
@@ -143,7 +143,7 @@ export function ReportCheckpointForm({
               id="county"
               name="County"
               type="text"
-              placeholder="County"
+              placeholder="* County"
               className={inputClass}
               value={form.County}
               onChange={(e) => updateField("County", e.target.value)}
@@ -165,14 +165,14 @@ export function ReportCheckpointForm({
           </ReportFormField>
           <ReportFormField
             id="location"
-            label="Checkpoint location"
+            label="Street / cross streets / area"
             isDashboard={isDashboard}
           >
             <input
               id="location"
               name="Location"
               type="text"
-              placeholder="Street / cross streets / area"
+              placeholder="Street / Cross Streets / Area"
               className={inputClass}
               value={form.Location}
               onChange={(e) => updateField("Location", e.target.value)}
@@ -193,38 +193,24 @@ export function ReportCheckpointForm({
               id="date"
               name="Date"
               type="date"
+              placeholder="mm/dd/yyyy"
               className={inputClass}
               value={form.Date}
               onChange={(e) => updateField("Date", e.target.value)}
             />
           </ReportFormField>
-          <ReportFormField id="time" label="Time" isDashboard={isDashboard}>
+          <ReportFormField id="time" label="Agency" isDashboard={isDashboard}>
             <input
               id="time"
               name="Time"
               type="text"
-              placeholder="e.g. 8pm–12am"
+              placeholder="Agency e.g. LAPD"
               className={inputClass}
               value={form.Time}
               onChange={(e) => updateField("Time", e.target.value)}
             />
           </ReportFormField>
         </div>
-        <ReportFormField
-          id="description"
-          label="Description"
-          isDashboard={isDashboard}
-        >
-          <textarea
-            id="description"
-            name="Description"
-            rows={isDashboard ? 4 : 1}
-            placeholder="Details about the checkpoint"
-            className={cn(inputClass, "resize-y")}
-            value={form.Description}
-            onChange={(e) => updateField("Description", e.target.value)}
-          />
-        </ReportFormField>
       </div>
 
       <div className={isDashboard ? "space-y-4" : undefined}>
@@ -235,7 +221,7 @@ export function ReportCheckpointForm({
         ) : null}
         <ReportFormField
           id="source"
-          label="Source"
+          label="Link to announcement"
           required
           isDashboard={isDashboard}
         >
@@ -243,7 +229,7 @@ export function ReportCheckpointForm({
             id="source"
             name="Source"
             type="url"
-            placeholder="Source URL"
+            placeholder="* Link to announcement e.g. https://www.instagram.com/lapdhq"
             className={inputClass}
             value={form.Source}
             onChange={(e) => updateField("Source", e.target.value)}

@@ -16,8 +16,8 @@ export function ReportCheckpointPageContent() {
               Report a checkpoint
             </h1>
             <p className="font-inter mt-2 text-sm text-white/65 md:text-base">
-              Submit a new DUI checkpoint for review. State, county, and source are
-              required; all other fields are optional.
+              Submit a new DUI checkpoint for review. State, county, and link to
+              announcement are required; all other fields are optional.
             </p>
           </div>
         </div>
